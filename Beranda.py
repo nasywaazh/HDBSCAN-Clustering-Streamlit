@@ -28,8 +28,6 @@ jumlah korban dan kerusakan dibandingkan dengan tahun-tahun sebelumnya. Kondisi 
 bencana banjir di Indonesia masih belum dilakukan secara optimal dan membutuhkan pendekatan yang lebih efektif berbasis data.
 """, unsafe_allow_html=True)
 
-st.write("") 
-
 st.markdown("""
 <div style="text-align: justify;">
 Di sisi lain, karakteristik dampak banjir di setiap provinsi di Indonesia cenderung berbeda-beda karena dipengaruhi oleh 
@@ -39,14 +37,14 @@ dikembangkan dengan memanfaatkan metode HDBSCAN yang dikombinasikan dengan <i>Ba
 klasterisasi yang lebih akurat. Aplikasi ini mampu menyajikan hasil klasterisasi dalam bentuk visualisasi interaktif 
 sehingga memudahkan pengguna dalam memahami distribusi tingkat keparahan dampak banjir serta mendukung pengambilan 
 keputusan dalam upaya mitigasi bencana secara lebih tepat sasaran.
-""")
+""", unsafe_allow_html=True)
 
 st.write("")  
 
 # Tujuan
 st.subheader("Tujuan")
 st.markdown("""
-- Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode HDBSCAN dan <i>Bayesian Optimization</i>  
+- Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode HDBSCAN dan *Bayesian Optimization*  
 - Menyediakan peta interaktif untuk menampilkan visualisasi hasil klasterisasi  
 - Menyediakan fitur prediksi kategori dampak banjir berdasarkan input data baru dari pengguna  
 """)
