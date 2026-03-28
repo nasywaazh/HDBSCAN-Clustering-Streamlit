@@ -4,14 +4,16 @@ import streamlit as st
 st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
 # Judul
-st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
-st.write("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-
-# Deskripsi 
-st.markdown("""
-Aplikasi ini dirancang untuk mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode **HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) 
-dan Bayesian Optimization
-""")
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
+    st.divider()
+    # Deskripsi
+    st.write("""
+    Aplikasi ini digunakan untuk mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir
+    menggunakan metode HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
+    dan Bayesian Optimization
+    """)
 
 # Latar Belakang
 st.subheader("Latar Belakang")
