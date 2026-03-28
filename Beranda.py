@@ -27,7 +27,7 @@ Pada tahun 2024, banjir tercatat sebagai bencana alam yang paling dominan terjad
 jumlah korban dan kerusakan dibandingkan dengan tahun-tahun sebelumnya. Kondisi ini menunjukkan bahwa upaya mitigasi 
 bencana banjir di Indonesia masih belum dilakukan secara optimal dan membutuhkan pendekatan yang lebih efektif berbasis data.
 """, unsafe_allow_html=True)
-
+st.write("")
 st.markdown("""
 <div style="text-align: justify;">
 Di sisi lain, karakteristik dampak banjir di setiap provinsi di Indonesia cenderung berbeda-beda karena dipengaruhi oleh 
