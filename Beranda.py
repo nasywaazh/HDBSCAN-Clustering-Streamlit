@@ -1,30 +1,43 @@
 import streamlit as st
 
-st.markdown("""
-<style>
-    .main {
-        background-color: #F3F4F6;
-    }
-    h1, h2, h3 {
-        color: #1E3A8A;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Konfigurasi halaman
 st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
-# Judul utama
-st.title("Aplikasi Klasterisasi Wilayah Terdampak Banjir di Indonesia")
+# Judul
+import streamlit as st
 
-# Deskripsi singkat
+st.set_page_config(layout="wide")
+
+# Judul
+st.markdown("""
+<h1 style='
+text-align:center;
+font-size:44px;
+color:#1E3A8A;
+'>
+APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA
+</h1>
+""", unsafe_allow_html=True)
+
+# Divider
+st.markdown("""
+<hr style='
+height:4px;
+border:none;
+background-color:#3B82F6;
+width:75%;
+margin:auto;
+margin-top:10px;
+margin-bottom:25px;
+'>
+""", unsafe_allow_html=True)
+
+# Deskripsi 
 st.markdown("""
 Aplikasi ini dikembangkan untuk **mengelompokkan provinsi di Indonesia berdasarkan tingkat keparahan dampak banjir** 
 menggunakan metode **HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)** 
 yang dioptimasi dengan **Bayesian Optimization**.
 """)
-
-st.divider()
 
 # Latar belakang singkat
 st.subheader("📌 Latar Belakang")
