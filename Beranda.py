@@ -10,7 +10,7 @@ st.divider()
 # Deskripsi
 st.markdown("""
 <div style="text-align: justify;">
-Aplikasi ini menggunakan metode <i>HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)</i> 
+Aplikasi ini menggunakan metode HDBSCAN (<i>Hierarchical Density-Based Spatial Clustering of Applications with Noise</i>) 
 dan <i>Bayesian Optimization</i>.
 </div>
 """, unsafe_allow_html=True)
