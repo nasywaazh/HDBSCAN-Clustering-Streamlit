@@ -3,6 +3,12 @@ import streamlit as st
 # Konfigurasi halaman
 st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
+# CSS
+def load_css():
+    with open("style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+load_css()
+
 # Judul 
 st.markdown("""
 <style>
