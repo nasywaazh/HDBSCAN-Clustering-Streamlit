@@ -1,0 +1,30 @@
+st.markdown("""
+<style>
+
+/* Background */
+.stApp {
+    background-color: #3B82F6;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #1E3A8A;
+}
+
+/* Judul */
+h1 {
+    color: white;
+}
+
+/* Subheader */
+h2 {
+    color: #E0F2FE;
+}
+
+/* Text */
+p, li {
+    color: white;
+}
+
+</style>
+""", unsafe_allow_html=True)
