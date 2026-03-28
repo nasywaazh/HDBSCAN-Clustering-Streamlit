@@ -26,7 +26,7 @@ yang menimbulkan dampak signifikan terhadap kerusakan infrastruktur dan gangguan
 Pada tahun 2024, banjir tercatat sebagai bencana alam yang paling dominan terjadi di Indonesia, disertai peningkatan 
 jumlah korban dan kerusakan dibandingkan dengan tahun-tahun sebelumnya. Kondisi ini menunjukkan bahwa upaya mitigasi 
 bencana banjir di Indonesia masih belum dilakukan secara optimal dan membutuhkan pendekatan yang lebih efektif berbasis data.
-""", , unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 st.write("") 
 
