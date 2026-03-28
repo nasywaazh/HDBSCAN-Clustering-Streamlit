@@ -3,41 +3,15 @@ import streamlit as st
 # Konfigurasi halaman
 st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
-# CSS
-def load_css():
-    with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-load_css()
-
-# Judul 
-st.markdown("""
-<style>
-.title {
-    text-align: center;
-    font-size: 50px;
-    font-weight: bold;
-    color: #1E3A8A;
-}
-
-.divider {
-    height: 4px;
-    background-color: #3B82F6;
-    border: none;
-    width: 80%;
-    margin: 20px auto;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown('<div class="title">APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</div>', unsafe_allow_html=True)
-st.markdown('<hr class="divider">', unsafe_allow_html=True)
+# Judul
+st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
+st.divider()
 
 # Deskripsi
-st.markdown("""
+st.write("""
 <div align="justify">
-Aplikasi ini digunakan untuk mengelompokkan provinsi di Indonesia menggunakan metode 
-HDBSCAN (*Hierarchical Density-Based Spatial Clustering of Applications with Noise*) 
-dan *Bayesian Optimization*.
+Aplikasi ini digunakan untuk mengelompokkan provinsi di Indonesia menggunakan metode HDBSCAN (*Hierarchical Density-Based
+Spatial Clustering of Applications with Noise*) dan *Bayesian Optimization*.
 </div>
 """, unsafe_allow_html=True)
 
@@ -50,7 +24,7 @@ yang menimbulkan dampak signifikan terhadap kerusakan infrastruktur dan gangguan
 banjir tercatat sebagai bencana alam yang paling dominan terjadi di Indonesia, disertai peningkatan jumlah korban dan kerusakan
 dibandingkan dengan tahun-tahun sebelumnya. Kondisi ini menunjukkan bahwa upaya mitigasi bencana banjir di Indonesia masih belum
 dilakukan secara optimal dan membutuhkan pendekatan yang lebih efektif berbasis data.
-
+</div>
 Di sisi lain, karakteristik dampak banjir di setiap provinsi di Indonesia cenderung berbeda-beda karena dipengaruhi oleh kondisi
 geografis, lingkungan, maupun sosial ekonomi. Oleh karena itu, diperlukan suatu sistem yang mampu mengidentifikasi pola dampak banjir
 dan mengelompokkan provinsi di Indonesia berdasarkan tingkat keparahan dampaknya. Aplikasi ini dikembangkan dengan memanfaatkan metode
