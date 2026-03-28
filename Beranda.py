@@ -4,33 +4,8 @@ import streamlit as st
 st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
 # Judul
-import streamlit as st
-
-st.set_page_config(layout="wide")
-
-# Judul
-st.markdown("""
-<h1 style='
-text-align:center;
-font-size:44px;
-color:#1E3A8A;
-'>
-APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA
-</h1>
-""", unsafe_allow_html=True)
-
-# Divider
-st.markdown("""
-<hr style='
-height:4px;
-border:none;
-background-color:#3B82F6;
-width:75%;
-margin:auto;
-margin-top:10px;
-margin-bottom:25px;
-'>
-""", unsafe_allow_html=True)
+st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
+st.divider()
 
 # Deskripsi 
 st.markdown("""
