@@ -1,11 +1,18 @@
 import streamlit as st
 
+st.markdown("""
+<style>
+    .main {
+        background-color: #F3F4F6;
+    }
+    h1, h2, h3 {
+        color: #1E3A8A;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Konfigurasi halaman
-st.set_page_config(
-    page_title="Klasterisasi Banjir",
-    page_icon="🌊",
-    layout="wide"
-)
+st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
 
 # Judul utama
 st.title("Aplikasi Klasterisasi Wilayah Terdampak Banjir di Indonesia")
@@ -64,9 +71,3 @@ with col2:
     """)
 
 st.divider()
-
-# Footer
-st.markdown("""
----
-💡 *Aplikasi ini dikembangkan sebagai bagian dari penelitian skripsi terkait analisis dampak bencana banjir di Indonesia.*
-""")
