@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.title("🧪 Prediksi Klaster")
+st.title("KLASTERISASI HDBSCAN & BAYESIAN OPTIMIZATION")
