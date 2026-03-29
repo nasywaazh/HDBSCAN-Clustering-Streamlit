@@ -4,14 +4,7 @@ import streamlit as st
 st.set_page_config(page_title="HDBSCAN Streamlit", layout="wide")
 
 # Logo
-st.sidebar.markdown(
-    """
-    <div style="text-align: center;">
-        <img src="logo.png" width="150">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.logo(logo.png)
 
 # Judul
 st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
