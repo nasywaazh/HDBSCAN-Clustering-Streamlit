@@ -22,12 +22,15 @@ HDBSCAN adalah sebagai berikut:
 </div>
 """, unsafe_allow_html=True)
 st.markdown("""
-- Inisialisasi parameter utama, yaitu minimum samples (min_samples) dan minimum cluster size (min_cluster_size) sebagai dasar dalam menentukan kepadatan dan ukuran minimum klaster
-- Menghitung core distance untuk setiap titik berdasarkan nilai min_samples dan menghitung mutual reachability distance antartitik data
-- Membangun graf berbobot dan membentuk Minimum Spanning Tree (MST) berdasarkan mutual reachability distance untuk mempresentasikan hubungan antartitik
-- Mengonstruksi struktur klaster hierarkis berdasarkan variasi kepadatan dengan menghapus edge secara bertahap dari MST sehingga terbentuk hierarki klaster dari yang paling padat hingga paling renggang
-- Mengekstraksi klaster datar berdasarkan stabilitas klaster dengan mempertahankan klaster yang paling stabil sebagai hasil akhir, sementara titik yang tidak memenuhi kriteria stabilititas dikategorikan sebagai noise
-""")
+<div style="text-align: justify;">
+- Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan dan ukuran minimum klaster  
+- Menghitung <i>core distance</i> untuk setiap titik berdasarkan nilai <i>min_samples</i> dan menghitung <i>mutual reachability distance</i> antartitik data  
+- Membangun graf berbobot dan membentuk <i>Minimum Spanning Tree (MST)</i> berdasarkan <i>mutual reachability distance</i> untuk mempresentasikan hubungan antartitik  
+- Mengonstruksi struktur klaster hierarkis berdasarkan variasi kepadatan dengan menghapus <i>edge</i> secara bertahap dari <i>MST</i> sehingga terbentuk hierarki klaster dari yang paling padat hingga paling renggang  
+- Mengekstraksi klaster datar berdasarkan stabilitas klaster dengan mempertahankan klaster yang paling stabil sebagai hasil akhir, sementara titik yang tidak memenuhi kriteria stabilititas dikategorikan sebagai <i>noise</i>  
+</div>
+""", unsafe_allow_html=True)
+st.write("")
 
 st.header("Bayesian Optimization")
 st.write("""
