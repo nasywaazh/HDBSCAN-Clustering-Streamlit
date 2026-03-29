@@ -44,7 +44,11 @@ st.write("")
 # Tujuan
 st.subheader("Tujuan")
 st.markdown("""
-- Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode HDBSCAN dan *Bayesian Optimization*  
-- Menyediakan peta interaktif untuk menampilkan visualisasi hasil klasterisasi  
-- Menyediakan fitur prediksi kategori dampak banjir berdasarkan input data baru dari pengguna  
-""")
+<div style="text-align: justify;">
+<ul>
+<li>Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode HDBSCAN dan <i>Bayesian Optimization</i>.</li>  
+<li>Menyediakan peta interaktif untuk menampilkan visualisasi hasil klasterisasi.</li>  
+<li>Menyediakan fitur prediksi kategori dampak banjir berdasarkan input data baru dari pengguna.</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
