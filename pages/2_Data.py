@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.title("DATA INDIKATOR DAMPAK BANJIR")
-st.write("Silakan upload file dataset dalam format CSV atau Excel (.xlsx)")
+st.write("Upload file dataset dalam format CSV atau Excel")
 
 # Upload file
 uploaded_file = st.file_uploader(
@@ -18,25 +18,24 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success("✅ File berhasil diupload!")
+        st.success("File berhasil diupload!")
 
         # Menampilkan informasi data
-        st.subheader("🔍 Informasi Dataset")
+        st.subheader("Informasi Dataset")
         col1, col2, col3 = st.columns(3)
         col1.metric("Jumlah Baris", df.shape[0])
         col2.metric("Jumlah Kolom", df.shape[1])
-        col3.metric("Jumlah Missing Value", df.isnull().sum().sum())
 
         # Preview data
-        st.subheader("📋 Preview Data")
+        st.subheader("Preview Data")
         st.dataframe(df, use_container_width=True)
 
         # Tampilkan tipe data
-        st.subheader("🧾 Tipe Data")
+        st.subheader("Tipe Data")
         st.dataframe(df.dtypes.astype(str))
 
         # Optional: download kembali
-        st.subheader("⬇️ Download Data")
+        st.subheader("Download Data")
         csv = df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="Download sebagai CSV",
@@ -49,7 +48,7 @@ if uploaded_file is not None:
         st.session_state["data"] = df
 
     except Exception as e:
-        st.error(f"❌ Terjadi error saat membaca file: {e}")
+        st.error(f"Terjadi error saat membaca file: {e}")
 
 else:
-    st.info("📁 Silakan upload file terlebih dahulu")
+    st.info("Upload file terlebih dahulu!")
