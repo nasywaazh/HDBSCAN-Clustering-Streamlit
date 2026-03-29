@@ -4,14 +4,21 @@ import streamlit as st
 st.set_page_config(page_title="HDBSCAN Streamlit", layout="wide")
 
 # Logo
-st.sidebar.markdown(
-    """
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://raw.githubusercontent.com/nasywaazh/HDBSCAN-Clustering-Streamlit/main/logo.png" width="150">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+[data-testid="stLogo"] img {
+    width: 150px;
+    margin: auto;
+    display: block;
+}
+[data-testid="stLogo"] {
+    display: flex;
+    justify-content: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.logo("logo.png")
 
 # Judul
 st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
