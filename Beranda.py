@@ -10,8 +10,8 @@ st.divider()
 # Deskripsi
 st.markdown("""
 <div style="text-align: justify;">
-Aplikasi ini menggunakan metode HDBSCAN (<i>Hierarchical Density-Based Spatial Clustering of Applications with Noise</i>) 
-dan <i>Bayesian Optimization</i>.
+Aplikasi ini digunakan untuk mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode
+HDBSCAN (<i>Hierarchical Density-Based Spatial Clustering of Applications with Noise</i>) dan <i>Bayesian Optimization</i>.
 </div>
 """, unsafe_allow_html=True)
 
