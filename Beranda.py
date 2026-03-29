@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Konfigurasi halaman
-st.set_page_config(page_title = "HDBSCAN Streamlit", layout="wide")
+st.set_page_config(page_title="HDBSCAN Streamlit", layout="wide")
 
 # Judul
 st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
