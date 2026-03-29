@@ -19,9 +19,9 @@ if uploaded_file is not None:
 
         st.success("File berhasil diupload!")
 
-        # Menampilkan informasi data
-        st.subheader("Informasi Dataset")
-        col1, col2, col3 = st.columns(3)
+        # Informasi data
+        st.subheader("Informasi Data")
+        col1, col2 = st.columns(2)
         col1.metric("Jumlah Baris", df.shape[0])
         col2.metric("Jumlah Kolom", df.shape[1])
 
@@ -31,19 +31,11 @@ if uploaded_file is not None:
 
         # Tampilkan tipe data
         st.subheader("Tipe Data")
-        st.dataframe(df.dtypes.astype(str))
+        dtype_df = df.dtypes.reset_index()
+        dtype_df.columns = ["Nama Kolom", "Tipe Data"]
+        st.dataframe(dtype_df, use_container_width=True, hide_index=True)
 
-        # Optional: download kembali
-        st.subheader("Download Data")
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Download sebagai CSV",
-            data=csv,
-            file_name="data_clean.csv",
-            mime="text/csv"
-        )
-
-        # Simpan ke session state (penting untuk halaman lain)
+        # Simpan ke session state
         st.session_state["data"] = df
 
     except Exception as e:
