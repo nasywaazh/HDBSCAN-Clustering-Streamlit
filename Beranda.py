@@ -3,6 +3,9 @@ import streamlit as st
 # Konfigurasi halaman
 st.set_page_config(page_title="HDBSCAN Streamlit", layout="wide")
 
+# Logo
+st.sidebar.image("logo.png", use_container_width=True)
+
 # Judul
 st.title("APLIKASI KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
 st.divider()
