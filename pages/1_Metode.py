@@ -23,11 +23,13 @@ HDBSCAN adalah sebagai berikut:
 """, unsafe_allow_html=True)
 st.markdown("""
 <div style="text-align: justify;">
-- Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan dan ukuran minimum klaster  
-- Menghitung <i>core distance</i> untuk setiap titik berdasarkan nilai <i>min_samples</i> dan menghitung <i>mutual reachability distance</i> antartitik data  
-- Membangun graf berbobot dan membentuk <i>Minimum Spanning Tree (MST)</i> berdasarkan <i>mutual reachability distance</i> untuk mempresentasikan hubungan antartitik  
-- Mengonstruksi struktur klaster hierarkis berdasarkan variasi kepadatan dengan menghapus <i>edge</i> secara bertahap dari <i>MST</i> sehingga terbentuk hierarki klaster dari yang paling padat hingga paling renggang  
-- Mengekstraksi klaster datar berdasarkan stabilitas klaster dengan mempertahankan klaster yang paling stabil sebagai hasil akhir, sementara titik yang tidak memenuhi kriteria stabilititas dikategorikan sebagai <i>noise</i>  
+<ul>
+<li>Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan dan ukuran minimum klaster</li>
+<li>Menghitung <i>core distance</i> untuk setiap titik berdasarkan nilai <i>min_samples</i> dan menghitung <i>mutual reachability distance</i> antartitik data</li>
+<li>Membangun graf berbobot dan membentuk <i>Minimum Spanning Tree (MST)</i> berdasarkan <i>mutual reachability distance</i> untuk mempresentasikan hubungan antartitik</li>
+<li>Mengonstruksi struktur klaster hierarkis berdasarkan variasi kepadatan dengan menghapus <i>edge</i> secara bertahap dari <i>MST</i> sehingga terbentuk hierarki klaster dari yang paling padat hingga paling renggang</li>
+<li>Mengekstraksi klaster datar berdasarkan stabilitas klaster dengan mempertahankan klaster yang paling stabil sebagai hasil akhir, sementara titik yang tidak memenuhi kriteria stabilititas dikategorikan sebagai <i>noise</i></li>
+</ul>
 </div>
 """, unsafe_allow_html=True)
 st.write("")
