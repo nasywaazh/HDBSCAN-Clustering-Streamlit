@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 
 st.title("DATA INDIKATOR DAMPAK BANJIR")
-st.write("Upload file dataset dalam format CSV atau Excel")
 
 # Upload file
 uploaded_file = st.file_uploader(
