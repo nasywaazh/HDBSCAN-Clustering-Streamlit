@@ -36,7 +36,22 @@ st.markdown("""
 st.write("")
 
 st.header("Bayesian Optimization")
-st.write("""
-Bayesian Optimization digunakan untuk menemukan parameter terbaik 
-dalam proses clustering.
-""")
+st.markdown("""
+<div style="text-align: justify;">
+<i>Bayesian Optimization</i> digunakan untuk mencari <i>hyperparameter</i> optimal dari HDBSCAN secara efisien. Metode optimasi ini
+memanfaatkan prinsip Teorema Bayes untuk membangun model probabilistik dari fungsi objektif dengan menggunakan <i>Gaussian Process</i>
+sebagai pendekatan utama dalam memodelkan hubungan antara parameter dan nilai fungsi. Keunggulan utama dari teknik optimasi ini terletak
+pada kemampuannya dalam menemukan solusi optimal global dengan jumlah iterasi yang lebih sedikit, karena proses pencarian dipandu oleh
+informasi probabilistik dari evaluasi sebelumnya, bukan melalui eksplorasi acak.
+</div>
+""", unsafe_allow_html=True)
+st.write("")
+st.markdown("""
+<div style="text-align: justify;">
+Proses optimasi difokuskan pada <i>hyperparameter</i> utama HDBSCAN, yaitu <i>min_samples</i> dan <i>min_cluster_size</i>. Tujuan dari
+optimasi ini adalah untuk memaksimalkan kualitas klasterisasi yang diukur menggunakan indeks DBCV (<i>Density-Based Clustering Validation</i>)
+sebagai metrik evaluasi utama. Proses ini dilakukan secara iteratif dengan mengevaluasi berbagai kombinasi <i>hyperparameter</i> dan memperbarui
+model untuk mengarahkan pencarian ke hasil yang lebih optimal. Hasil dari proses optimasi ini berupa kombinasi <i>hyperparameter</i> terbaik
+yang akan digunakan dalam proses klasterisasi HDBSCAN untuk menghasilkan klaster yang lebih akurat dan stabil.
+</div>
+""", unsafe_allow_html=True)
