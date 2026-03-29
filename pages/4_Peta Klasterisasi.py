@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.title("🗺️ Peta Klasterisasi")
+st.title("PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
