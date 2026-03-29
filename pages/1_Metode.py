@@ -1,6 +1,7 @@
 import streamlit as st
 
-st.title("Metode Klasterisasi")
+st.title("METODE KLASTERISASI")
+st.divider()
 
 st.header("HDBSCAN")
 st.markdown("""
