@@ -313,12 +313,12 @@ with menu[1]:
 
     # Evaluasi Model HDBSCAN
     st.markdown("### 4. Evaluasi Model")
+    dbcv_score = validity_index(X_clustering, labels)
+    min_samples = int(best_params["min_samples"])
+    dcsi_score = dcsi_index(X_clustering, labels, min_samples)
     col1, col2 = st.columns(2)
     with col1:
         st.metric("DBCV Score", f"{dbcv_score:.4f}")
-    min_samples = int(best_params["min_samples"])
-    dcsi_score = dcsi_index(X_clustering, labels, min_samples)
-
     with col2:
         if dcsi_score is not None:
             st.metric("DCSI Score", f"{dcsi_score:.4f}")
