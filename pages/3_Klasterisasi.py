@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-st.title("KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION")
+st.title("KLASTERISASI HDBSCAN & BAYESIAN OPTIMIZATION")
 st.divider()
 
 # Data yang diupload pengguna
@@ -18,7 +18,7 @@ if "data" not in st.session_state:
 df = st.session_state["data"]
 
 # Standarisasi data
-st.subheader("1. Preprocessing Data")
+st.subheader("Preprocessing Data")
 data_numeric = df.drop(columns=["Provinsi"])
 scaler = StandardScaler()
 scaled_standard = pd.DataFrame(
@@ -61,7 +61,7 @@ vif_data["VIF"] = [
 
 with st.expander("Uji Multikolinieritas (VIF)"):
     st.dataframe(vif_data)
-    if (vif_data["VIF"] > 10).any():
-        st.warning("Terdapat multikolinieritas (VIF > 10)")
+    if (vif_data["VIF"] > 5).any():
+        st.warning("Terdapat multikolinieritas (VIF > 5)")
     else:
         st.success("Tidak ada multikolinieritas tinggi")
