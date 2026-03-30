@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import matplotlib.plt as plt
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
 from statsmodels.stats.outliers_influence import variance_inflation_factor
