@@ -15,6 +15,8 @@ from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
 from scipy.sparse.csgraph import minimum_spanning_tree
 from itertools import combinations
+from scipy.spatial import ConvexHull
+from matplotlib.patches import Polygon
 
 st.title("KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION")
 st.divider()
@@ -294,19 +296,22 @@ with menu[1]:
     targets = optimizer.space.target
     iterations = np.arange(1, len(targets) + 1)
     best_so_far = np.maximum.accumulate(targets)
+    col1, col2 = st.columns(2)
 
-    fig1, ax1 = plt.subplots(figsize=(5, 3))
-    ax1.plot(iterations, best_so_far, marker='o')
-    ax1.set_title("Best DBCV Over Time")
-    ax1.set_xlabel("Iterasi")
-    ax1.set_ylabel("Best DBCV Score")
-    st.pyplot(fig1)
+    with col1:
+        fig1, ax1 = plt.subplots(figsize=(6, 4))
+        ax1.plot(iterations, best_so_far, marker='o')
+        ax1.set_title("Best DBCV Over Time")
+        ax1.set_xlabel("Iterasi")
+        ax1.set_ylabel("Best DBCV Score")
+        st.pyplot(fig1)
 
-    fig2, ax2 = plt.subplots(figsize=(5, 3))
-    ax2.plot(iterations, targets, marker='o')
-    ax2.axhline(best_dbcv, color='red', linestyle="--", label=f"Best DBCV = {best_dbcv:.4f}")
-    ax2.set_title("Bayesian Optimization Convergence")
-    st.pyplot(fig2)
+    with col2:
+        fig2, ax2 = plt.subplots(figsize=(6, 4))
+        ax2.plot(iterations, targets, marker='o')
+        ax2.axhline(best_dbcv, color='red', linestyle="--", label=f"Best DBCV = {best_dbcv:.4f}")
+        ax2.set_title("Bayesian Optimization Convergence")
+        st.pyplot(fig2)
 
     # Model HDBSCAN
     st.markdown("#### 2. Distribusi Klaster HDBSCAN")
@@ -318,7 +323,64 @@ with menu[1]:
     labels = model.fit_predict(X_clustering)
     df_result = df.copy()
     df_result["Cluster"] = labels
-    st.success("Klasterisasi berhasil dilakukan!")
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    unique_labels = sorted(set(cluster_labels))
+    n_clusters = len([l for l in unique_labels if l != -1])
+    palette = sns.color_palette("Set2", n_clusters)
+    color_map = {}
+    palette_idx = 0
+
+    for label in unique_labels:
+        if label == -1:
+            color_map[label] = "gray"
+        else:
+            color_map[label] = palette[palette_idx]
+            palette_idx += 1
+
+    for label in unique_labels:
+        idx = cluster_labels == label
+        points = pca_standard[idx]
+
+        color = color_map[label]
+
+        if label == -1:
+            ax.scatter(
+                points['PC1'], points['PC2'],
+                s=60, c='gray',
+                label='Noise',
+                edgecolor='k', alpha=0.6
+            )
+        else:
+            ax.scatter(
+                points['PC1'], points['PC2'],
+                s=60, color=color,
+                label=f'Cluster {label}',
+                edgecolor='k', alpha=0.9
+            )
+
+            if len(points) >= 3:
+                hull = ConvexHull(points[['PC1', 'PC2']])
+                hull_points = points.iloc[hull.vertices][['PC1', 'PC2']]
+
+                polygon = Polygon(
+                    hull_points,
+                    closed=True,
+                    facecolor=color,
+                    alpha=0.2,
+                    edgecolor=color,
+                    linewidth=2
+                )
+                ax.add_patch(polygon)
+
+    ax.set_title("Distribusi Klaster HDBSCAN (PCA)", fontsize=14)
+    ax.set_xlabel("PC1", fontsize=12)
+    ax.set_ylabel("PC2", fontsize=12)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.legend(title="Cluster", loc="best")
+    ax.grid(True, linestyle='--', alpha=0.3)
+    st.pyplot(fig)
 
     # Evaluasi model HDBSCAN
     st.markdown("### 3. Evaluasi Model")
