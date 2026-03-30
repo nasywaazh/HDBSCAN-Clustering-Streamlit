@@ -412,7 +412,7 @@ with menu[2]:
 
     # Karakteristik setiap klaster
     st.markdown("#### 2. Karakteristik Setiap Klaster")
-        numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+    numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
     cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
 
     st.markdown("##### Rata-rata Setiap Klaster")
