@@ -268,7 +268,7 @@ with menu[1]:
         best_dbcv = optimizer.max["target"]
 
     st.success("Parameter optimal ditemukan!")
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(4)
     with col1:
         st.metric("min_cluster_size", int(np.floor(best_params["min_cluster_size"])))
     with col2:
