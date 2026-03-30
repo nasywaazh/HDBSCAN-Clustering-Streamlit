@@ -243,7 +243,7 @@ def dcsi_index(X, labels, min_samples):
     return total / weight_sum
 
 with menu[1]:
-    # Pencarian Parameter Optimal
+    # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     with st.spinner("Mencari parameter optimal..."):
         def objective(min_cluster_size, min_samples):
@@ -258,18 +258,25 @@ with menu[1]:
             )
             labels = clusterer.fit_predict(X_clustering)
 
-            if len(set(labels)) <= 1:
-                return -1
+            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+            if n_clusters < 2:
+                return -1.0
 
-            return validity_index(X_clustering, labels)
+            try:
+                dbcv = validity_index(X_clustering, labels)
+                return dbcv
+            except:
+                return -1.0
 
-        optimizer = BayesianOptimization(
-            f=objective, pbounds={"min_cluster_size": (2, 7), "min_samples": (1, 6)},
-            random_state=42)
-        optimizer.maximize(init_points=5, n_iter=10)
+        pbounds = {"min_cluster_size": (2, 7), "min_samples": (1, 6)}
 
-    best_params = optimizer.max["params"]
-    best_dbcv = optimizer.max["target"]
+        optimizer = BayesianOptimization(f = hdbscan_objective_dbcv,
+                                         pbounds = pbounds,
+                                         random_state = 42,
+                                         verbose = 2)
+        optimizer.maximize(init_points = 8, n_iter = 30)
+        best_params = optimizer.max["params"]
+        best_dbcv = optimizer.max["target"]
 
     st.success("Parameter optimal ditemukan!")
     col1, col2, col3 = st.columns(3)
@@ -278,10 +285,8 @@ with menu[1]:
     with col2:
         st.metric("min_samples", int(best_params["min_samples"]))
     with col3:
-        st.metric("Nilai DBCV Terbaik:", f"{best_dbcv:.4f}")
+        st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
 
-    # Evaluasi Bayesian Optimization
-    st.markdown("#### 2. Evaluasi Bayesian Optimization")
     targets = optimizer.space.target
     iterations = np.arange(1, len(targets) + 1)
     best_so_far = np.maximum.accumulate(targets)
@@ -290,7 +295,7 @@ with menu[1]:
     ax1.plot(iterations, best_so_far, marker='o')
     ax1.set_title("Best DBCV Over Time")
     ax1.set_xlabel("Iterasi")
-    ax1.set_ylabel("DBCV Score")
+    ax1.set_ylabel("Best DBCV Score")
     st.pyplot(fig1)
 
     fig2, ax2 = plt.subplots()
@@ -300,7 +305,7 @@ with menu[1]:
     st.pyplot(fig2)
 
     # Model HDBSCAN
-    st.markdown("#### 3. Model HDBSCAN")
+    st.markdown("#### 2. Distribusi Klaster HDBSCAN")
     model = hdbscan.HDBSCAN(
         min_cluster_size=int(best_params["min_cluster_size"]),
         min_samples=int(best_params["min_samples"]),
@@ -311,8 +316,8 @@ with menu[1]:
     df_result["Cluster"] = labels
     st.success("Klasterisasi berhasil dilakukan!")
 
-    # Evaluasi Model HDBSCAN
-    st.markdown("### 4. Evaluasi Model")
+    # Evaluasi model HDBSCAN
+    st.markdown("### 3. Evaluasi Model")
     dbcv_score = validity_index(X_clustering, labels)
     min_samples = int(best_params["min_samples"])
     dcsi_score = dcsi_index(X_clustering, labels, min_samples)
