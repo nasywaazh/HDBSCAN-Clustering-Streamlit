@@ -25,7 +25,7 @@ if uploaded_file is not None:
         col1.metric("Jumlah Baris", df.shape[0])
         col2.metric("Jumlah Kolom", df.shape[1])
         col3.metric("Jumlah Missing Values",  df.isnull().sum().sum())
-        col4.metric("Jumlah Data Duplikat", df.duplicate().sum().sum())
+        col4.metric("Jumlah Data Duplikat", df.duplicated().sum().sum())
 
         # Preview data
         st.subheader("Preview Data")
