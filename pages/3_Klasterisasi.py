@@ -452,7 +452,7 @@ with menu[2]:
 
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
-        st.markdown("** Klaster Noise**")
+        st.markdown("**Klaster -1 (Noise)**")
         st.dataframe(df_noise)
         mean_noise = df_noise[numeric_cols].mean().round(3).to_frame(name="Nilai Rata-rata").T
         pct_noise = (df_noise[numeric_cols].mean().div(
