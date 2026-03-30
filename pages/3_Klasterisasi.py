@@ -298,7 +298,7 @@ with menu[1]:
         st.pyplot(fig2)
 
     # Model HDBSCAN
-    st.markdown("#### 2. Distribusi Klaster HDBSCAN")
+    st.markdown("#### 2. Visualisasi Distribusi Klaster")
     hdbscan_model = hdbscan.HDBSCAN(
         min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
         min_samples=int(np.floor(best_params["min_samples"])),
@@ -366,15 +366,32 @@ with menu[1]:
     st.pyplot(fig)
 
     # Evaluasi model HDBSCAN
-    st.markdown("### 3. Evaluasi Model")
+    st.markdown("#### 3. Evaluasi Model")
     dbcv_score = validity_index(X_clustering, cluster_labels)
     min_samples = int(best_params["min_samples"])
     dcsi_score = dcsi_index(X_clustering, cluster_labels, min_samples)
     col1, col2 = st.columns(2)
     with col1:
         st.metric("DBCV Score", f"{dbcv_score:.4f}")
+        st.caption("Kriteria DBCV Score > 0.5")
     with col2:
         if dcsi_score is not None:
             st.metric("DCSI Score", f"{dcsi_score:.4f}")
+            st.caption("Kriteria DCSI Score > 0.5")
         else:
             st.warning("DCSI tidak dapat dihitung")
+
+    if dcsi_score is not None:
+        if dbcv_score > 0.5 and dcsi_score > 0.5:
+            st.success("Klaster yang terbentuk sudah baik")
+        elif dbcv_score > 0.5 and dcsi_score <= 0.5:
+            st.warning("Klaster cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI")
+        elif dbcv_score <= 0.5 and dcsi_score > 0.5:
+            st.warning("Klaster cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV")
+        else:
+            st.error("Klaster kurang optimal berdasarkan DBCV dan DCSI")
+    else:
+        if dbcv_score > 0.5:
+            st.success("Klaster yang terbentuk sudah baik berdasarkan DBCV")
+        else:
+            st.error("Klaster kurang optimal berdasarkan DBCV")
