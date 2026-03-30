@@ -432,14 +432,27 @@ with menu[2]:
     # Interpretasi klaster
     st.markdown("#### 3. Interpretasi Klaster")
     unique_clusters = sorted([c for c in df_result["Cluster"].unique() if c != -1])
-    
     for cluster in unique_clusters:
         df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
-        st.markdown(f"**Klaster {cluster}**")
+        st.markdown(f"**Cluster {cluster}**")
         st.dataframe(df_cluster)
+        n_anggota = len(df_cluster)
+        other_clusters_mean = cluster_mean_interp.drop(index=cluster).mean()
+        this_cluster_mean = cluster_mean_interp.loc[cluster]
+        dominant_features = this_cluster_mean[this_cluster_mean > other_clusters_mean].nlargest(3).index.tolist()
+        
+        if dominant_features:
+            fitur_str = " dan ".join(dominant_features)
+        else:
+            fitur_str = "tidak ada fitur yang secara signifikan mendominasi klaster lain"
+        
+        st.markdown(f"**Anggota klaster:** {n_anggota} provinsi")
+        st.markdown(f"**Fitur yang mendominasi:** {fitur_str}")
         st.divider()
     
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
-        st.markdown("**Noise (-1)**")
+        st.markdown("**Cluster -1 (Noise)**")
         st.dataframe(df_noise)
+        st.markdown(f"**Anggota klaster:** {len(df_noise)} provinsi")
+        st.divider()
