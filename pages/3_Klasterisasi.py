@@ -451,27 +451,15 @@ with menu[2]:
         st.divider()
 
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
-
     if not df_noise.empty:
-
         st.markdown("**Noise (-1)**")
         st.dataframe(df_noise)
-
         mean_noise = df_noise[numeric_cols].mean().round(3).to_frame(name="Nilai Rata-rata").T
-
-        pct_noise = (
-            df_noise[numeric_cols].mean().div(
-                df_result[df_result["Cluster"] != -1]
-                .groupby("Cluster")[numeric_cols]
-                .mean()
-                .sum(axis=0)
-            ) * 100
-        ).round(2).to_frame(name="Rata-Rata Persentase (%)").T
-
+        pct_noise = (df_noise[numeric_cols].mean().div(
+            df_result[df_result["Cluster"] != -1].groupby("Cluster")[numeric_cols].mean().sum(axis=0)) * 100
+                    ).round(2).to_frame(name="Rata-Rata Persentase (%)").T
         combined_noise = pd.concat([mean_noise, pct_noise], axis=0)
         combined_noise.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-
         st.markdown("**Karakteristik:**")
         st.dataframe(combined_noise)
-
         st.markdown(f"**Anggota Klaster:** {len(df_noise)} Provinsi")
