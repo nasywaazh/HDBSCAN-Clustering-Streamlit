@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.decomposition import PCA
 
 st.title("KLASTERISASI HDBSCAN & BAYESIAN OPTIMIZATION")
 st.divider()
@@ -35,7 +37,7 @@ with menu[0]:
     st.dataframe(scaled_standard)
 
     # Uji statistik
-    st.subheader("2. Uji Statistik")
+    st.markdown("2. Uji Statistik")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
     col1, col2 = st.columns(2)
@@ -102,7 +104,7 @@ with menu[0]:
     st.pyplot(fig)
 
     # Reduksi data
-    st.markdown("5. Principal Component Analysis (PCA)")
+    st.markdown("4. Reduksi Data (Principal Component Analysis)")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
