@@ -432,26 +432,30 @@ with menu[2]:
     # Interpretasi klaster
     st.markdown("#### 3. Interpretasi Klaster")
     unique_clusters = sorted([c for c in df_result["Cluster"].unique() if c != -1])
-    cluster_mean_interp = df_result[df_result["Cluster"] != -1].groupby("Cluster")[numeric_cols].mean()
-    cluster_mean_interp.index = cluster_mean_interp.index.astype(int)
-    
+    cluster_mean_all = df_result[df_result["Cluster"] != -1].groupby("Cluster")[numeric_cols].mean().round(3)
+    cluster_pct_all = cluster_mean_all.div(cluster_mean_all.sum(axis=0), axis=1) * 100
+    cluster_pct_all = cluster_pct_all.round(2)
+
     for cluster in unique_clusters:
         df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
         st.markdown(f"**Klaster {cluster}**")
         st.dataframe(df_cluster)
-
-        n_anggota = len(df_cluster)
+        mean_row = cluster_mean_all.loc[cluster].to_frame(name="Nilai Rata-rata").T
+        pct_row = cluster_pct_all.loc[cluster].to_frame(name="Rata-Rata Persentase (%)").T
+        combined = pd.concat([mean_row, pct_row], axis=0)
+        combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
+        st.dataframe(combined)
         st.markdown(f"**Anggota Klaster:** {n_anggota} Provinsi")
-        st.markdown("**Nilai Rata-Rata:**")
-        mean_cluster = df_cluster[numeric_cols].mean().round(3).to_frame(name=f"Klaster {cluster}").T
-        st.dataframe(mean_cluster)
-        st.markdown("**Rata-rata Persentase (%):**")
-        pct_cluster = (mean_cluster.div(mean_cluster.sum(axis=0), axis=1) * 100).round(2)
-        st.dataframe(pct_cluster)
         st.divider()
 
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
-        st.markdown("**Klaster -1 (Noise)**")
-        st.dataframe(df_noise)
+        st.markdown("**Noise (-1)**")
+        mean_noise = df_noise[numeric_cols].mean().round(3).to_frame(name="Nilai Rata-rata").T
+        pct_noise = (df_noise[numeric_cols].mean().div(
+            df_result[df_result["Cluster"] != -1].groupby("Cluster")[numeric_cols].mean().sum(axis=0)
+        ) * 100).round(2).to_frame(name="Persentase (%)").T
+        combined_noise = pd.concat([mean_noise, pct_noise], axis=0)
+        combined_noise.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
+        st.dataframe(combined_noise)
         st.markdown(f"**Anggota Klaster:** {len(df_noise)} Provinsi")
