@@ -28,7 +28,7 @@ menu = st.tabs([
 # Preprocessing data
 with menu[0]:
     # Standarisasi data
-    st.markdown("## 1. Standarisasi Data")
+    st.markdown("#### 1. Standarisasi Data")
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
     scaled_standard = pd.DataFrame(
@@ -37,21 +37,21 @@ with menu[0]:
     st.dataframe(scaled_standard)
 
     # Uji statistik
-    st.markdown("## 2. Uji Statistik")
+    st.markdown("#### 2. Uji Statistik")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
     col1, col2 = st.columns(2)
     with col1:
-        st.caption("Kriteria Nilai KMO > 0.5")
         st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
+        st.caption("Kriteria Nilai KMO > 0.5")
         if kmo_model > 0.5:
             st.success("Data sudah representatif")
         else:
             st.error("Data belum representatif")
         
     with col2:
+        st.metric("Uji Bartlett", f"{p_value:.6f}")
         st.caption("Kriteria p-value < 0.05")
-        st.metric("Uji Bartlett (p-value)", f"{p_value:.6f}")
         if p_value < 0.05:
             st.success("Terdapat korelasi signifikan antarvariabel")
             korelasi_ok = True
@@ -67,7 +67,7 @@ with menu[0]:
         for i in range(X_vif.shape[1])
     ]
 
-    st.write("Uji Multikolinieritas dengan Variance Inflation Factor (VIF):")
+    st.write("Uji Multikolinieritas dengan Variance Inflation Factor (VIF)")
     st.dataframe(vif_data)
     high_vif = vif_data[vif_data["VIF"] >= 5]
     if not high_vif.empty:
@@ -82,7 +82,7 @@ with menu[0]:
         multikolinieritas = False
 
     # Deteksi outlier
-    st.markdown("## 3. Deteksi Outlier (Local Outlier Factor)")
+    st.markdown("#### 3. Deteksi Outlier (Local Outlier Factor)")
     lof = LocalOutlierFactor(n_neighbors=20)
     y_pred = lof.fit_predict(scaled_standard)
     lof_scores = -lof.negative_outlier_factor_
@@ -105,7 +105,7 @@ with menu[0]:
     st.pyplot(fig)
 
     # Reduksi data
-    st.markdown("## 4. Reduksi Data (Principal Component Analysis)")
+    st.markdown("#### 4. Reduksi Data (Principal Component Analysis)")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
@@ -137,3 +137,6 @@ with menu[0]:
     else:
         st.info("PCA tidak diperlukan")
         st.session_state["X_clustering"] = scaled_standard
+
+# Pemodelan Klasterisasi
+    # Bayesian Optimization
