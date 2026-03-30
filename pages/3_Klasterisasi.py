@@ -248,14 +248,17 @@ with menu[1]:
     with st.spinner("Mencari parameter optimal..."):
         X_clustering = np.array(X_clustering)
         def objective(min_cluster_size, min_samples):
-            min_cluster_size = int(min_cluster_size)
-            min_samples = int(min_samples)
+            min_cluster_size = int(np.floor(min_cluster_size))
+            min_samples = int(np.floor(min_samples))
+            if min_cluster_size < 2 or min_samples < 1:
+                return -1.0
             if min_samples > min_cluster_size:
-                return -1
+                return -1.0
 
             clusterer = hdbscan.HDBSCAN(
                 min_cluster_size=min_cluster_size,
                 min_samples=min_samples
+                metric="euclidean"
             )
             labels = clusterer.fit_predict(X_clustering)
 
@@ -282,9 +285,9 @@ with menu[1]:
     st.success("Parameter optimal ditemukan!")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("min_cluster_size", int(best_params["min_cluster_size"]))
+        st.metric("min_cluster_size", int(np.floor(best_params["min_cluster_size"])))
     with col2:
-        st.metric("min_samples", int(best_params["min_samples"]))
+        st.metric("min_samples", int(np.floor(best_params["min_samples"])))
     with col3:
         st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
 
@@ -308,8 +311,8 @@ with menu[1]:
     # Model HDBSCAN
     st.markdown("#### 2. Distribusi Klaster HDBSCAN")
     model = hdbscan.HDBSCAN(
-        min_cluster_size=int(best_params["min_cluster_size"]),
-        min_samples=int(best_params["min_samples"]),
+        min_cluster_size=int(np.floor(best_params["min_cluster_size"]))),
+        min_samples=int(np.floor(best_params["min_samples"]))),
         prediction_data=True
     )
     labels = model.fit_predict(X_clustering)
