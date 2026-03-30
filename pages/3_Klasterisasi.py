@@ -155,7 +155,7 @@ if "X_clustering" not in st.session_state:
     st.stop()
 X_clustering = st.session_state["X_clustering"].values
 
-# Evaluasi Model HDBSCAN
+# Rumus perhitungan DCSI
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
     n = len(X_cluster)
     if n < 2:
@@ -283,7 +283,7 @@ with menu[1]:
     col1, col2 = st.columns(2)
 
     with col1:
-        fig1, ax1 = plt.subplots(figsize=(6, 4))
+        fig1, ax1 = plt.subplots(figsize=(8, 5))
         ax1.plot(iterations, best_so_far, marker='o')
         ax1.set_title("Best DBCV Over Time")
         ax1.set_xlabel("Iterasi")
@@ -291,7 +291,7 @@ with menu[1]:
         st.pyplot(fig1)
 
     with col2:
-        fig2, ax2 = plt.subplots(figsize=(6, 4))
+        fig2, ax2 = plt.subplots(figsize=(8, 5))
         ax2.plot(iterations, targets, marker='o')
         ax2.axhline(best_dbcv, color='red', linestyle="--", label=f"Best DBCV = {best_dbcv:.4f}")
         ax2.set_title("Bayesian Optimization Convergence")
@@ -356,7 +356,7 @@ with menu[1]:
             except Exception:
                 pass  
 
-    ax.set_title("Distribusi Klaster HDBSCAN", fontsize=14)
+    ax.set_title("Distribusi Klaster HDBSCAN + Bayesian Optimization", fontsize=14)
     ax.set_xlabel(xcol)
     ax.set_ylabel(ycol)
     ax.set_xticks([])
@@ -383,15 +383,43 @@ with menu[1]:
 
     if dcsi_score is not None:
         if dbcv_score > 0.5 and dcsi_score > 0.5:
-            st.success("Klaster yang terbentuk sudah baik")
+            st.success("Kualitas klaster sudah baik dengan stabilitas dan pemisahan yang jelas antarklaster")
         elif dbcv_score > 0.5 and dcsi_score <= 0.5:
-            st.warning("Klaster cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI")
+            st.warning("Kualitas klaster  cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI")
         elif dbcv_score <= 0.5 and dcsi_score > 0.5:
-            st.warning("Klaster cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV")
+            st.warning("Kualitas klaster cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV")
         else:
-            st.error("Klaster kurang optimal berdasarkan DBCV dan DCSI")
+            st.error("Kualitas klaster yang buruk berdasarkan DBCV dan DCSI")
     else:
         if dbcv_score > 0.5:
-            st.success("Klaster yang terbentuk sudah baik berdasarkan DBCV")
+            st.success("Kualitas klaster sudah baik berdasarkan DBCV")
         else:
-            st.error("Klaster kurang optimal berdasarkan DBCV")
+            st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
+
+# Hasil klasterisasi
+with menu[2]:
+    if "cluster_labels" not in st.session_state:
+        st.warning("Silakan jalankan proses klasterisasi terlebih dahulu!")
+        st.stop()
+
+    cluster_labels = st.session_state.cluster_labels
+    df_result = df.copy()
+    df_result["Cluster"] = cluster_labels
+
+    # Dataframe hasil klasterisasi
+    st.markdown("#### 1. Hasil Klasterisasi")
+    st.dataframe(df_result)
+
+    # Karakteristik setiap klaster
+    st.markdown("#### 2. Karakteristik Setiap Klaster")
+        numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+    cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
+
+    st.markdown("##### Rata-rata Setiap Klaster")
+    st.dataframe(cluster_mean)
+    numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+
+    cluster_percentage = cluster_mean.div(cluster_mean.sum(axis=1), axis=0) * 100
+    cluster_percentage = cluster_percentage.round(2)
+    st.markdown("##### Rata-Rata Persentase Klaster (%)")
+    st.dataframe(cluster_percentage)
