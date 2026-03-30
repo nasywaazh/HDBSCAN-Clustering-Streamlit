@@ -445,9 +445,9 @@ with menu[2]:
         pct_row = cluster_pct_all.loc[cluster].to_frame(name="Rata-Rata Persentase (%)").T
         combined = pd.concat([mean_row, pct_row], axis=0)
         combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-        st.markdown("**Karakteristik:**")
+        st.markdown("**Karakteristik**")
         st.dataframe(combined)
-        st.markdown(f"**Anggota Klaster:** {len(df_cluster)} Provinsi")
+        st.markdown(f"**Anggota Klaster :** {len(df_cluster)} Provinsi")
         st.divider()
 
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
@@ -460,6 +460,6 @@ with menu[2]:
                     ).round(2).to_frame(name="Rata-Rata Persentase (%)").T
         combined_noise = pd.concat([mean_noise, pct_noise], axis=0)
         combined_noise.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-        st.markdown("**Karakteristik:**")
+        st.markdown("**Karakteristik**")
         st.dataframe(combined_noise)
-        st.markdown(f"**Anggota Klaster:** {len(df_noise)} Provinsi")
+        st.markdown(f"**Anggota Klaster :** {len(df_noise)} Provinsi")
