@@ -28,7 +28,7 @@ menu = st.tabs([
 # Preprocessing data
 with menu[0]:
     # Standarisasi data
-    st.markdown("1. Standarisasi Data")
+    st.markdown("## 1. Standarisasi Data")
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
     scaled_standard = pd.DataFrame(
@@ -37,27 +37,27 @@ with menu[0]:
     st.dataframe(scaled_standard)
 
     # Uji statistik
-    st.markdown("2. Uji Statistik")
+    st.markdown("## 2. Uji Statistik")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
     col1, col2 = st.columns(2)
     with col1:
+        st.caption("Kriteria Nilai KMO > 0.5")
         st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
-
-    if kmo_model > 0.5:
-        st.success("Data sudah representatif")
-    else:
-        st.error("Data belum representatif")
+        if kmo_model > 0.5:
+            st.success("Data sudah representatif")
+        else:
+            st.error("Data belum representatif")
         
     with col2:
+        st.caption("Kriteria p-value < 0.05")
         st.metric("Uji Bartlett (p-value)", f"{p_value:.6f}")
-
-    if p_value < 0.05:
-        st.success("Terdapat korelasi signifikan antar variabel")
-        korelasi_ok = True
-    else:
-        st.warning("Tidak ada korelasi signifikan")
-        korelasi_ok = False
+        if p_value < 0.05:
+            st.success("Terdapat korelasi signifikan antarvariabel")
+            korelasi_ok = True
+        else:
+            st.warning("Tidak terdapat korelasi signifikan antarvariabel")
+            korelasi_ok = False
 
     X_vif = scaled_standard.copy()
     vif_data = pd.DataFrame()
@@ -82,7 +82,7 @@ with menu[0]:
         multikolinieritas = False
 
     # Deteksi outlier
-    st.markdown("3. Deteksi Outlier (Local Outlier Factor)")
+    st.markdown("## 3. Deteksi Outlier (Local Outlier Factor)")
     lof = LocalOutlierFactor(n_neighbors=20)
     y_pred = lof.fit_predict(scaled_standard)
     lof_scores = -lof.negative_outlier_factor_
@@ -97,14 +97,15 @@ with menu[0]:
     st.dataframe(df_lof[["Provinsi", "LOF Score", "Label"]])
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    sns.barplot(data=df_lof, x="Provinsi", y="LOF Score", hue="Label", ax=ax)
+    sns.barplot(data=df_lof, x="Provinsi", y="LOF Score", hue="Label",
+                palette={"Normal": "Skyblue", "Outlier": "Salmon"}) , ax=ax)
     plt.xticks(rotation=90)
     plt.axhline(threshold, linestyle="--")
     plt.title("Visualisasi LOF")
     st.pyplot(fig)
 
     # Reduksi data
-    st.markdown("4. Reduksi Data (Principal Component Analysis)")
+    st.markdown("## 4. Reduksi Data (Principal Component Analysis)")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
@@ -124,7 +125,7 @@ with menu[0]:
         if kumulatif[n_components - 1] < 80:
             n_components = np.argmax(kumulatif >= 80) + 1
 
-        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1 dan proporsi variansi kumulatif ≥ 80% : {n_components}")
+        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1 dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen")
         pca_final = PCA(n_components=n_components)
         pca_result = pd.DataFrame(
             pca_final.fit_transform(scaled_standard),
