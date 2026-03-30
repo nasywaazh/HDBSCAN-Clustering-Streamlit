@@ -432,8 +432,6 @@ with menu[2]:
     # Interpretasi klaster
     st.markdown("#### 3. Interpretasi Klaster")
     unique_clusters = sorted([c for c in df_result["Cluster"].unique() if c != -1])
-    
-    # Hitung mean per klaster untuk perbandingan dominasi fitur
     cluster_mean_interp = df_result[df_result["Cluster"] != -1].groupby("Cluster")[numeric_cols].mean()
     cluster_mean_interp.index = cluster_mean_interp.index.astype(int)
     
@@ -441,27 +439,19 @@ with menu[2]:
         df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
         st.markdown(f"**Klaster {cluster}**")
         st.dataframe(df_cluster)
-        
-        # Jumlah anggota
+
         n_anggota = len(df_cluster)
-        
-        # Fitur dominan: fitur yang nilainya lebih tinggi dibanding rata-rata klaster lain
-        other_clusters_mean = cluster_mean_interp.drop(index=int(cluster)).mean(numeric_only=True)
-        this_cluster_mean = cluster_mean_interp.loc[int(cluster)]
-        dominant_features = this_cluster_mean[this_cluster_mean > other_clusters_mean].nlargest(3).index.tolist()
-        
-        if dominant_features:
-            fitur_str = " dan ".join(dominant_features)
-        else:
-            fitur_str = "tidak ada fitur yang secara signifikan mendominasi klaster lain"
-        
-        st.markdown(f"**Anggota klaster:** {n_anggota} provinsi")
-        st.markdown(f"**Fitur yang mendominasi:** {fitur_str}")
+        st.markdown(f"**Anggota Klaster:** {n_anggota} Provinsi")
+        st.markdown("**Nilai Rata-Rata:**")
+        mean_cluster = df_cluster[numeric_cols].mean().round(3).to_frame(name=f"Klaster {cluster}").T
+        st.dataframe(mean_cluster)
+        st.markdown("**Rata-rata Persentase (%):**")
+        pct_cluster = (mean_cluster.div(mean_cluster.sum(axis=0), axis=1) * 100).round(2)
+        st.dataframe(pct_cluster)
         st.divider()
-    
-    # Tampilkan noise jika ada
+
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
         st.markdown("**Klaster -1 (Noise)**")
         st.dataframe(df_noise)
-        st.markdown(f"**Anggota klaster:** {len(df_noise)} provinsi")
+        st.markdown(f"**Anggota Klaster:** {len(df_noise)} Provinsi")
