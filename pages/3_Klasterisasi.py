@@ -414,11 +414,8 @@ with menu[2]:
     st.markdown("#### 2. Karakteristik Setiap Klaster")
     numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
     cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
-
     st.markdown("##### Rata-rata Setiap Klaster")
     st.dataframe(cluster_mean)
-    numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
-
     cluster_percentage = cluster_mean.div(cluster_mean.sum(axis=1), axis=0) * 100
     cluster_percentage = cluster_percentage.round(2)
     st.markdown("##### Rata-Rata Persentase Klaster (%)")
