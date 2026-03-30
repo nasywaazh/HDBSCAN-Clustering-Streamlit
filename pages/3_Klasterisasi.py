@@ -98,7 +98,7 @@ with menu[0]:
 
     fig, ax = plt.subplots(figsize=(10, 4))
     sns.barplot(data=df_lof, x="Provinsi", y="LOF Score", hue="Label",
-                palette={"Normal": "Skyblue", "Outlier": "Salmon"}) , ax=ax)
+                palette={"Normal": "Skyblue", "Outlier": "Salmon"} , ax=ax)
     plt.xticks(rotation=90)
     plt.axhline(threshold, linestyle="--")
     plt.title("Visualisasi LOF")
