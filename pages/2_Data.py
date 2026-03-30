@@ -21,15 +21,17 @@ if uploaded_file is not None:
 
         # Informasi data
         st.subheader("Informasi Data")
-        col1, col2 = st.columns(2)
+        col1, col2, col3, col4 = st.columns(4)
         col1.metric("Jumlah Baris", df.shape[0])
         col2.metric("Jumlah Kolom", df.shape[1])
+        col3.metric("Jumlah Missing Values",  df.isnull().sum().sum())
+        col4.metric("Jumlah Data Duplikat", df.duplicate().sum().sum())
 
         # Preview data
         st.subheader("Preview Data")
         st.dataframe(df, use_container_width=True)
 
-        # Tampilkan tipe data
+        # Tipe data
         st.subheader("Tipe Data")
         dtype_df = df.dtypes.reset_index()
         dtype_df.columns = ["Nama Kolom", "Tipe Data"]
