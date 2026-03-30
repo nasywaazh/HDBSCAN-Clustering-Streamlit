@@ -24,10 +24,9 @@ menu = st.tabs([
 ])
 
 # Preprocessing data
-st.subheader("Preprocessing Data")
 with menu[0]:
     # Standarisasi data
-    st.subheader("Standarisasi Data")
+    st.markdown("1. Standarisasi Data")
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
     scaled_standard = pd.DataFrame(
@@ -36,7 +35,7 @@ with menu[0]:
     st.dataframe(scaled_standard)
 
     # Uji statistik
-    st.subheader("Uji Statistik")
+    st.subheader("2. Uji Statistik")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
     col1, col2 = st.columns(2)
@@ -79,3 +78,59 @@ with menu[0]:
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 5)")
         multikolinieritas = False
+
+    # Deteksi outlier
+    st.markdown("3. Deteksi Outlier (Local Outlier Factor)")
+    lof = LocalOutlierFactor(n_neighbors=20)
+    y_pred = lof.fit_predict(scaled_standard)
+    lof_scores = -lof.negative_outlier_factor_
+    df_lof = df.copy()
+    df_lof["LOF Score"] = lof_scores
+    threshold = lof_scores.std()
+    df_lof["Label"] = np.where(
+        df_lof["LOF Score"] > threshold,
+        "Outlier",
+        "Normal"
+    )
+    st.dataframe(df_lof[["Provinsi", "LOF Score", "Label"]])
+
+    fig, ax = plt.subplots(figsize=(10, 4))
+    sns.barplot(data=df_lof, x="Provinsi", y="LOF Score", hue="Label", ax=ax)
+    plt.xticks(rotation=90)
+    plt.axhline(threshold, linestyle="--")
+    plt.title("Visualisasi LOF")
+    st.pyplot(fig)
+
+    # Reduksi data
+    st.markdown("5. Principal Component Analysis (PCA)")
+    if multikolinieritas and korelasi_ok:
+        pca = PCA()
+        pca.fit(scaled_standard)
+        eigenvalues = pca.explained_variance_
+        proporsi = pca.explained_variance_ratio_ * 100
+        kumulatif = np.cumsum(proporsi)
+        pca_df = pd.DataFrame({
+            "Komponen": [f"PC{i+1}" for i in range(len(eigenvalues))],
+            "Eigenvalue": eigenvalues,
+            "Proporsi Varians (%)": proporsi,
+            "Kumulatif (%)": kumulatif
+        })
+        st.dataframe(pca_df)
+
+        valid_pc = pca_df[pca_df["Eigenvalue"] > 1]
+        n_components = len(valid_pc)
+        if kumulatif[n_components - 1] < 80:
+            n_components = np.argmax(kumulatif >= 80) + 1
+
+        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1 dan proporsi variansi kumulatif ≥ 80% : {n_components}")
+        pca_final = PCA(n_components=n_components)
+        pca_result = pd.DataFrame(
+            pca_final.fit_transform(scaled_standard),
+            columns=[f"PC{i+1}" for i in range(n_components)]
+        )
+        st.dataframe(pca_result)
+        
+        st.session_state["X_clustering"] = pca_result
+    else:
+        st.info("PCA tidak diperlukan")
+        st.session_state["X_clustering"] = scaled_standard
