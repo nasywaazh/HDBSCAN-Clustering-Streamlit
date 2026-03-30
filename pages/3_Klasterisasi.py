@@ -305,6 +305,7 @@ with menu[1]:
         prediction_data=True)
     hdbscan_model.fit(X_clustering)
     cluster_labels = hdbscan_model.labels_
+    st.session_state["cluster_labels"] = cluster_labels
 
     df_result = df.copy()
     df_result["Cluster"] = cluster_labels
@@ -401,7 +402,6 @@ with menu[2]:
     if "cluster_labels" not in st.session_state:
         st.warning("Silakan jalankan proses klasterisasi terlebih dahulu!")
         st.stop()
-
     cluster_labels = st.session_state.cluster_labels
     df_result = df.copy()
     df_result["Cluster"] = cluster_labels
