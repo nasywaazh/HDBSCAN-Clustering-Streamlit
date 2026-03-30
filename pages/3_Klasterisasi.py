@@ -246,6 +246,7 @@ with menu[1]:
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     with st.spinner("Mencari parameter optimal..."):
+        X_clustering = X_clustering.values
         def objective(min_cluster_size, min_samples):
             min_cluster_size = int(min_cluster_size)
             min_samples = int(min_samples)
@@ -291,14 +292,14 @@ with menu[1]:
     iterations = np.arange(1, len(targets) + 1)
     best_so_far = np.maximum.accumulate(targets)
 
-    fig1, ax1 = plt.subplots(figsize=(8, 5))
+    fig1, ax1 = plt.subplots(figsize=(5, 3))
     ax1.plot(iterations, best_so_far, marker='o')
     ax1.set_title("Best DBCV Over Time")
     ax1.set_xlabel("Iterasi")
     ax1.set_ylabel("Best DBCV Score")
     st.pyplot(fig1)
 
-    fig2, ax2 = plt.subplots(figsize=(8, 5))
+    fig2, ax2 = plt.subplots(figsize=(5, 3))
     ax2.plot(iterations, targets, marker='o')
     ax2.axhline(best_dbcv, color='red', linestyle="--", label=f"Best DBCV = {best_dbcv:.4f}")
     ax2.set_title("Bayesian Optimization Convergence")
