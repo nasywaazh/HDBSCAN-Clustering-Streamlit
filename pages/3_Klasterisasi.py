@@ -125,7 +125,7 @@ with menu[0]:
             "Komponen": [f"PC{i+1}" for i in range(len(eigenvalues))],
             "Eigenvalue": eigenvalues,
             "Proporsi Varians (%)": proporsi,
-            "Kumulatif (%)": kumulatif
+            "Proporsi Varians Kumulatif (%)": kumulatif
         })
         st.dataframe(pca_df)
 
@@ -143,9 +143,11 @@ with menu[0]:
         st.dataframe(pca_result)
         
         st.session_state["X_clustering"] = pca_result
+        st.session_["X_plot"] = pca_result
     else:
         st.info("PCA tidak diperlukan")
         st.session_state["X_clustering"] = scaled_standard
+        st.session_state["X_plot"] = scaled_standard
 
 # Pemodelan klasterisasi
 if "X_clustering" not in st.session_state:
@@ -163,7 +165,6 @@ def get_eps_i(X_cluster, min_samples, quantile=0.5):
     distances, _ = nbrs.kneighbors(X_cluster)
     return np.quantile(distances[:, -1], quantile)
 
-
 def get_core_points(X_cluster, min_samples, eps_i):
     n = len(X_cluster)
     if n < 2 or eps_i is None:
@@ -172,7 +173,6 @@ def get_core_points(X_cluster, min_samples, eps_i):
     neighbors = nbrs.radius_neighbors(X_cluster, return_distance=False)
     core_mask = np.array([len(nb) >= min_samples for nb in neighbors])
     return np.where(core_mask)[0]
-
 
 def compute_connectedness(X_cluster, min_samples, eps_i):
     core_idx = get_core_points(X_cluster, min_samples, eps_i)
@@ -183,33 +183,25 @@ def compute_connectedness(X_cluster, min_samples, eps_i):
     mst = minimum_spanning_tree(dist_matrix).toarray()
     return np.max(mst)
 
-
 def compute_separation(X_ci, X_cj, min_samples, eps_i, eps_j):
     core_i = get_core_points(X_ci, min_samples, eps_i)
     core_j = get_core_points(X_cj, min_samples, eps_j)
-
     if len(core_i) == 0 or len(core_j) == 0:
         return np.inf
-
     X_core_i = X_ci[core_i]
     X_core_j = X_cj[core_j]
-
     dist = cdist(X_core_i, X_core_j)
     return np.min(dist)
-
 
 def dcsi_index(X, labels, min_samples):
     mask = labels != -1
     X_valid = X[mask]
     labels_valid = labels[mask]
-
     clusters = np.unique(labels_valid)
     if len(clusters) < 2:
         return None
-
     eps_dict = {}
     conn_dict = {}
-
     for c in clusters:
         X_c = X_valid[labels_valid == c]
         eps = get_eps_i(X_c, min_samples)
@@ -218,30 +210,21 @@ def dcsi_index(X, labels, min_samples):
 
     total = 0
     weight_sum = 0
-
     for ci, cj in combinations(clusters, 2):
         X_ci = X_valid[labels_valid == ci]
         X_cj = X_valid[labels_valid == cj]
-
         sep = compute_separation(
             X_ci, X_cj, min_samples,
-            eps_dict[ci], eps_dict[cj]
-        )
-
+            eps_dict[ci], eps_dict[cj])
         max_conn = max(conn_dict[ci], conn_dict[cj])
-
         if np.isinf(sep) or np.isinf(max_conn) or (sep + max_conn) == 0:
             continue
-
         score = sep / (sep + max_conn)
         weight = len(X_ci) + len(X_cj)
-
         total += score * weight
         weight_sum += weight
-
     if weight_sum == 0:
         return None
-
     return total / weight_sum
 
 with menu[1]:
@@ -249,6 +232,7 @@ with menu[1]:
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     with st.spinner("Mencari parameter optimal..."):
         X_clustering = np.array(X_clustering)
+        X_plot = st.session_state.get("X_plot", st.session_state["X_clustering"])
         def objective(min_cluster_size, min_samples):
             min_cluster_size = int(np.floor(min_cluster_size))
             min_samples = int(np.floor(min_samples))
@@ -325,18 +309,16 @@ with menu[1]:
     df_result = df.copy()
     df_result["Cluster"] = cluster_labels
 
-    if isinstance(pca_standard, np.ndarray):
-        pca_standard = pd.DataFrame(pca_standard, columns=["PC1", "PC2"])
+    X_plot = st.session_state.get("X_plot", pd.DataFrame(X_clustering))
+    xcol, ycol = X_plot.columns[0], X_plot.columns[1]
 
     fig, ax = plt.subplots(figsize=(10, 6))
-
     unique_labels = sorted(set(cluster_labels))
     n_clusters = len([l for l in unique_labels if l != -1])
     palette = sns.color_palette("Set2", n_clusters)
 
     color_map = {}
     palette_idx = 0
-
     for label in unique_labels:
         if label == -1:
             color_map[label] = "gray"
@@ -346,41 +328,41 @@ with menu[1]:
 
     for label in unique_labels:
         idx = cluster_labels == label
-        points = pca_standard[idx]
-
+        points = X_plot[idx].reset_index(drop=True)
         color = color_map[label]
 
         ax.scatter(
-            points['PC1'], points['PC2'],
+            points[xcol], points[ycol],
             s=60,
-            c='gray' if label == -1 else color,
+            c='gray' if label == -1 else [color],
             label='Noise' if label == -1 else f'Cluster {label}',
             edgecolor='k',
             alpha=0.6 if label == -1 else 0.9
         )
 
         if label != -1 and len(points) >= 3:
-            hull = ConvexHull(points[['PC1', 'PC2']])
-            hull_points = points.iloc[hull.vertices][['PC1', 'PC2']]
+            try:
+                hull = ConvexHull(points[[xcol, ycol]])
+                hull_points = points.iloc[hull.vertices][[xcol, ycol]]
+                polygon = Polygon(
+                    hull_points.values,
+                    closed=True,
+                    facecolor=color,
+                    alpha=0.2,
+                    edgecolor=color,
+                    linewidth=2
+                )
+                ax.add_patch(polygon)
+            except Exception:
+                pass  
 
-            polygon = Polygon(
-                hull_points,
-                closed=True,
-                facecolor=color,
-                alpha=0.2,
-                edgecolor=color,
-                linewidth=2
-            )
-            ax.add_patch(polygon)
-
-    ax.set_title("Distribusi Klaster HDBSCAN (PCA)", fontsize=14)
-    ax.set_xlabel("PC1")
-    ax.set_ylabel("PC2")
+    ax.set_title("Distribusi Klaster HDBSCAN", fontsize=14)
+    ax.set_xlabel(xcol)
+    ax.set_ylabel(ycol)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.legend(title="Cluster")
     ax.grid(True, linestyle='--', alpha=0.3)
-
     st.pyplot(fig)
 
     # Evaluasi model HDBSCAN
