@@ -246,7 +246,7 @@ with menu[1]:
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     with st.spinner("Mencari parameter optimal..."):
-        X_clustering = X_clustering.values
+        X_clustering = np.array(X_clustering)
         def objective(min_cluster_size, min_samples):
             min_cluster_size = int(min_cluster_size)
             min_samples = int(min_samples)
