@@ -270,7 +270,7 @@ with menu[1]:
 
         pbounds = {"min_cluster_size": (2, 7), "min_samples": (1, 6)}
 
-        optimizer = BayesianOptimization(f = hdbscan_objective_dbcv,
+        optimizer = BayesianOptimization(f = objective,
                                          pbounds = pbounds,
                                          random_state = 42,
                                          verbose = 2)
@@ -291,17 +291,17 @@ with menu[1]:
     iterations = np.arange(1, len(targets) + 1)
     best_so_far = np.maximum.accumulate(targets)
 
-    fig1, ax1 = plt.subplots()
+    fig1, ax1 = plt.subplots(figsize=(8, 5))
     ax1.plot(iterations, best_so_far, marker='o')
     ax1.set_title("Best DBCV Over Time")
     ax1.set_xlabel("Iterasi")
     ax1.set_ylabel("Best DBCV Score")
     st.pyplot(fig1)
 
-    fig2, ax2 = plt.subplots()
+    fig2, ax2 = plt.subplots(figsize=(8, 5))
     ax2.plot(iterations, targets, marker='o')
-    ax2.axhline(best_dbcv, linestyle="--")
-    ax2.set_title("Konvergensi Bayesian Optimization")
+    ax2.axhline(best_dbcv, color='red', linestyle="--", label=f"Best DBCV = {best_dbcv:.4f}")
+    ax2.set_title("Bayesian Optimization Convergence")
     st.pyplot(fig2)
 
     # Model HDBSCAN
