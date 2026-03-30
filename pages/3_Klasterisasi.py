@@ -19,7 +19,6 @@ from scipy.spatial import ConvexHull
 from matplotlib.patches import Polygon
 
 st.title("KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION")
-st.divider()
 
 # Data yang diupload pengguna
 if "data" not in st.session_state:
@@ -423,3 +422,30 @@ with menu[2]:
 
     # Interpretasi klaster
     st.markdown("#### 3. Interpretasi Klaster")
+    unique_clusters = sorted([c for c in df_result["Cluster"].unique() if c != -1])
+    
+    for cluster in unique_clusters:
+        df_cluster = df_result[df_result["Cluster"] == cluster]
+        provinsi_list = ", ".join(df_cluster["Provinsi"].tolist())
+        cluster_stats = df_cluster[numeric_cols].mean()
+        
+        # Tentukan karakteristik dominan berdasarkan persentase tertinggi
+        pct = cluster_mean.loc[cluster].div(cluster_mean.sum(axis=0)) * 100
+        top_vars = pct.nlargest(3).index.tolist()
+        top_vals = [f"{v} ({cluster_mean.loc[cluster, v]:.2f})" for v in top_vars]
+        
+        st.markdown(f"**Klaster {cluster}**")
+        st.markdown(f"**Provinsi:** {provinsi_list}")
+        st.markdown(f"**Interpretasi:** Klaster {cluster} memiliki nilai rata-rata tertinggi pada variabel "
+                    f"{', '.join(top_vars)}, dengan nilai masing-masing {', '.join(top_vals)}. "
+                    f"Klaster ini terdiri dari {len(df_cluster)} provinsi.")
+        st.divider()
+
+    df_noise = df_result[df_result["Cluster"] == -1]
+    if not df_noise.empty:
+        provinsi_noise = ", ".join(df_noise["Provinsi"].tolist())
+        st.markdown("**Noise (-1)**")
+        st.markdown(f"**Provinsi:** {provinsi_noise}")
+        st.markdown("**Interpretasi:** Provinsi-provinsi ini tidak masuk ke klaster manapun "
+                    "karena memiliki karakteristik yang berbeda signifikan dari provinsi lainnya.")
+        st.divider()
