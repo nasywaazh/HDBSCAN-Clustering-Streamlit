@@ -315,7 +315,7 @@ with menu[1]:
 
     # Model HDBSCAN
     st.markdown("#### 2. Distribusi Klaster HDBSCAN")
-    hdbscan_model = HDBSCAN(
+    hdbscan_model = hdbscan.HDBSCAN(
         min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
         min_samples=int(np.floor(best_params["min_samples"])),
         prediction_data=True)
