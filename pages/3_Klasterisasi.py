@@ -276,10 +276,10 @@ with menu[1]:
     with col3:
         st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
     with col4:
-            best_clusterer = hdbscan.HDBSCAN(
-                min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
-                min_samples=int(np.floor(best_params["min_samples"])),
-                metric="euclidean")
+         best_clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
+            min_samples=int(np.floor(best_params["min_samples"])),
+            metric="euclidean")
         best_labels = best_clusterer.fit_predict(X_clustering)
         n_clusters = len(set(best_labels)) - (1 if -1 in best_labels else 0)
         st.metric("Jumlah Klaster Utama", n_clusters)
