@@ -315,12 +315,13 @@ with menu[1]:
 
     # Model HDBSCAN
     st.markdown("#### 2. Distribusi Klaster HDBSCAN")
-    model = hdbscan.HDBSCAN(
+    hdbscan_model = HDBSCAN(
         min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
         min_samples=int(np.floor(best_params["min_samples"])),
         prediction_data=True
     )
-    labels = model.fit_predict(X_clustering)
+    hdbscan_model = hdbscan_model.fit_predict(X_clustering)
+    cluster_labels = hdbscan_model.labels_
     df_result = df.copy()
     df_result["Cluster"] = labels
     
@@ -384,9 +385,9 @@ with menu[1]:
 
     # Evaluasi model HDBSCAN
     st.markdown("### 3. Evaluasi Model")
-    dbcv_score = validity_index(X_clustering, labels)
+    dbcv_score = validity_index(X_clustering, cluster_labels)
     min_samples = int(best_params["min_samples"])
-    dcsi_score = dcsi_index(X_clustering, labels, min_samples)
+    dcsi_score = dcsi_index(X_clustering, cluster_labels, min_samples)
     col1, col2 = st.columns(2)
     with col1:
         st.metric("DBCV Score", f"{dbcv_score:.4f}")
