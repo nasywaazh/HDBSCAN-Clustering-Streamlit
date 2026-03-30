@@ -257,7 +257,7 @@ with menu[1]:
 
             clusterer = hdbscan.HDBSCAN(
                 min_cluster_size=min_cluster_size,
-                min_samples=min_samples
+                min_samples=min_samples,
                 metric="euclidean"
             )
             labels = clusterer.fit_predict(X_clustering)
