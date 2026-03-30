@@ -437,17 +437,17 @@ with menu[2]:
     cluster_pct_all = cluster_pct_all.round(2)
 
 for cluster in unique_clusters:
-        df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
-        st.markdown(f"**Klaster {cluster}**")
-        st.dataframe(df_cluster)
-        mean_row = cluster_mean_all.loc[cluster].to_frame(name="Nilai Rata-rata").T
-        pct_row = cluster_pct_all.loc[cluster].to_frame(name="Rata-Rata Persentase (%)").T
-        combined = pd.concat([mean_row, pct_row], axis=0)
-        combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-        st.markdown("**Karakteristik:**")
-        st.dataframe(combined)
-        st.markdown(f"**Anggota Klaster:** {len(df_cluster)} Provinsi")  # ganti df_noise → df_cluster
-        st.divider()
+    df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
+    st.markdown(f"**Klaster {cluster}**")
+    st.dataframe(df_cluster)
+    mean_row = cluster_mean_all.loc[cluster].to_frame(name="Nilai Rata-rata").T
+    pct_row = cluster_pct_all.loc[cluster].to_frame(name="Rata-Rata Persentase (%)").T
+    combined = pd.concat([mean_row, pct_row], axis=0)
+    combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
+    st.markdown("**Karakteristik:**")
+    st.dataframe(combined)
+    st.markdown(f"**Anggota Klaster:** {len(df_cluster)} Provinsi")
+    st.divider()
 
     df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
