@@ -28,9 +28,9 @@ if "data" not in st.session_state:
 df = st.session_state["data"]
 
 menu = st.tabs([
-    "Preprocessing Data",
-    "Pemodelan Klasterisasi",
-    "Hasil Klasterisasi"
+    "PREPROCESSING DATA",
+    "PEMODELAN KLASTERISASI",
+    "HASIL KLASTERISASI"
 ])
 
 # Preprocessing data
@@ -275,6 +275,14 @@ with menu[1]:
         st.metric("min_samples", int(np.floor(best_params["min_samples"])))
     with col3:
         st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
+    with col4:
+            best_clusterer = hdbscan.HDBSCAN(
+                min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
+                min_samples=int(np.floor(best_params["min_samples"])),
+                metric="euclidean")
+        best_labels = best_clusterer.fit_predict(X_clustering)
+        n_clusters = len(set(best_labels)) - (1 if -1 in best_labels else 0)
+        st.metric("Jumlah Klaster Utama", n_clusters)
 
     targets = optimizer.space.target
     iterations = np.arange(1, len(targets) + 1)
@@ -425,27 +433,12 @@ with menu[2]:
     unique_clusters = sorted([c for c in df_result["Cluster"].unique() if c != -1])
     
     for cluster in unique_clusters:
-        df_cluster = df_result[df_result["Cluster"] == cluster]
-        provinsi_list = ", ".join(df_cluster["Provinsi"].tolist())
-        cluster_stats = df_cluster[numeric_cols].mean()
-        
-        # Tentukan karakteristik dominan berdasarkan persentase tertinggi
-        pct = cluster_mean.loc[cluster].div(cluster_mean.sum(axis=0)) * 100
-        top_vars = pct.nlargest(3).index.tolist()
-        top_vals = [f"{v} ({cluster_mean.loc[cluster, v]:.2f})" for v in top_vars]
-        
+        df_cluster = df_result[df_result["Cluster"] == cluster].reset_index(drop=True)
         st.markdown(f"**Klaster {cluster}**")
-        st.markdown(f"**Provinsi:** {provinsi_list}")
-        st.markdown(f"**Interpretasi:** Klaster {cluster} memiliki nilai rata-rata tertinggi pada variabel "
-                    f"{', '.join(top_vars)}, dengan nilai masing-masing {', '.join(top_vals)}. "
-                    f"Klaster ini terdiri dari {len(df_cluster)} provinsi.")
+        st.dataframe(df_cluster)
         st.divider()
-
-    df_noise = df_result[df_result["Cluster"] == -1]
+    
+    df_noise = df_result[df_result["Cluster"] == -1].reset_index(drop=True)
     if not df_noise.empty:
-        provinsi_noise = ", ".join(df_noise["Provinsi"].tolist())
         st.markdown("**Noise (-1)**")
-        st.markdown(f"**Provinsi:** {provinsi_noise}")
-        st.markdown("**Interpretasi:** Provinsi-provinsi ini tidak masuk ke klaster manapun "
-                    "karena memiliki karakteristik yang berbeda signifikan dari provinsi lainnya.")
-        st.divider()
+        st.dataframe(df_noise)
