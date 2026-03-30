@@ -17,14 +17,21 @@ if "data" not in st.session_state:
 
 df = st.session_state["data"]
 
+menu = st.tabs([
+    "Preprocessing Data",
+    "Pemodelan Klasterisasi",
+    "Hasil Klasterisasi"
+])
+
 # Preprocessing data
 st.subheader("Preprocessing Data")
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Standarisasi Data",
-    "Uji Statistik",
-    "Deteksi Outlier (LOF)",
-    "Reduksi Data (PCA)"
-])
+with menu[0]:
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Standarisasi Data",
+        "Uji Statistik",
+        "Deteksi Outlier (LOF)",
+        "Reduksi Data (PCA)"
+    ])
 
 # Standarisasi data
 with tab1:
@@ -46,14 +53,15 @@ with tab2:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Nilai KMO", f"{kmo_model:.4f}")
-    with col2:
-        st.metric("Bartlett p-value", f"{p_value:.6f}")
-        
+        st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
+
     if kmo_model > 0.5:
         st.success("Data sudah representatif")
     else:
         st.error("Data belum representatif")
+        
+    with col2:
+        st.metric("Uji Bartlett (p-value)", f"{p_value:.6f}")
 
     if p_value < 0.05:
         st.success("Terdapat korelasi signifikan antar variabel")
@@ -71,7 +79,7 @@ with tab2:
         for i in range(X_vif.shape[1])
     ]
 
-    st.write("Hasil Uji Multikolinieritas (VIF):")
+    st.write("Uji Multikolinieritas dengan Variance Inflation Factor (VIF):")
     st.dataframe(vif_data)
 
     high_vif = vif_data[vif_data["VIF"] >= 5]
