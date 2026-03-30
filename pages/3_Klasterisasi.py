@@ -143,7 +143,7 @@ with menu[0]:
         st.dataframe(pca_result)
         
         st.session_state["X_clustering"] = pca_result
-        st.session_["X_plot"] = pca_result
+        st.session_state["X_plot"] = pca_result
     else:
         st.info("PCA tidak diperlukan")
         st.session_state["X_clustering"] = scaled_standard
