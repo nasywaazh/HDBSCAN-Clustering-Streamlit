@@ -142,7 +142,7 @@ with menu[0]:
             st.session_state.get("pca_n_components") != n_components or
             st.session_state.get("pca_input_hash") != joblib.hash(scaled_standard.values)):
 
-            pca_final = PCA(n_components=n_components, random_state=42)
+            pca_final = PCA(n_components=n_components, svd_solver="full")
             pca_result = pd.DataFrame(
                 pca_final.fit_transform(scaled_standard),
                 columns=[f"PC{i+1}" for i in range(n_components)]
