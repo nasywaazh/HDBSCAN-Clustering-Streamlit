@@ -1,138 +1,114 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-import json
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
-st.title("PETA INTERAKTIF KLASTERISASI DAMPAK BANJIR")
+st.title("Peta Klasterisasi Dampak Banjir di Indonesia")
 
 # =========================
 # VALIDASI DATA
 # =========================
-if "cluster_labels" not in st.session_state or "data" not in st.session_state:
-    st.warning("Silakan lakukan klasterisasi terlebih dahulu!")
+if "df_clustered" not in st.session_state:
+    st.warning("Silakan lakukan klasterisasi terlebih dahulu di halaman Klasterisasi!")
     st.stop()
 
-df = st.session_state["data"].copy()
-df["Cluster"] = st.session_state["cluster_labels"]
-
-# Label cluster (termasuk noise)
-df["Klaster"] = df["Cluster"].apply(
-    lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
-)
+df = st.session_state["df_clustered"]
 
 # =========================
-# FILTER KLASTER (INTERAKTIF)
+# LOAD PETA INDONESIA
 # =========================
-cluster_options = ["Semua"] + sorted(df["Klaster"].unique())
+@st.cache_data
+def load_map():
+    url = "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson"
+    gdf = gpd.read_file(url)
+    gdf = gdf.rename(columns={"Propinsi": "Provinsi"})
+    return gdf
+
+gdf = load_map()
+
+# =========================
+# CLEAN DATA (WAJIB!)
+# =========================
+df["Provinsi"] = df["Provinsi"].str.strip().str.upper()
+gdf["Provinsi"] = gdf["Provinsi"].str.strip().str.upper()
+
+# =========================
+# MERGE DATA
+# =========================
+gdf = gdf.merge(df, on="Provinsi", how="left")
+
+# =========================
+# HANDLE NILAI KOSONG
+# =========================
+gdf["Cluster"] = gdf["Cluster"].fillna(-1)
+
+# =========================
+# FILTER KLASTER (OPSIONAL)
+# =========================
+cluster_options = ["Semua"] + sorted(gdf["Cluster"].unique().tolist())
 selected_cluster = st.selectbox("Pilih Klaster", cluster_options)
 
 if selected_cluster != "Semua":
-    df = df[df["Klaster"] == selected_cluster]
-
-# =========================
-# MAPPING NAMA PROVINSI
-# =========================
-mapping = {
-    "ACEH": "DI. ACEH",
-    "DI YOGYAKARTA": "DAERAH ISTIMEWA YOGYAKARTA",
-    "KEPULAUAN BANGKA BELITUNG": "BANGKA BELITUNG",
-    "NUSA TENGGARA BARAT": "NUSATENGGARA BARAT",
-    "PAPUA BARAT DAYA": "PAPUA BARAT",
-    "PAPUA PEGUNUNGAN": "PAPUA",
-    "PAPUA SELATAN": "PAPUA",
-    "PAPUA TENGAH": "PAPUA",
-}
-
-df["Provinsi_Map"] = df["Provinsi"].str.upper().replace(mapping)
-
-# =========================
-# LOAD GEOJSON
-# =========================
-@st.cache_data
-def load_geojson():
-    with open("indonesia-prov.geojson", "r") as f:
-        return json.load(f)
-
-geojson = load_geojson()
-
-# =========================
-# KOLOM NUMERIK
-# =========================
-numeric_cols = [
-    c for c in df.select_dtypes(include="number").columns
-    if c != "Cluster"
-]
+    gdf_plot = gdf[gdf["Cluster"] == selected_cluster]
+else:
+    gdf_plot = gdf
 
 # =========================
 # WARNA KLASTER
 # =========================
-palette = px.colors.qualitative.Set2
-cluster_labels_sorted = sorted(df["Cluster"].unique())
+cluster_colors = {
+    0: "#66c2a5",
+    1: "#fc8d62",
+    2: "#8da0cb",
+    3: "#e78ac3",  # jika cluster lebih dari 3
+    -1: "#d3d3d3"
+}
 
-color_map = {}
-color_idx = 0
-
-for c in cluster_labels_sorted:
-    if c == -1:
-        color_map["Noise (-1)"] = "#bbbbbb"
-    else:
-        color_map[f"Klaster {c}"] = palette[color_idx % len(palette)]
-        color_idx += 1
-
-category_order = [
-    f"Klaster {c}" for c in cluster_labels_sorted if c != -1
-] + ["Noise (-1)"]
+gdf_plot["color"] = gdf_plot["Cluster"].map(cluster_colors)
 
 # =========================
-# HOVER CUSTOM
+# PLOT PETA
 # =========================
-df["hover_text"] = df.apply(
-    lambda row: (
-        f"<b>{row['Provinsi']}</b><br>"
-        f"<b>Klaster:</b> {row['Klaster']}<br><br>"
-        + "<br>".join([
-            f"<b>{col}:</b> {int(row[col]):,}"
-            for col in numeric_cols
-        ])
-    ),
-    axis=1
+fig, ax = plt.subplots(figsize=(12, 8))
+
+gdf_plot.plot(
+    ax=ax,
+    color=gdf_plot["color"],
+    edgecolor="black",
+    linewidth=0.5
+)
+
+ax.set_title("Peta Klasterisasi Dampak Banjir di Indonesia", fontsize=14)
+ax.axis("off")
+
+# =========================
+# LEGEND DINAMIS
+# =========================
+unique_clusters = sorted(gdf["Cluster"].unique())
+
+legend_patches = []
+for c in unique_clusters:
+    label = f"Klaster {c}" if c != -1 else "Noise (-1)"
+    color = cluster_colors.get(c, "#cccccc")
+    legend_patches.append(mpatches.Patch(color=color, label=label))
+
+ax.legend(
+    handles=legend_patches,
+    title="Klaster",
+    loc="lower left"
 )
 
 # =========================
-# PETA CHOROPLETH
+# TAMPILKAN
 # =========================
-fig = px.choropleth(
-    df,
-    geojson=geojson,
-    locations="Provinsi_Map",
-    featureidkey="properties.Propinsi",
-    color="Klaster",
-    color_discrete_map=color_map,
-    category_orders={"Klaster": category_order},
-    custom_data=["hover_text"]
-)
+st.pyplot(fig)
 
-fig.update_traces(
-    hovertemplate="%{customdata[0]}<extra></extra>"
-)
+# =========================
+# DEBUG (OPSIONAL - HAPUS SAAT FINAL)
+# =========================
+with st.expander("Debug Data"):
+    st.write("Preview Data Clustering:")
+    st.dataframe(df.head())
 
-fig.update_geos(
-    fitbounds="locations",
-    visible=False,
-    bgcolor="#f0f4f8"
-)
-
-fig.update_layout(
-    title=dict(
-        text="Peta Klasterisasi Dampak Banjir di Indonesia",
-        x=0.5
-    ),
-    margin={"r": 10, "t": 50, "l": 10, "b": 10},
-    legend=dict(
-        title="Klaster",
-        bgcolor="rgba(255,255,255,0.85)"
-    ),
-    height=650
-)
-
-st.plotly_chart(fig, use_container_width=True)
+    st.write("Preview Geo Data:")
+    st.dataframe(gdf[["Provinsi", "Cluster"]].head())
