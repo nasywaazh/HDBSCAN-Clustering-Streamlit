@@ -241,12 +241,7 @@ def dcsi_index(X, labels, min_samples):
 with menu[1]:
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
-    st.write("Shape X_clustering:", np.array(X_clustering).shape)
-    st.write("Sample pertama:", np.array(X_clustering)[0])
-    st.write("Mean:", np.mean(X_clustering))
-    st.write("Std:", np.std(X_clustering))
     with st.spinner("Mencari parameter optimal..."):
-        X_clustering = np.array(X_clustering)
         X_plot = st.session_state.get("X_plot", st.session_state["X_clustering"])
         def objective(min_cluster_size, min_samples):
             min_cluster_size = int(np.floor(min_cluster_size))
