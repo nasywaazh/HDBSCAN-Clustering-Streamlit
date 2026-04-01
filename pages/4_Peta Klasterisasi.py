@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import requests
+import json
 
 st.title("PETA INTERAKTIF KLASTERISASI DAMPAK BANJIR")
 
@@ -26,15 +27,10 @@ df["Provinsi_Map"] = df["Provinsi"].str.upper()
 # =========================
 @st.cache_data
 def load_geojson():
-    url = "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson"
-    response = requests.get(url, timeout=10)
-    return response.json()
+    with open("indonesia-prov.geojson", "r") as f:
+        return json.load(f)
 
-try:
-    geojson = load_geojson()
-except Exception as e:
-    st.error(f"Gagal memuat GeoJSON: {e}")
-    st.stop()
+geojson = load_geojson()
 
 # =========================
 # DEBUG: CEK KECOCOKAN NAMA PROVINSI
