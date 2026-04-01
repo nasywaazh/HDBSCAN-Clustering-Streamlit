@@ -275,7 +275,6 @@ with menu[1]:
                                          random_state = 42,
                                          verbose = 0)
         optimizer.maximize(init_points = 8, n_iter = 20)
-        st.dataframe(pd.DataFrame(debug_rows))
         best_dbcv = optimizer.max["target"]
         final_best_dbcv = best_dbcv
         final_mcs = None
