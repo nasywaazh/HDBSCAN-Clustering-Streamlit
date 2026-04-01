@@ -239,6 +239,9 @@ def dcsi_index(X, labels, min_samples):
     return total / weight_sum
 
 with menu[1]:
+    import importlib.metadata
+    st.write("hdbscan:", importlib.metadata.version("hdbscan"))
+    st.write("numpy:", importlib.metadata.version("numpy"))
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     with st.spinner("Mencari parameter optimal..."):
