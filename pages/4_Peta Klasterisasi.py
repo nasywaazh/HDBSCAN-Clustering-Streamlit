@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import json
 import plotly.express as px
 import requests
 
@@ -15,95 +14,110 @@ if "cluster_labels" not in st.session_state or "data" not in st.session_state:
 
 df = st.session_state["data"].copy()
 df["Cluster"] = st.session_state["cluster_labels"]
+df["Cluster_Label"] = df["Cluster"].apply(
+    lambda x: f"Noise (-1)" if x == -1 else f"Klaster {x}"
+)
 
 # =========================
 # LOAD GEOJSON INDONESIA
 # =========================
-url_geojson = "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson"
-response = requests.get(url_geojson)
-geojson = response.json()
+@st.cache_data
+def load_geojson():
+    url = "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson"
+    response = requests.get(url)
+    return response.json()
+
+geojson = load_geojson()
 
 # =========================
 # NORMALISASI NAMA PROVINSI
 # =========================
-df["Provinsi"] = df["Provinsi"].str.upper()
+# Ambil nama provinsi dari GeoJSON untuk pencocokan
+geojson_names = [f["properties"]["Propinsi"] for f in geojson["features"]]
+
+# Normalisasi ke Title Case agar cocok dengan GeoJSON
+df["Provinsi_Map"] = df["Provinsi"].str.title()
 
 # =========================
 # PILIH VARIABEL NUMERIK
 # =========================
-numeric_cols = df.select_dtypes(include="number").columns.drop("Cluster")
+numeric_cols = [c for c in df.select_dtypes(include="number").columns if c != "Cluster"]
+
+# =========================
+# FILTER KLASTER
+# =========================
+st.markdown("### Filter Klaster")
+all_clusters = sorted(df["Cluster"].unique())
+cluster_filter = st.multiselect(
+    "Pilih klaster yang ingin ditampilkan:",
+    options=all_clusters,
+    default=all_clusters,
+    format_func=lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
+)
+filtered_df = df[df["Cluster"].isin(cluster_filter)]
+
+# =========================
+# WARNA DISKRIT PER KLASTER
+# =========================
+palette = px.colors.qualitative.Set2
+cluster_labels_sorted = sorted(df["Cluster"].unique())
+color_map = {}
+color_idx = 0
+for c in cluster_labels_sorted:
+    if c == -1:
+        color_map[f"Noise (-1)"] = "#aaaaaa"
+    else:
+        color_map[f"Klaster {c}"] = palette[color_idx % len(palette)]
+        color_idx += 1
 
 # =========================
 # PETA CHOROPLETH
 # =========================
 fig = px.choropleth(
-    df,
+    filtered_df,
     geojson=geojson,
-    locations="Provinsi",
+    locations="Provinsi_Map",
     featureidkey="properties.Propinsi",
-    color="Cluster",
-    color_continuous_scale="Set2",
-    hover_data=numeric_cols,
-    title="Peta Klasterisasi Dampak Banjir di Indonesia"
+    color="Cluster_Label",
+    color_discrete_map=color_map,
+    hover_name="Provinsi_Map",
+    hover_data={col: True for col in numeric_cols} | {"Cluster_Label": True, "Provinsi_Map": False},
+    title="Peta Klasterisasi Dampak Banjir di Indonesia",
+    category_orders={"Cluster_Label": [f"Klaster {c}" for c in cluster_labels_sorted if c != -1] + ["Noise (-1)"]}
 )
-
 fig.update_geos(fitbounds="locations", visible=False)
-
+fig.update_layout(
+    margin={"r": 0, "t": 40, "l": 0, "b": 0},
+    legend_title_text="Klaster"
+)
 st.plotly_chart(fig, use_container_width=True)
 
 # =========================
-# INTERAKSI KLIK PROVINSI
+# DETAIL PROVINSI VIA SELECTBOX
 # =========================
-st.markdown("### Detail Provinsi (Klik pada peta)")
+st.markdown("### Detail Provinsi")
+st.caption("Hover pada peta untuk melihat ringkasan, atau pilih provinsi di bawah untuk detail lengkap.")
 
-clicked = st.plotly_chart(fig, use_container_width=True)
-
-# Streamlit belum native support klik → workaround pakai selectbox
 selected_prov = st.selectbox(
-    "Pilih Provinsi untuk melihat detail:",
-    df["Provinsi"].unique()
+    "Pilih Provinsi:",
+    options=sorted(df["Provinsi"].unique())
 )
 
-# =========================
-# DETAIL DATA
-# =========================
 detail = df[df["Provinsi"] == selected_prov]
-
 if not detail.empty:
-    st.markdown(f"#### {selected_prov}")
+    row = detail.iloc[0]
+    cluster_val = int(row["Cluster"])
 
-    cluster = int(detail["Cluster"].values[0])
-    st.markdown(f"**Cluster:** {cluster}")
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if cluster_val == -1:
+            st.error("Noise (-1)")
+            st.caption("Tidak masuk klaster utama")
+        else:
+            st.success(f"Klaster {cluster_val}")
 
-    if cluster == -1:
-        st.info("Provinsi ini termasuk kategori **Noise (tidak masuk klaster utama)**")
-
-    st.markdown("**Indikator Dampak Banjir:**")
-    st.dataframe(detail[numeric_cols].T.rename(columns={detail.index[0]: "Nilai"}))
-
-# =========================
-# OPSIONAL: FILTER KLASTER
-# =========================
-st.markdown("### Filter Klaster")
-
-cluster_filter = st.multiselect(
-    "Pilih klaster yang ingin ditampilkan:",
-    options=sorted(df["Cluster"].unique()),
-    default=sorted(df["Cluster"].unique())
-)
-
-filtered_df = df[df["Cluster"].isin(cluster_filter)]
-
-fig_filtered = px.choropleth(
-    filtered_df,
-    geojson=geojson,
-    locations="Provinsi",
-    featureidkey="properties.Propinsi",
-    color="Cluster",
-    hover_data=numeric_cols,
-    title="Peta Klasterisasi (Filtered)"
-)
-
-fig_filtered.update_geos(fitbounds="locations", visible=False)
-
-st.plotly_chart(fig_filtered, use_container_width=True)
+    with col2:
+        st.markdown(f"#### {selected_prov}")
+        st.markdown("**Indikator Dampak Banjir:**")
+        detail_table = detail[numeric_cols].T.rename(columns={detail.index[0]: "Nilai"})
+        st.dataframe(detail_table, use_container_width=True)
