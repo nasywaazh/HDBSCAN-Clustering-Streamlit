@@ -298,6 +298,11 @@ with menu[1]:
     with col4:
         st.metric("Jumlah Klaster Utama", n_clusters)
 
+    st.write("Shape X_clustering:", np.array(X_clustering).shape)
+    st.write("Sample pertama:", np.array(X_clustering)[0])
+    st.write("Mean:", np.mean(X_clustering))
+    st.write("Std:", np.std(X_clustering))
+    
     targets = optimizer.space.target
     iterations = np.arange(1, len(targets) + 1)
     best_so_far = np.maximum.accumulate(targets)
