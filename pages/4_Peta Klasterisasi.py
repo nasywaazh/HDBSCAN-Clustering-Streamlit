@@ -19,7 +19,8 @@ df["Cluster"] = st.session_state["cluster_labels"]
 # LOAD GEOJSON INDONESIA
 # =========================
 url_geojson = "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-prov.geojson"
-geojson = json.loads(pd.read_json(url_geojson).to_json())
+response = requests.get(url_geojson)
+geojson = response.json()
 
 # =========================
 # NORMALISASI NAMA PROVINSI
