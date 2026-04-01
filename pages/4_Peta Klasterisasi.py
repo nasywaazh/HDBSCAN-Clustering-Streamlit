@@ -14,7 +14,7 @@ if "cluster_labels" not in st.session_state or "data" not in st.session_state:
 
 df = st.session_state["data"].copy()
 df["Cluster"] = st.session_state["cluster_labels"]
-df["Cluster_Label"] = df["Cluster"].apply(
+df["Klaster"] = df["Cluster"].apply(
     lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
 )
 
@@ -57,12 +57,24 @@ color_map = {}
 color_idx = 0
 for c in cluster_labels_sorted:
     if c == -1:
-        color_map["Noise (-1)"] = "#aaaaaa"
+        color_map["Noise (-1)"] = "#bbbbbb"
     else:
         color_map[f"Klaster {c}"] = palette[color_idx % len(palette)]
         color_idx += 1
 
 category_order = [f"Klaster {c}" for c in cluster_labels_sorted if c != -1] + ["Noise (-1)"]
+
+# =========================
+# CUSTOM HOVER TEMPLATE
+# =========================
+df["hover_text"] = df.apply(
+    lambda row: (
+        f"<b>{row['Provinsi']}</b><br>"
+        f"<b>Klaster:</b> {row['Klaster']}<br>"
+        "<br>"
+        + "<br>".join([f"<b>{col}:</b> {int(row[col]):,}" for col in numeric_cols])
+    ), axis=1
+)
 
 # =========================
 # PETA CHOROPLETH
@@ -72,20 +84,43 @@ fig = px.choropleth(
     geojson=geojson,
     locations="Provinsi_Map",
     featureidkey="properties.Propinsi",
-    color="Cluster_Label",
+    color="Klaster",
     color_discrete_map=color_map,
-    hover_name="Provinsi",
-    hover_data={col: True for col in numeric_cols} | {
-        "Cluster_Label": True,
-        "Provinsi_Map": False
-    },
-    title="Peta Klasterisasi Dampak Banjir di Indonesia",
-    category_orders={"Cluster_Label": category_order}
+    category_orders={"Klaster": category_order},
+    custom_data=["hover_text"]
 )
-fig.update_geos(fitbounds="locations", visible=False)
+
+fig.update_traces(
+    hovertemplate="%{customdata[0]}<extra></extra>"
+)
+
+fig.update_geos(
+    fitbounds="locations",
+    visible=False,
+    bgcolor="#f0f4f8"
+)
+
 fig.update_layout(
-    margin={"r": 0, "t": 40, "l": 0, "b": 0},
-    legend_title_text="Klaster",
-    height=600
+    title=dict(
+        text="Peta Klasterisasi Dampak Banjir di Indonesia",
+        font=dict(size=16, color="#1a1a2e"),
+        x=0.5,
+        xanchor="center"
+    ),
+    margin={"r": 10, "t": 50, "l": 10, "b": 10},
+    legend=dict(
+        title=dict(text="Klaster", font=dict(size=13)),
+        font=dict(size=12),
+        bgcolor="rgba(255,255,255,0.85)",
+        bordercolor="#cccccc",
+        borderwidth=1,
+        x=0.01,
+        y=0.99,
+        xanchor="left",
+        yanchor="top"
+    ),
+    paper_bgcolor="#f0f4f8",
+    height=650
 )
+
 st.plotly_chart(fig, use_container_width=True)
