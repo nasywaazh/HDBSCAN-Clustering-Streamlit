@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
+import requests
 
 st.title("PETA INTERAKTIF KLASTERISASI DAMPAK BANJIR")
 
