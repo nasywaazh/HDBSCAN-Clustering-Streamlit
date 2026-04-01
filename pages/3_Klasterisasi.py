@@ -263,26 +263,39 @@ with menu[1]:
                                          pbounds = pbounds,
                                          random_state = 42,
                                          verbose = 2)
-        optimizer.maximize(init_points = 8, n_iter = 30)
-        best_params = optimizer.max["params"]
+        optimizer.maximize(init_points = 8, n_iter = 20)
         best_dbcv = optimizer.max["target"]
+        candidates = [
+            res for res in optimizer.res
+            if abs(res["target"] - best_dbcv) < 1e-9
+        ]        
+        best_params = min(
+            candidates,
+            key=lambda x: (
+                int(np.floor(x["params"]["min_cluster_size"])),
+                int(np.floor(x["params"]["min_samples"]))
+            )
+        )["params"]
+        best_min_cluster_size = int(np.floor(best_params["min_cluster_size"]))
+        best_min_samples = int(np.floor(best_params["min_samples"]))
 
-    st.success("Parameter optimal ditemukan!")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("min_cluster_size", int(np.floor(best_params["min_cluster_size"])))
-    with col2:
-        st.metric("min_samples", int(np.floor(best_params["min_samples"])))
-    with col3:
-        st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
-    with col4:
         best_clusterer = hdbscan.HDBSCAN(
-            min_cluster_size=int(np.floor(best_params["min_cluster_size"])),
-            min_samples=int(np.floor(best_params["min_samples"])),
+            min_cluster_size=best_min_cluster_size,
+            min_samples=best_min_samples,
             metric="euclidean"
         )
         best_labels = best_clusterer.fit_predict(X_clustering)
         n_clusters = len(set(best_labels)) - (1 if -1 in best_labels else 0)
+
+    st.success("Parameter optimal ditemukan!")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("min_cluster_size", best_min_cluster_size)
+    with col2:
+        st.metric("min_samples", best_min_samples)
+    with col3:
+        st.metric("Best DBCV Score", f"{best_dbcv:.4f}")
+    with col4:
         st.metric("Jumlah Klaster Utama", n_clusters)
 
     targets = optimizer.space.target
@@ -422,7 +435,7 @@ with menu[2]:
     st.markdown("#### 2. Karakteristik Setiap Klaster")
     numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
     cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
-    st.markdown("##### Nilai Rata-rata Setiap Klaster")
+    st.markdown("##### Nilai Rata-rata Klaster")
     st.dataframe(cluster_mean)
     cluster_percentage = cluster_mean.div(cluster_mean.sum(axis=0), axis=1) * 100
     cluster_percentage = cluster_percentage.round(2)
