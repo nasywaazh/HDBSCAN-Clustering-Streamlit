@@ -373,6 +373,9 @@ with menu[1]:
     hdbscan_model.fit(X_clustering)
     cluster_labels = hdbscan_model.labels_
     st.session_state["cluster_labels"] = cluster_labels
+    df_result = df.copy()
+    df_result["Cluster"] = cluster_labels
+    st.session_state["df_clustered"] = df_result
 
     df_result = df.copy()
     df_result["Cluster"] = cluster_labels
