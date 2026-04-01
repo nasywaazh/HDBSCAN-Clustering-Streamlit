@@ -276,19 +276,53 @@ with menu[1]:
                                          verbose = 0)
         optimizer.maximize(init_points = 8, n_iter = 20)
         best_dbcv = optimizer.max["target"]
-        candidates = [
-            res for res in optimizer.res
-            if abs(res["target"] - best_dbcv) < 1e-9
-        ]        
-        best_params = min(
-            candidates,
-            key=lambda x: (
-                int(np.floor(x["params"]["min_cluster_size"])),
-                int(np.floor(x["params"]["min_samples"]))
-            )
-        )["params"]
-        best_min_cluster_size = int(np.floor(best_params["min_cluster_size"]))
-        best_min_samples = int(np.floor(best_params["min_samples"]))
+        final_best_dbcv = best_dbcv
+        final_mcs = None
+        final_ms = None
+
+        for mcs in range(2, 8):
+            for ms in range(1, 7):
+                if ms > mcs:
+                    continue
+                clusterer = hdbscan.HDBSCAN(
+                    min_cluster_size=mcs,
+                    min_samples=ms,
+                    metric="euclidean"
+                )
+                labels = clusterer.fit_predict(X_clustering)
+                n_valid = len(set(labels)) - (1 if -1 in labels else 0)
+                if n_valid < 2:
+                    continue
+                try:
+                    dbcv = validity_index(X_clustering, labels)
+                    # Update jika lebih baik, atau sama tapi parameter lebih kecil
+                    if (dbcv > final_best_dbcv + 1e-9) or (
+                        abs(dbcv - final_best_dbcv) < 1e-9 and
+                        (final_mcs is None or (mcs, ms) < (final_mcs, final_ms))
+                    ):
+                        final_best_dbcv = dbcv
+                        final_mcs = mcs
+                        final_ms = ms
+                except:
+                    continue
+
+        if final_mcs is None:
+            candidates = [
+                res for res in optimizer.res
+                if abs(res["target"] - best_dbcv) < 1e-9
+            ]
+            best_params = min(
+                candidates,
+                key=lambda x: (
+                    int(np.floor(x["params"]["min_cluster_size"])),
+                    int(np.floor(x["params"]["min_samples"]))
+                )
+            )["params"]
+            final_mcs = int(np.floor(best_params["min_cluster_size"]))
+            final_ms = int(np.floor(best_params["min_samples"]))
+        best_min_cluster_size = final_mcs
+        best_min_samples = final_ms
+        best_dbcv = final_best_dbcv
 
         best_clusterer = hdbscan.HDBSCAN(
             min_cluster_size=best_min_cluster_size,
