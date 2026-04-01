@@ -275,6 +275,21 @@ with menu[1]:
                                          random_state = 42,
                                          verbose = 0)
         optimizer.maximize(init_points = 8, n_iter = 20)
+        st.write("### Debug Iterasi Bayesian Optimization")
+        debug_rows = []
+        for i, res in enumerate(optimizer.res):
+            mcs = int(np.floor(res["params"]["min_cluster_size"]))
+            ms = int(np.floor(res["params"]["min_samples"]))
+            debug_rows.append({
+                "iter": i+1,
+                "min_cluster_size (raw)": round(res["params"]["min_cluster_size"], 4),
+                "min_samples (raw)": round(res["params"]["min_samples"], 4),
+                "min_cluster_size (int)": mcs,
+                "min_samples (int)": ms,
+                "target": round(res["target"], 7)
+            })
+        st.dataframe(pd.DataFrame(debug_rows))
+        
         best_dbcv = optimizer.max["target"]
         final_best_dbcv = best_dbcv
         final_mcs = None
