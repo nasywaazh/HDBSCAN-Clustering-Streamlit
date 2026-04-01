@@ -19,7 +19,7 @@ df["Cluster"] = st.session_state["cluster_labels"]
 # =========================
 # LOAD GEOJSON INDONESIA
 # =========================
-url_geojson = "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-prov.geojson"
+url_geojson = "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson"
 response = requests.get(url_geojson)
 geojson = response.json()
 
