@@ -242,8 +242,7 @@ with menu[1]:
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
     import importlib.metadata
-    st.write("bayes_opt version:", importlib.metadata.version("bayesian-optimization"))on__)
-    import scipy; st.write("scipy version:", scipy.__version__)
+    st.write("bayes_opt version:", importlib.metadata.version("bayesian-optimization"))
     with st.spinner("Mencari parameter optimal..."):
         X_plot = st.session_state.get("X_plot", st.session_state["X_clustering"])
         def objective(min_cluster_size, min_samples):
