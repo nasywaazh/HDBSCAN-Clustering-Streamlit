@@ -17,6 +17,7 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 from itertools import combinations
 from scipy.spatial import ConvexHull
 from matplotlib.patches import Polygon
+import joblib
 
 st.title("KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION")
 
@@ -133,21 +134,32 @@ with menu[0]:
         if kumulatif[n_components - 1] < 80:
             n_components = np.argmax(kumulatif >= 80) + 1
 
-        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1 dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen")
-        pca_final = PCA(n_components=n_components)
-        pca_result = pd.DataFrame(
-            pca_final.fit_transform(scaled_standard),
-            columns=[f"PC{i+1}" for i in range(n_components)]
-        )
+        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1 "
+                   f"dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen")
+
+        # Hanya recompute jika belum ada atau n_components berubah
+        if ("X_clustering" not in st.session_state or
+            st.session_state.get("pca_n_components") != n_components or
+            st.session_state.get("pca_input_hash") != joblib.hash(scaled_standard.values)):
+
+            pca_final = PCA(n_components=n_components, random_state=42)
+            pca_result = pd.DataFrame(
+                pca_final.fit_transform(scaled_standard),
+                columns=[f"PC{i+1}" for i in range(n_components)]
+            )
+            st.session_state["X_clustering"] = pca_result
+            st.session_state["X_plot"] = pca_result
+            st.session_state["pca_n_components"] = n_components
+            st.session_state["pca_input_hash"] = joblib.hash(scaled_standard.values)  # ✅ cache key
+        else:
+            pca_result = st.session_state["X_clustering"]
         st.dataframe(pca_result)
-        
-        st.session_state["X_clustering"] = pca_result
-        st.session_state["X_plot"] = pca_result
+
     else:
         st.info("PCA tidak diperlukan")
         st.session_state["X_clustering"] = scaled_standard
         st.session_state["X_plot"] = scaled_standard
-
+        
 # Pemodelan klasterisasi
 if "X_clustering" not in st.session_state:
     st.warning("Silakan lakukan preprocessing data terlebih dahulu!")
