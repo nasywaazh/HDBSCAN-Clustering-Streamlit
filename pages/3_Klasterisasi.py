@@ -241,8 +241,6 @@ def dcsi_index(X, labels, min_samples):
 with menu[1]:
     # Pencarian parameter optimal
     st.markdown("#### 1. Pencarian Parameter Optimal (Bayesian Optimization)")
-    import importlib.metadata
-    st.write("bayes_opt version:", importlib.metadata.version("bayesian-optimization"))
     with st.spinner("Mencari parameter optimal..."):
         X_plot = st.session_state.get("X_plot", st.session_state["X_clustering"])
         def objective(min_cluster_size, min_samples):
@@ -275,7 +273,7 @@ with menu[1]:
         optimizer = BayesianOptimization(f = objective,
                                          pbounds = pbounds,
                                          random_state = 42,
-                                         verbose = 2)
+                                         verbose = 0)
         optimizer.maximize(init_points = 8, n_iter = 20)
         best_dbcv = optimizer.max["target"]
         candidates = [
