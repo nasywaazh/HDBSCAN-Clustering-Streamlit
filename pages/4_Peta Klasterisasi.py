@@ -309,15 +309,29 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Filter Klaster
-st.markdown("#### Filter Provinsi Berdasarkan Klaster")
-selected_cluster = st.selectbox(
-    "Pilih Klaster",
-    df_result["label_klaster"].unique()
+# Detail Provinsi
+st.markdown("### Pilih Provinsi!")
+selected_prov = st.selectbox(
+    "Pilih Provinsi",
+    sorted(df_result["Provinsi"].unique())
 )
 
-filtered_df = df_result[df_result["label_klaster"] == selected_cluster]
-st.dataframe(filtered_df)
+prov_data = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
+st.write(f"**Klaster:** {prov_data['label_klaster']}")
+
+st.markdown("#### Indikator Dampak Banjir")
+for col in numeric_cols:
+    st.write(f"- {col}: {prov_data[col]}")
+
+st.markdown("#### Indikator Dampak Banjir")
+
+cols = st.columns(3)
+
+for i, col in enumerate(numeric_cols):
+    cols[i % 3].metric(
+        label=col,
+        value=f"{prov_data[col]:,.0f}"
+    )
 
 # Download Hasil Klasterisasi
 st.markdown("#### Unduh Hasil Klasterisasi")
