@@ -9,7 +9,7 @@ from urllib.request import urlopen
 st.title("PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
 st.divider()
 if "df_clustered" not in st.session_state:
-    st.warning("Lakukan proses klasterisasi terlebih dahulu!")
+    st.warning("Silakan upload dataset dan lakukan proses klasterisasi terlebih dahulu!")
     st.stop()
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
