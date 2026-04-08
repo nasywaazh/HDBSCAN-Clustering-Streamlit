@@ -190,13 +190,6 @@ st.markdown("### Peta Klasterisasi Provinsi Indonesia Berdasarkan Indikator Damp
 
 # Plot
 if geojson and feature_id_key:
-    if show_debug:
-        key_name = feature_id_key.replace("properties.", "")
-        all_geo_ids = [f["properties"].get(key_name) for f in geojson["features"]]
-        st.caption(f"GeoJSON key: `{feature_id_key}`")
-        st.caption(f"ID di GeoJSON: `{sorted(set(all_geo_ids))}`")
-        st.caption(f"kode_bps dataset: `{df_map['kode_bps'].dropna().astype(int).unique().tolist()}`")
-
     df_choropleth = df_map.dropna(subset=["kode_bps"]).copy()
     df_choropleth["kode_bps"] = df_choropleth["kode_bps"].astype(int)
     df_marker = df_map[df_map["kode_bps"].isna()].copy()
