@@ -144,7 +144,7 @@ with st.sidebar:
     )
 
     selected_hover = st.multiselect(
-        "Tampilan Data di Hover!",
+        "Data Hover",
         options=numeric_cols,
         default=numeric_cols 
     )
