@@ -22,6 +22,49 @@ df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 # GeoJSON Indonesia menggunakan kode provinsi BPS / ISO.
 # Sesuaikan mapping ini dengan nama kolom "Provinsi" di dataset Anda.
 PROV_CODE_MAP: dict[str, str] = {
+    # ── Huruf kapital semua (format dataset) ────────────────────────────────
+    "ACEH": "ID-AC",
+    "SUMATERA UTARA": "ID-SU",
+    "SUMATERA BARAT": "ID-SB",
+    "RIAU": "ID-RI",
+    "JAMBI": "ID-JA",
+    "SUMATERA SELATAN": "ID-SS",
+    "BENGKULU": "ID-BE",
+    "LAMPUNG": "ID-LA",
+    "KEPULAUAN BANGKA BELITUNG": "ID-BB",
+    "KEPULAUAN RIAU": "ID-KR",
+    "DAERAH KHUSUS IBUKOTA JAKARTA": "ID-JK",
+    "DKI JAKARTA": "ID-JK",
+    "JAWA BARAT": "ID-JB",
+    "JAWA TENGAH": "ID-JT",
+    "DAERAH ISTIMEWA YOGYAKARTA": "ID-YO",
+    "DI YOGYAKARTA": "ID-YO",
+    "JAWA TIMUR": "ID-JI",
+    "BANTEN": "ID-BT",
+    "BALI": "ID-BA",
+    "NUSA TENGGARA BARAT": "ID-NB",
+    "NUSA TENGGARA TIMUR": "ID-NT",
+    "KALIMANTAN BARAT": "ID-KB",
+    "KALIMANTAN TENGAH": "ID-KT",
+    "KALIMANTAN SELATAN": "ID-KS",
+    "KALIMANTAN TIMUR": "ID-KI",
+    "KALIMANTAN UTARA": "ID-KU",
+    "SULAWESI UTARA": "ID-SA",
+    "SULAWESI TENGAH": "ID-ST",
+    "SULAWESI SELATAN": "ID-SN",
+    "SULAWESI TENGGARA": "ID-SG",
+    "GORONTALO": "ID-GO",
+    "SULAWESI BARAT": "ID-SR",
+    "MALUKU": "ID-MA",
+    "MALUKU UTARA": "ID-MU",
+    "PAPUA BARAT": "ID-PB",
+    "PAPUA": "ID-PA",
+    # Provinsi pemekaran Papua (2022) — semua dipetakan ke induk di GeoJSON lama
+    "PAPUA BARAT DAYA": "ID-PB",
+    "PAPUA SELATAN": "ID-PA",
+    "PAPUA PEGUNUNGAN": "ID-PA",
+    "PAPUA TENGAH": "ID-PA",
+    # ── Title Case (fallback) ────────────────────────────────────────────────
     "Aceh": "ID-AC",
     "Sumatera Utara": "ID-SU",
     "Sumatera Barat": "ID-SB",
@@ -33,9 +76,11 @@ PROV_CODE_MAP: dict[str, str] = {
     "Kepulauan Bangka Belitung": "ID-BB",
     "Kepulauan Riau": "ID-KR",
     "DKI Jakarta": "ID-JK",
+    "Daerah Khusus Ibukota Jakarta": "ID-JK",
     "Jawa Barat": "ID-JB",
     "Jawa Tengah": "ID-JT",
     "DI Yogyakarta": "ID-YO",
+    "Daerah Istimewa Yogyakarta": "ID-YO",
     "Jawa Timur": "ID-JI",
     "Banten": "ID-BT",
     "Bali": "ID-BA",
@@ -55,16 +100,11 @@ PROV_CODE_MAP: dict[str, str] = {
     "Maluku": "ID-MA",
     "Maluku Utara": "ID-MU",
     "Papua Barat": "ID-PB",
+    "Papua Barat Daya": "ID-PB",
     "Papua": "ID-PA",
-    # Nama alternatif / singkatan yang sering muncul di dataset
-    "Kepulauan Bangka-Belitung": "ID-BB",
-    "Bangka Belitung": "ID-BB",
-    "Kep. Bangka Belitung": "ID-BB",
-    "Kep. Riau": "ID-KR",
-    "Yogyakarta": "ID-YO",
-    "D.I. Yogyakarta": "ID-YO",
-    "D.K.I. Jakarta": "ID-JK",
-    "Jakarta": "ID-JK",
+    "Papua Selatan": "ID-PA",
+    "Papua Pegunungan": "ID-PA",
+    "Papua Tengah": "ID-PA",
 }
 
 # ── Load GeoJSON provinsi Indonesia ─────────────────────────────────────────
@@ -73,18 +113,42 @@ GEOJSON_URL = (
     "master/indonesia-en.geojson"
 )
 
+GEOJSON_URL_FALLBACK = (
+    "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/"
+    "master/indonesia-prov.geojson"
+)
+
 @st.cache_data(show_spinner="Memuat data GeoJSON peta Indonesia…")
-def load_geojson(url: str) -> dict:
-    with urlopen(url) as resp:
-        return json.load(resp)
+def load_geojson(url: str, fallback_url: str) -> tuple[dict, str]:
+    """Load GeoJSON dan deteksi otomatis featureidkey yang benar."""
+    for target_url in [url, fallback_url]:
+        try:
+            with urlopen(target_url) as resp:
+                data = json.load(resp)
+            # Deteksi key ID yang tersedia di properties fitur pertama
+            sample_props = data["features"][0]["properties"]
+            # Cari key yang nilainya mengandung "ID-" (kode ISO provinsi)
+            for key, val in sample_props.items():
+                if isinstance(val, str) and val.startswith("ID-"):
+                    return data, f"properties.{key}"
+            # Fallback: coba key umum
+            for candidate in ["state_code", "kode", "id", "ISO", "CODE", "code"]:
+                if candidate in sample_props:
+                    return data, f"properties.{candidate}"
+            # Kembalikan key pertama sebagai last resort
+            first_key = list(sample_props.keys())[0]
+            return data, f"properties.{first_key}"
+        except Exception:
+            continue
+    raise RuntimeError("Gagal memuat GeoJSON dari semua sumber.")
 
 try:
-    geojson = load_geojson(GEOJSON_URL)
+    geojson, feature_id_key = load_geojson(GEOJSON_URL, GEOJSON_URL_FALLBACK)
+    st.caption(f"ℹ️ GeoJSON dimuat. Menggunakan key: `{feature_id_key}`")
 except Exception as e:
     st.error(
         f"Gagal memuat GeoJSON: {e}\n\n"
-        "Pastikan koneksi internet tersedia, atau ganti `GEOJSON_URL` "
-        "dengan path file GeoJSON lokal."
+        "Pastikan koneksi internet tersedia."
     )
     st.stop()
 
@@ -153,7 +217,7 @@ fig = px.choropleth_mapbox(
     df_map,
     geojson=geojson,
     locations="kode_provinsi",
-    featureidkey="properties.state_code",   # sesuaikan dengan key GeoJSON
+    featureidkey=feature_id_key,
     color="label_klaster",
     color_discrete_map=color_discrete_map,
     category_orders={"label_klaster": unique_labels},
