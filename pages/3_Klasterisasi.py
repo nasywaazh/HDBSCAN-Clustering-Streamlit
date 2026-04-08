@@ -153,6 +153,7 @@ with menu[0]:
             st.session_state["pca_input_hash"] = joblib.hash(scaled_standard.values)  # ✅ cache key
         else:
             pca_result = st.session_state["X_clustering"]
+        st.write("Hasil Reduksi Data dengan PCA:")
         st.dataframe(pca_result)
 
     else:
