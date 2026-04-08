@@ -310,19 +310,13 @@ else:
     st.plotly_chart(fig, use_container_width=True)
 
 # Detail Informasi Setiap Provinsi
-st.markdown("### Detail Provinsi")
-
 selected_prov = st.selectbox(
     "Pilih Provinsi",
     sorted(df_result["Provinsi"].unique())
 )
-
 prov_data = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-
-st.write(f"**Klaster:** {prov_data['label_klaster']}")
-
+st.markdown(f"#### {prov_data['label_klaster']}")
 cols = st.columns(3)
-
 for i, col in enumerate(numeric_cols):
     cols[i % 3].metric(
         label=col.replace("_", " "),
@@ -330,6 +324,7 @@ for i, col in enumerate(numeric_cols):
     )
 
 # Download Hasil Klasterisasi
+st.write()
 st.markdown("#### Unduh Hasil Klasterisasi")
 csv = (
     df_result.drop(
