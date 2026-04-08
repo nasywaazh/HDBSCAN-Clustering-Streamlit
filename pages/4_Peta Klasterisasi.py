@@ -52,125 +52,56 @@ CENTROIDS = {
     "Papua Barat": (-1.336248, 133.174698),
     "Papua Barat Daya": (-1.800000, 132.000000),
     "Papua": (-4.269928, 138.080353),
-    "Papua Selatan": (-6.500000, 140.000000),
-    "Papua Pegunungan": (-4.000000, 138.500000),
-    "Papua Tengah": (-3.500000, 135.500000),
+    "Papua Selatan": (-6.500000, 140.500000),
+    "Papua Pegunungan": (-4.200000, 138.800000),
+    "Papua Tengah": (-3.800000, 135.500000),
 }
 
-# ── Mapping nama provinsi → kode BPS numerik (untuk choropleth GeoJSON) ──────
-# Provinsi pemekaran baru (2022) belum ada di GeoJSON lama → None (tampil sbg marker)
+# ── Mapping nama provinsi → kode BPS numerik ─────────────────────────────────
 KODE_MAP = {
-    "Aceh": 11,
-    "Sumatera Utara": 12,
-    "Sumatera Barat": 13,
-    "Riau": 14,
-    "Jambi": 15,
-    "Sumatera Selatan": 16,
-    "Bengkulu": 17,
-    "Lampung": 18,
-    "Kepulauan Bangka Belitung": 19,
-    "Kepulauan Riau": 21,
-    "Daerah Khusus Ibukota Jakarta": 31,
-    "Jawa Barat": 32,
-    "Jawa Tengah": 33,
-    "Daerah Istimewa Yogyakarta": 34,
-    "Jawa Timur": 35,
-    "Banten": 36,
-    "Bali": 51,
-    "Nusa Tenggara Barat": 52,
-    "Nusa Tenggara Timur": 53,
-    "Kalimantan Barat": 61,
-    "Kalimantan Tengah": 62,
-    "Kalimantan Selatan": 63,
-    "Kalimantan Timur": 64,
-    "Kalimantan Utara": 65,
-    "Sulawesi Utara": 71,
-    "Sulawesi Tengah": 72,
-    "Sulawesi Selatan": 73,
-    "Sulawesi Tenggara": 74,
-    "Gorontalo": 75,
-    "Sulawesi Barat": 76,
-    "Maluku": 81,
-    "Maluku Utara": 82,
-    "Papua Barat": 91,
-    "Papua": 94,
-    # Provinsi pemekaran baru — belum ada polygon di GeoJSON lama
+    "Aceh": 11, "Sumatera Utara": 12, "Sumatera Barat": 13,
+    "Riau": 14, "Jambi": 15, "Sumatera Selatan": 16,
+    "Bengkulu": 17, "Lampung": 18, "Kepulauan Bangka Belitung": 19,
+    "Kepulauan Riau": 21, "Daerah Khusus Ibukota Jakarta": 31,
+    "Jawa Barat": 32, "Jawa Tengah": 33, "Daerah Istimewa Yogyakarta": 34,
+    "Jawa Timur": 35, "Banten": 36, "Bali": 51,
+    "Nusa Tenggara Barat": 52, "Nusa Tenggara Timur": 53,
+    "Kalimantan Barat": 61, "Kalimantan Tengah": 62,
+    "Kalimantan Selatan": 63, "Kalimantan Timur": 64, "Kalimantan Utara": 65,
+    "Sulawesi Utara": 71, "Sulawesi Tengah": 72, "Sulawesi Selatan": 73,
+    "Sulawesi Tenggara": 74, "Gorontalo": 75, "Sulawesi Barat": 76,
+    "Maluku": 81, "Maluku Utara": 82,
+    "Papua Barat": 91, "Papua": 94,
+    # Pemekaran 2022 — belum ada polygon di GeoJSON lama → ditampilkan sbg marker
     "Papua Barat Daya": None,
     "Papua Selatan": None,
     "Papua Pegunungan": None,
     "Papua Tengah": None,
 }
 
-# ── Normalisasi nama provinsi dari dataset → nama canonical ──────────────────
-# Mencakup semua variasi yang mungkin muncul di kolom "Provinsi"
+# ── Normalisasi nama provinsi ─────────────────────────────────────────────────
 ALIAS = {
-    # Variasi DKI Jakarta
-    "Dki Jakarta": "Daerah Khusus Ibukota Jakarta",
     "DKI Jakarta": "Daerah Khusus Ibukota Jakarta",
-    "Dki": "Daerah Khusus Ibukota Jakarta",
+    "Dki Jakarta": "Daerah Khusus Ibukota Jakarta",
     "D.K.I. Jakarta": "Daerah Khusus Ibukota Jakarta",
     "Jakarta": "Daerah Khusus Ibukota Jakarta",
-    # Variasi DI Yogyakarta
-    "Di Yogyakarta": "Daerah Istimewa Yogyakarta",
     "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
+    "Di Yogyakarta": "Daerah Istimewa Yogyakarta",
     "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta",
     "Yogyakarta": "Daerah Istimewa Yogyakarta",
-    "Daerah Istimewa Yogyakarta": "Daerah Istimewa Yogyakarta",
-    # Variasi Kepulauan
     "Kep. Bangka Belitung": "Kepulauan Bangka Belitung",
     "Bangka Belitung": "Kepulauan Bangka Belitung",
     "Kep. Riau": "Kepulauan Riau",
-    # Nama lengkap sudah benar — pastikan tetap terpetakan
-    "Aceh": "Aceh",
-    "Sumatera Utara": "Sumatera Utara",
-    "Sumatera Barat": "Sumatera Barat",
-    "Sumatera Selatan": "Sumatera Selatan",
-    "Riau": "Riau",
-    "Jambi": "Jambi",
-    "Bengkulu": "Bengkulu",
-    "Lampung": "Lampung",
-    "Kepulauan Bangka Belitung": "Kepulauan Bangka Belitung",
-    "Kepulauan Riau": "Kepulauan Riau",
-    "Jawa Barat": "Jawa Barat",
-    "Jawa Tengah": "Jawa Tengah",
-    "Jawa Timur": "Jawa Timur",
-    "Banten": "Banten",
-    "Bali": "Bali",
-    "Nusa Tenggara Barat": "Nusa Tenggara Barat",
-    "Nusa Tenggara Timur": "Nusa Tenggara Timur",
-    "Kalimantan Barat": "Kalimantan Barat",
-    "Kalimantan Tengah": "Kalimantan Tengah",
-    "Kalimantan Selatan": "Kalimantan Selatan",
-    "Kalimantan Timur": "Kalimantan Timur",
-    "Kalimantan Utara": "Kalimantan Utara",
-    "Sulawesi Utara": "Sulawesi Utara",
-    "Sulawesi Tengah": "Sulawesi Tengah",
-    "Sulawesi Selatan": "Sulawesi Selatan",
-    "Sulawesi Tenggara": "Sulawesi Tenggara",
-    "Gorontalo": "Gorontalo",
-    "Sulawesi Barat": "Sulawesi Barat",
-    "Maluku": "Maluku",
-    "Maluku Utara": "Maluku Utara",
-    "Papua Barat": "Papua Barat",
-    "Papua Barat Daya": "Papua Barat Daya",
-    "Papua": "Papua",
-    "Papua Selatan": "Papua Selatan",
-    "Papua Pegunungan": "Papua Pegunungan",
-    "Papua Tengah": "Papua Tengah",
 }
 
 def normalize_province(name: str) -> str:
-    """Normalisasi nama provinsi: cek ALIAS exact match dulu, lalu title-case fallback."""
     stripped = name.strip()
-    # Cek exact match dulu (case-sensitive)
     if stripped in ALIAS:
         return ALIAS[stripped]
-    # Cek title-case
     titled = stripped.title()
     if titled in ALIAS:
         return ALIAS[titled]
-    # Fallback: kembalikan title-case apa adanya
-    return titled
+    return stripped
 
 df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 
@@ -231,15 +162,11 @@ df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
 
 if show_debug:
     st.markdown("**Tabel normalisasi provinsi:**")
-    st.dataframe(
-        df_result[["Provinsi", "Provinsi_norm", "kode_bps", "label_klaster"]]
-    )
+    st.dataframe(df_result[["Provinsi", "Provinsi_norm", "kode_bps", "label_klaster"]])
 
 missing_coord = df_result[df_result["lat"].isna()]["Provinsi"].tolist()
 if missing_coord:
-    st.warning(
-        f"Provinsi tanpa koordinat (tidak ditampilkan): **{', '.join(missing_coord)}**"
-    )
+    st.warning(f"Provinsi tanpa koordinat: **{', '.join(missing_coord)}**")
 
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
@@ -256,24 +183,16 @@ def load_geojson(urls):
             with urlopen(url, timeout=15) as resp:
                 gj = json.load(resp)
             props = gj["features"][0]["properties"]
-            if show_debug:
-                st.caption(f"GeoJSON dimuat dari: `{url}`")
-                st.caption(f"Sample properties GeoJSON: `{props}`")
-            # Prioritaskan key numerik BPS
             for candidate in ["kode", "Kode", "KODE"]:
                 if candidate in props and isinstance(props[candidate], (int, float)):
                     return gj, f"properties.{candidate}"
-            # Fallback: key lain yang bernilai numerik
             for k, v in props.items():
                 if isinstance(v, (int, float)) and 10 <= v <= 99:
                     return gj, f"properties.{k}"
-            # Fallback ISO string
             for k, v in props.items():
                 if isinstance(v, str) and v.startswith("ID-"):
                     return gj, f"properties.{k}"
-        except Exception as e:
-            if show_debug:
-                st.caption(f"Gagal memuat {url}: {e}")
+        except Exception:
             continue
     return None, None
 
@@ -281,25 +200,24 @@ geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
 st.markdown("### 🗺️ Peta Sebaran Klaster Provinsi")
 
-# ── Plot ──────────────────────────────────────────────────────────────────────
+# ── Plot: SATU peta — choropleth + marker overlay ────────────────────────────
 if geojson and feature_id_key:
     if show_debug:
         key_name = feature_id_key.replace("properties.", "")
         all_geo_ids = [f["properties"].get(key_name) for f in geojson["features"]]
-        st.caption(f"GeoJSON key digunakan: `{feature_id_key}`")
-        st.caption(f"Semua ID di GeoJSON: `{sorted(set(all_geo_ids))}`")
-        st.caption(
-            f"Contoh kode_bps dataset: `{df_map['kode_bps'].dropna().astype(int).unique().tolist()}`"
-        )
+        st.caption(f"GeoJSON key: `{feature_id_key}`")
+        st.caption(f"ID di GeoJSON: `{sorted(set(all_geo_ids))}`")
+        st.caption(f"kode_bps dataset: `{df_map['kode_bps'].dropna().astype(int).unique().tolist()}`")
 
-    # Provinsi yang punya kode BPS (ada di GeoJSON)
     df_choropleth = df_map.dropna(subset=["kode_bps"]).copy()
     df_choropleth["kode_bps"] = df_choropleth["kode_bps"].astype(int)
+    df_marker = df_map[df_map["kode_bps"].isna()].copy()
 
     hover_cols = {col: True for col in selected_hover}
     for c in ["kode_bps", "lat", "lon", "Provinsi_norm"]:
         hover_cols[c] = False
 
+    # Base choropleth
     fig = px.choropleth_mapbox(
         df_choropleth,
         geojson=geojson,
@@ -316,9 +234,45 @@ if geojson and feature_id_key:
         opacity=0.75,
         labels={"label_klaster": "Klaster"},
     )
+
+    # Overlay marker provinsi pemekaran ke figure yang SAMA
+    if not df_marker.empty:
+        existing_labels = set(df_choropleth["label_klaster"].unique())
+        for lbl in df_marker["label_klaster"].unique():
+            sub = df_marker[df_marker["label_klaster"] == lbl]
+            customdata = (
+                sub[selected_hover].values
+                if selected_hover
+                else np.empty((len(sub), 0))
+            )
+            hover_lines = ["<b>%{text}</b>"] + [
+                f"{col}: %{{customdata[{i}]}}" for i, col in enumerate(selected_hover)
+            ]
+            fig.add_trace(
+                go.Scattermapbox(
+                    lat=sub["lat"],
+                    lon=sub["lon"],
+                    mode="markers+text",
+                    marker=dict(
+                        size=22,
+                        color=color_map.get(lbl, "#999"),
+                        opacity=0.9,
+                    ),
+                    text=sub["Provinsi"],
+                    textposition="top center",
+                    textfont=dict(size=10, color="#333"),
+                    customdata=customdata,
+                    hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
+                    name=lbl,
+                    legendgroup=lbl,
+                    # Jangan duplikat entri legend jika klaster sudah ada
+                    showlegend=(lbl not in existing_labels),
+                )
+            )
+
     fig.update_layout(
         margin={"r": 0, "t": 10, "l": 0, "b": 0},
-        height=580,
+        height=600,
         legend=dict(
             title="Klaster",
             orientation="v",
@@ -331,57 +285,21 @@ if geojson and feature_id_key:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # ── Provinsi pemekaran baru (kode_bps = None) → overlay marker ───────────
-    df_extra = df_map[df_map["kode_bps"].isna()]
-    if not df_extra.empty:
+    if not df_marker.empty:
+        nama_pemekaran = ", ".join(sorted(df_marker["Provinsi"].tolist()))
         st.caption(
-            f"ℹ️ {len(df_extra)} provinsi pemekaran baru ditampilkan sebagai marker "
-            f"(belum ada di GeoJSON): "
-            f"**{', '.join(sorted(df_extra['Provinsi'].tolist()))}**"
+            f"ℹ️ Provinsi pemekaran 2022 ditampilkan sebagai **marker bulat** "
+            f"karena polygon belum tersedia di GeoJSON: _{nama_pemekaran}_"
         )
-        fig_extra = go.Figure()
-        for lbl in df_extra["label_klaster"].unique():
-            sub = df_extra[df_extra["label_klaster"] == lbl]
-            customdata = (
-                sub[selected_hover].values
-                if selected_hover
-                else np.empty((len(sub), 0))
-            )
-            hover_lines = ["<b>%{text}</b>", f"Klaster: {lbl}"] + [
-                f"{col}: %{{customdata[{i}]}}"
-                for i, col in enumerate(selected_hover)
-            ]
-            fig_extra.add_trace(
-                go.Scattermapbox(
-                    lat=sub["lat"],
-                    lon=sub["lon"],
-                    mode="markers+text",
-                    marker=dict(size=16, color=color_map.get(lbl, "#999")),
-                    text=sub["Provinsi"],
-                    textposition="top center",
-                    customdata=customdata,
-                    hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
-                    name=lbl,
-                )
-            )
-        fig_extra.update_layout(
-            mapbox_style=map_style,
-            mapbox=dict(zoom=3.5, center={"lat": -2.5, "lon": 118}),
-            margin={"r": 0, "t": 0, "l": 0, "b": 0},
-            height=380,
-            legend=dict(title="Klaster", bgcolor="rgba(255,255,255,0.85)"),
-        )
-        st.plotly_chart(fig_extra, use_container_width=True)
 
 else:
-    # ── Fallback: bubble map (tidak butuh GeoJSON) ────────────────────────────
+    # Fallback bubble map
     st.info("GeoJSON tidak dapat dimuat — menampilkan bubble map.")
     fig = go.Figure()
     for lbl in unique_labels:
         sub = df_map[df_map["label_klaster"] == lbl]
         customdata = (
-            sub[selected_hover].values
-            if selected_hover
+            sub[selected_hover].values if selected_hover
             else np.empty((len(sub), 0))
         )
         hover_lines = ["<b>%{text}</b>", f"Klaster: {lbl}"] + [
@@ -389,8 +307,7 @@ else:
         ]
         fig.add_trace(
             go.Scattermapbox(
-                lat=sub["lat"],
-                lon=sub["lon"],
+                lat=sub["lat"], lon=sub["lon"],
                 mode="markers+text",
                 marker=dict(size=18, color=color_map.get(lbl, "#999"), opacity=0.85),
                 text=sub["Provinsi"],
@@ -404,7 +321,7 @@ else:
         mapbox_style=map_style,
         mapbox=dict(zoom=3.8, center={"lat": -2.5, "lon": 118}),
         margin={"r": 0, "t": 10, "l": 0, "b": 0},
-        height=580,
+        height=600,
         legend=dict(title="Klaster", bgcolor="rgba(255,255,255,0.85)"),
     )
     st.plotly_chart(fig, use_container_width=True)
