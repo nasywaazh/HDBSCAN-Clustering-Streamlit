@@ -6,16 +6,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 from urllib.request import urlopen
 
-st.title("PETA KLASTERISASI PROVINSI INDONESIA")
-
-# ── Guard ────────────────────────────────────────────────────────────────────
+st.title("PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
 if "df_clustered" not in st.session_state:
-    st.warning("Data klasterisasi belum tersedia. Jalankan Pemodelan Klasterisasi terlebih dahulu!")
+    st.warning("Lakukan proses klasterisasi terlebih dahulu!")
     st.stop()
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
-# ── Koordinat centroid tiap provinsi ─────────────────────────────────────────
+# Koordinat centroid tiap provinsi
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397),
     "Sumatera Utara": (2.115201, 99.544901),
@@ -57,7 +55,7 @@ CENTROIDS = {
     "Papua Tengah": (-3.800000, 135.500000),
 }
 
-# ── Mapping nama provinsi → kode BPS numerik ─────────────────────────────────
+# Mapping Nama Provinsi → Kode BPS Numerik
 KODE_MAP = {
     "Aceh": 11, "Sumatera Utara": 12, "Sumatera Barat": 13,
     "Riau": 14, "Jambi": 15, "Sumatera Selatan": 16,
@@ -79,7 +77,7 @@ KODE_MAP = {
     "Papua Tengah": None,
 }
 
-# ── Normalisasi nama provinsi ─────────────────────────────────────────────────
+# Normalisasi Nama Provinsi
 ALIAS = {
     "DKI Jakarta": "Daerah Khusus Ibukota Jakarta",
     "Dki Jakarta": "Daerah Khusus Ibukota Jakarta",
@@ -105,7 +103,7 @@ def normalize_province(name: str) -> str:
 
 df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 
-# ── Label & warna klaster ─────────────────────────────────────────────────────
+# Label Klaster
 df_result["label_klaster"] = df_result["Cluster"].apply(
     lambda x: "Noise" if x == -1 else f"Klaster {x}"
 )
@@ -129,29 +127,23 @@ for lbl in unique_labels:
         color_map[lbl] = PALETTE[ci % len(PALETTE)]
         ci += 1
 
-# ── Kolom numerik ─────────────────────────────────────────────────────────────
+# Kolom Numerik
 numeric_cols = (
     df_result.select_dtypes(include=np.number)
     .columns.drop(["Cluster"], errors="ignore")
     .tolist()
 )
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# Sidebar
 with st.sidebar:
-    st.header("⚙️ Pengaturan Peta")
-    selected_hover = st.multiselect(
-        "Tampilkan variabel di tooltip",
-        options=numeric_cols,
-        default=numeric_cols[:3] if len(numeric_cols) >= 3 else numeric_cols,
-    )
+    st.header("Pengaturan Peta")
     map_style = st.selectbox(
         "Gaya peta dasar",
         ["carto-positron", "carto-darkmatter", "open-street-map", "white-bg"],
         index=0,
     )
-    show_debug = st.checkbox("🔍 Debug info", value=False)
 
-# ── Tambahkan koordinat & kode BPS ───────────────────────────────────────────
+# Tambahkan Koordinat & Kode BPS
 df_result["lat"] = df_result["Provinsi_norm"].map(
     lambda p: CENTROIDS.get(p, (None, None))[0]
 )
@@ -160,17 +152,13 @@ df_result["lon"] = df_result["Provinsi_norm"].map(
 )
 df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
 
-if show_debug:
-    st.markdown("**Tabel normalisasi provinsi:**")
-    st.dataframe(df_result[["Provinsi", "Provinsi_norm", "kode_bps", "label_klaster"]])
-
 missing_coord = df_result[df_result["lat"].isna()]["Provinsi"].tolist()
 if missing_coord:
     st.warning(f"Provinsi tanpa koordinat: **{', '.join(missing_coord)}**")
 
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
-# ── Load GeoJSON ──────────────────────────────────────────────────────────────
+# Load GeoJSON
 GEOJSON_URLS = [
     "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
     "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
@@ -198,9 +186,9 @@ def load_geojson(urls):
 
 geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
-st.markdown("### 🗺️ Peta Sebaran Klaster Provinsi")
+st.markdown("### Peta Klasterisasi Provinsi Indonesia Berdasarkan Indikator Dampak Banjir")
 
-# ── Plot: SATU peta — choropleth + marker overlay ────────────────────────────
+# Plot
 if geojson and feature_id_key:
     if show_debug:
         key_name = feature_id_key.replace("properties.", "")
@@ -287,10 +275,6 @@ if geojson and feature_id_key:
 
     if not df_marker.empty:
         nama_pemekaran = ", ".join(sorted(df_marker["Provinsi"].tolist()))
-        st.caption(
-            f"ℹ️ Provinsi pemekaran 2022 ditampilkan sebagai **marker bulat** "
-            f"karena polygon belum tersedia di GeoJSON: _{nama_pemekaran}_"
-        )
 
 else:
     # Fallback bubble map
@@ -326,46 +310,8 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# ── Ringkasan ─────────────────────────────────────────────────────────────────
-st.markdown("### 📊 Ringkasan Anggota per Klaster")
-summary = (
-    df_result.groupby("label_klaster")["Provinsi"]
-    .apply(lambda x: ", ".join(sorted(x)))
-    .reset_index()
-    .rename(columns={"label_klaster": "Klaster", "Provinsi": "Anggota Provinsi"})
-)
-summary.insert(
-    1,
-    "Jumlah Provinsi",
-    df_result.groupby("label_klaster")["Provinsi"].count().values,
-)
-st.dataframe(summary, use_container_width=True, hide_index=True)
-
-# ── Bar chart ─────────────────────────────────────────────────────────────────
-st.markdown("### 📈 Distribusi Jumlah Provinsi per Klaster")
-count_df = df_result["label_klaster"].value_counts().reset_index()
-count_df.columns = ["Klaster", "Jumlah"]
-count_df["Warna"] = count_df["Klaster"].map(color_map)
-fig_bar = go.Figure(
-    go.Bar(
-        x=count_df["Klaster"],
-        y=count_df["Jumlah"],
-        marker_color=count_df["Warna"],
-        text=count_df["Jumlah"],
-        textposition="outside",
-    )
-)
-fig_bar.update_layout(
-    xaxis_title="Klaster",
-    yaxis_title="Jumlah Provinsi",
-    plot_bgcolor="white",
-    height=350,
-    margin=dict(t=20, b=40),
-)
-st.plotly_chart(fig_bar, use_container_width=True)
-
-# ── Download ──────────────────────────────────────────────────────────────────
-st.markdown("### 💾 Unduh Hasil Klasterisasi")
+# Download Hasil Klasterisasi
+st.markdown("### Unduh Hasil Klasterisasi!")
 csv = (
     df_result.drop(
         columns=["Provinsi_norm", "lat", "lon", "kode_bps", "label_klaster"],
