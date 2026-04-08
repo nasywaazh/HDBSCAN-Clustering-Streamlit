@@ -48,7 +48,6 @@ st.markdown("""
 <ul>
 <li>Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode HDBSCAN dan <i>Bayesian Optimization</i>.</li>  
 <li>Menyediakan peta interaktif untuk menampilkan visualisasi hasil klasterisasi.</li>  
-<li>Menyediakan fitur prediksi kategori dampak banjir berdasarkan input data baru dari pengguna.</li>
 </ul>
 </div>
 """, unsafe_allow_html=True)
