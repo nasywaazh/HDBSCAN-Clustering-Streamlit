@@ -317,27 +317,13 @@ selected_prov = st.selectbox(
 )
 
 prov_data = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-st.write(f"**Klaster:** {prov_data['label_klaster']}")
-
-st.markdown("#### Indikator Dampak Banjir")
-for col in numeric_cols:
-    st.write(f"- {col}: {prov_data[col]}")
-
-st.markdown("#### Indikator Dampak Banjir")
-
+st.write("{prov_data['label_klaster']}")
 cols = st.columns(3)
-
 for i, col in enumerate(numeric_cols):
     cols[i % 3].metric(
         label=col,
         value=f"{prov_data[col]:,.0f}"
     )
-
-st.markdown(f"""
-### Informasi Provinsi: {selected_prov}
-
-- **Klaster:** :orange[{prov_data['label_klaster']}]  
-""")
 
 # Download Hasil Klasterisasi
 st.markdown("#### Unduh Hasil Klasterisasi")
