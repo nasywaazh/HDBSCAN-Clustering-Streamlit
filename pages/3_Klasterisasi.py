@@ -366,7 +366,7 @@ with menu[1]:
         st.pyplot(fig2)
 
     # Model HDBSCAN
-    st.markdown("#### 2. Visualisasi Distribusi Klaster")
+    st.markdown("#### 2. Visualisasi Scatter Plot")
     hdbscan_model = hdbscan.HDBSCAN(
         min_cluster_size=best_min_cluster_size,
         min_samples=best_min_samples,
@@ -483,16 +483,16 @@ with menu[2]:
     # Nilai rata-rata setiap klaster
     numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
     cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
-    st.markdown("##### Nilai Rata-rata Klaster")
+    st.markdown("###### Nilai Rata-rata Klaster")
     st.dataframe(cluster_mean)
     # Rata-rata persentase setiap klaster
     cluster_percentage = cluster_mean.div(cluster_mean.sum(axis=0), axis=1) * 100
     cluster_percentage = cluster_percentage.round(2)
-    st.markdown("##### Rata-Rata Persentase Klaster (%)")
+    st.markdown("###### Rata-Rata Persentase Klaster (%)")
     st.dataframe(cluster_percentage)
 
     # Karakteristik klaster
-    st.markdown("#### 2. Interpretasi Klaster")
+    st.markdown("#### 2. Karakteristik Setiap Klaster")
 
     # Semua klaster (termasuk noise)
     all_clusters = sorted(df_result["Cluster"].unique())
@@ -507,7 +507,7 @@ with menu[2]:
 
     # Filter data
     df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
-    st.markdown(f"### Klaster {selected_cluster}")
+    st.markdown(f"##### Klaster {selected_cluster}")
     st.dataframe(df_cluster)
 
     # Kolom numerik
