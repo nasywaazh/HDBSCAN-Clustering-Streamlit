@@ -11,3 +11,5 @@ hdbscan==0.8.40
 bayesian-optimization==1.4.3
 plotly==5.22.0
 requests==2.31.0
+joblib==1.4.2
+urllib3==2.2.1
