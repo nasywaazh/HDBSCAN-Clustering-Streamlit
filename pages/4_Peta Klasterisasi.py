@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from urllib.request import urlopen
 
 st.title("PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA")
+st.divider()
 if "df_clustered" not in st.session_state:
     st.warning("Lakukan proses klasterisasi terlebih dahulu!")
     st.stop()
@@ -113,19 +114,18 @@ def sort_key(lbl):
 
 unique_labels = sorted(df_result["label_klaster"].unique(), key=sort_key)
 
-PALETTE = [
-    "#2ECC71", "#3498DB", "#E74C3C", "#F39C12",
-    "#9B59B6", "#1ABC9C", "#E67E22", "#E91E63",
-    "#00BCD4", "#8BC34A",
-]
-color_map = {}
-ci = 0
+color_map = {
+    "Klaster 0": "#FFA500", 
+    "Klaster 1": "#FF0000",
+    "Klaster 2": "#FFFF00",
+}
+
+# Tambahkan default untuk klaster lain
 for lbl in unique_labels:
-    if lbl == "Noise":
-        color_map[lbl] = "#AAAAAA"
-    else:
-        color_map[lbl] = PALETTE[ci % len(PALETTE)]
-        ci += 1
+    if lbl not in color_map:
+        color_map[lbl] = "#3498DB" 
+
+color_map["Noise"] = "#AAAAAA"
 
 # Kolom Numerik
 numeric_cols = (
@@ -192,7 +192,7 @@ def load_geojson(urls):
 
 geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
-st.markdown("### Peta Klasterisasi Provinsi Indonesia Berdasarkan Indikator Dampak Banjir")
+st.markdown("#### Peta Klasterisasi Berdasarkan Indikator Dampak Banjir")
 
 # Plot
 if geojson and feature_id_key:
@@ -309,8 +309,18 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+# Filter Klaster
+st.markdown("#### Filter Provinsi Berdasarkan Klaster")
+selected_cluster = st.selectbox(
+    "Pilih Klaster",
+    df_result["label_klaster"].unique()
+)
+
+filtered_df = df_result[df_result["label_klaster"] == selected_cluster]
+st.dataframe(filtered_df)
+
 # Download Hasil Klasterisasi
-st.markdown("### Unduh Hasil Klasterisasi!")
+st.markdown("#### Unduh Hasil Klasterisasi")
 csv = (
     df_result.drop(
         columns=["Provinsi_norm", "lat", "lon", "kode_bps", "label_klaster"],
