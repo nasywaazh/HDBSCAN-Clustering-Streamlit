@@ -138,13 +138,13 @@ numeric_cols = (
 with st.sidebar:
     st.header("Pengaturan Peta")
     map_style = st.selectbox(
-        "Pilih Jenis Gaya Peta!",
+        "Gaya Peta",
         ["carto-positron", "carto-darkmatter", "open-street-map", "white-bg"],
         index=0,
     )
 
     selected_hover = st.multiselect(
-        "Pilih data untuk ditampilkan di hover!",
+        "Tampilan Data di Hover!",
         options=numeric_cols,
         default=numeric_cols 
     )
