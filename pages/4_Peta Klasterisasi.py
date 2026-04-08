@@ -333,6 +333,12 @@ for i, col in enumerate(numeric_cols):
         value=f"{prov_data[col]:,.0f}"
     )
 
+st.markdown(f"""
+### Informasi Provinsi: {selected_prov}
+
+- **Klaster:** :orange[{prov_data['label_klaster']}]  
+""")
+
 # Download Hasil Klasterisasi
 st.markdown("#### Unduh Hasil Klasterisasi")
 csv = (
