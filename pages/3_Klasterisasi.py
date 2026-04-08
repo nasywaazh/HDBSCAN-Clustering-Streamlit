@@ -78,16 +78,16 @@ with menu[0]:
 
     st.write("Uji Multikolinieritas dengan Variance Inflation Factor (VIF)")
     st.dataframe(vif_data)
-    high_vif = vif_data[vif_data["VIF"] >= 5]
+    high_vif = vif_data[vif_data["VIF"] >= 10]
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
         st.warning(
-            f"Variabel {variabels} memiliki nilai VIF ≥ 5 "
+            f"Variabel {variabels} memiliki nilai VIF ≥ 10 "
             "yang mengindikasikan adanya multikolinieritas yang tinggi."
         )
         multikolinieritas = True
     else:
-        st.success("Tidak terdapat multikolinieritas tinggi (VIF < 5)")
+        st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
         multikolinieritas = False
 
     # Deteksi outlier
