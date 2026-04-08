@@ -309,21 +309,25 @@ else:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Detail Provinsi
-st.markdown("### Pilih Provinsi!")
 selected_prov = st.selectbox(
     "Pilih Provinsi",
     sorted(df_result["Provinsi"].unique())
 )
 
 prov_data = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-st.write("{prov_data['label_klaster']}")
-cols = st.columns(3)
-for i, col in enumerate(numeric_cols):
-    cols[i % 3].metric(
-        label=col,
-        value=f"{prov_data[col]:,.0f}"
-    )
+
+# Warna klaster (sinkron dengan peta kamu)
+cluster_color = {
+    "Klaster 0": "orange",
+    "Klaster 1": "red",
+    "Klaster 2": "yellow",
+    "Noise": "gray"
+}
+
+st.markdown(f"""
+### 📍 {selected_prov}
+**Klaster:** :{cluster_color.get(prov_data['label_klaster'], 'blue')}[{prov_data['label_klaster']}]
+""")
 
 # Download Hasil Klasterisasi
 st.markdown("#### Unduh Hasil Klasterisasi")
