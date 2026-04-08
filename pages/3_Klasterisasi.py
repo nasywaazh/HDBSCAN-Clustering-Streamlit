@@ -507,7 +507,7 @@ with menu[2]:
 
     # Filter data
     df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
-    st.markdown(f"##### Klaster {selected_cluster}")
+    st.markdown(f"###### Klaster {selected_cluster}")
     st.dataframe(df_cluster)
 
     # Kolom numerik
@@ -520,11 +520,9 @@ with menu[2]:
     cluster_pct_all = cluster_mean_all.div(cluster_mean_all.sum(axis=0), axis=1) * 100
     cluster_pct_all = cluster_pct_all.round(2)
 
-    # =========================
-    # Kondisi jika noise
-    # =========================
+    # Klaster noise
     if selected_cluster == -1:
-        st.warning("Klaster -1 merupakan noise (data yang tidak tergabung dalam klaster manapun)")
+        st.warning("Klaster -1 merupakan noise (tidak tergabung dalam klaster utama manapun)")
 
         mean_noise = df_cluster[numeric_cols].mean().round(3).to_frame(name="Nilai Rata-rata").T
 
@@ -543,18 +541,14 @@ with menu[2]:
         st.markdown("**Karakteristik:**")
         st.dataframe(combined_noise)
 
-    # =========================
-    # Jika klaster normal
-    # =========================
+    # Klaster utama
     else:
         mean_row = cluster_mean_all.loc[selected_cluster].to_frame(name="Nilai Rata-rata").T
         pct_row = cluster_pct_all.loc[selected_cluster].to_frame(name="Rata-Rata Persentase (%)").T
-
         combined = pd.concat([mean_row, pct_row], axis=0)
         combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-
         st.markdown("**Karakteristik:**")
         st.dataframe(combined)
-
+        
     # Jumlah anggota
     st.markdown(f"**Anggota Klaster:** {len(df_cluster)} Provinsi")
