@@ -480,33 +480,33 @@ with menu[2]:
     # Dataframe hasil klasterisasi
     st.markdown("#### 1. Hasil Klasterisasi")
     st.dataframe(df_result)
-
-    # Karakteristik setiap klaster
-    st.markdown("#### 2. Karakteristik Setiap Klaster")
+    # Nilai rata-rata setiap klaster
     numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
     cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
     st.markdown("##### Nilai Rata-rata Klaster")
     st.dataframe(cluster_mean)
+    # Rata-rata persentase setiap klaster
     cluster_percentage = cluster_mean.div(cluster_mean.sum(axis=0), axis=1) * 100
     cluster_percentage = cluster_percentage.round(2)
     st.markdown("##### Rata-Rata Persentase Klaster (%)")
     st.dataframe(cluster_percentage)
 
-    # Interpretasi klaster
-    st.markdown("#### 3. Interpretasi Klaster")
+    # Karakteristik klaster
+    st.markdown("#### 2. Interpretasi Klaster")
 
     # Semua klaster (termasuk noise)
     all_clusters = sorted(df_result["Cluster"].unique())
 
     # Selectbox
+    all_clusters = sorted(df_result["Cluster"].unique())
     selected_cluster = st.selectbox(
-        "Pilih Klaster",
-        all_clusters
+        "Pilih Klaster!",
+        all_clusters,
+        format_func=lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
     )
 
     # Filter data
     df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
-
     st.markdown(f"### Klaster {selected_cluster}")
     st.dataframe(df_cluster)
 
