@@ -22,8 +22,8 @@ if uploaded_file is not None:
         # Informasi data
         st.subheader("Informasi Data")
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Jumlah Baris", df.shape[0])
-        col2.metric("Jumlah Kolom", df.shape[1])
+        col1.metric("Jumlah Observasi", df.shape[0])
+        col2.metric("Jumlah Variabel", df.shape[1])
         col3.metric("Jumlah Missing Values",  df.isnull().sum().sum())
         col4.metric("Jumlah Data Duplikat", df.duplicated().sum().sum())
 
@@ -34,7 +34,7 @@ if uploaded_file is not None:
         # Tipe data
         st.subheader("Tipe Data")
         dtype_df = df.dtypes.reset_index()
-        dtype_df.columns = ["Nama Kolom", "Tipe Data"]
+        dtype_df.columns = ["Nama Variabel", "Tipe Data"]
         st.dataframe(dtype_df, use_container_width=True, hide_index=True)
 
         # Simpan ke session state
