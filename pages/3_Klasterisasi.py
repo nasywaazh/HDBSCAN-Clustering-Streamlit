@@ -54,9 +54,9 @@ with menu[0]:
         st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
         st.caption("Kriteria Nilai KMO > 0.5")
         if kmo_model > 0.5:
-            st.success("Data sudah representatif")
+            st.success("Data sudah sesuai untuk dilakukan pemodelan")
         else:
-            st.error("Data belum representatif")
+            st.error("Data belum sesuai untuk dilakukan pemodelan")
         
     with col2:
         st.metric("Uji Bartlett", f"{p_value:.6f}")
