@@ -123,11 +123,11 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
 .section-title {
-    font-size: 1rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: #1565c0;
     margin: 0;
@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.72rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -160,7 +160,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 2rem;
+    font-size: 2.3rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
@@ -216,9 +216,6 @@ div[data-baseweb="notification"] {
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
-    <p class="page-sub">
-        Pengguna mengunggah data indikator dampak banjir sebelum melakukan proses klasterisasi.
-    </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
         <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
@@ -240,7 +237,7 @@ st.markdown("""
             margin-bottom: 0.8rem;
             line-height: 1.6;
         ">
-        Upload file terlebih dahulu!
+        Upload file terlebih dahulu sebelum melakukan proses klasterisasi!
         </p>
 """, unsafe_allow_html=True)
 
@@ -260,7 +257,7 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success(f"File **{uploaded_file.name}** berhasil diupload!")
+        st.success(f"File telah berhasil diupload!")
 
         # INFORMASI DATA
         st.markdown("""
@@ -305,12 +302,11 @@ if uploaded_file is not None:
             <div class="section-header">
                 <h2 class="section-title">Preview Data</h2>
             </div>
-            <div class="section-body">
+        </div>
         """, unsafe_allow_html=True)
 
-        st.dataframe(df, use_container_width=True)
-
-        st.markdown("</div></div>", unsafe_allow_html=True)
+with st.container():
+    st.dataframe(df, use_container_width=True)
 
         # TIPE DATA
         st.markdown("""
