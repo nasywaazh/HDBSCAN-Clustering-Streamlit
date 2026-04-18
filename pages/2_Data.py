@@ -259,13 +259,13 @@ if uploaded_file is not None:
 
         st.success(f"File telah berhasil diupload!")
 
-        # INFORMASI DATA
+        # INFORMASI DATA ───────────────────────────────
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
                 <h2 class="section-title">Informasi Data</h2>
             </div>
-            <div class="section-body">
+        </div>
         """, unsafe_allow_html=True)
 
         n_obs      = df.shape[0]
@@ -294,9 +294,7 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-        # PREVIEW DATA
+        # PREVIEW DATA ────────────────────────────────
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
@@ -305,25 +303,23 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
-with st.container():
-    st.dataframe(df, use_container_width=True)
+        st.dataframe(df, use_container_width=True)
 
-        # TIPE DATA
+        # TIPE DATA 
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
                 <div class="section-icon">🔍</div>
                 <h2 class="section-title">Tipe Data Variabel</h2>
             </div>
-            <div class="section-body">
+        </div>
         """, unsafe_allow_html=True)
 
         dtype_df = df.dtypes.reset_index()
         dtype_df.columns = ["Nama Variabel", "Tipe Data"]
         dtype_df["Tipe Data"] = dtype_df["Tipe Data"].astype(str)
-        st.dataframe(dtype_df, use_container_width=True, hide_index=True)
 
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        st.dataframe(dtype_df, use_container_width=True, hide_index=True)
 
         # Simpan ke session state
         st.session_state["data"] = df
