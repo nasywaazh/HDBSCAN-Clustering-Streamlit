@@ -69,7 +69,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1rem;
 }
 .hero-title {
-    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    font-size: 2.1rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
@@ -98,49 +98,6 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.15);
     border: 1px solid rgba(255,255,255,0.30);
     color: #e8f4fd;
-}
-
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.6rem;
-}
-.stat-card {
-    background: #ffffff;
-    border: 1px solid #d4e8f8;
-    border-radius: 14px;
-    padding: 1.2rem 1.3rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.stat-card:hover {
-    box-shadow: 0 6px 24px rgba(21, 101, 192, 0.12);
-    transform: translateY(-2px);
-}
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #1565c0, #0288d1);
-    border-radius: 14px 14px 0 0;
-}
-.stat-num {
-    font-size: 1.7rem;
-    font-weight: 800;
-    color: #1565c0;
-    line-height: 1;
-    margin-bottom: 0.35rem;
-}
-.stat-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #7bafd4;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
 }
 
 .section-card {
@@ -232,28 +189,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # LATAR BELAKANG
-st.markdown("""
-<div class="stats-row">
-    <div class="stat-card">
-        <div class="stat-num">34</div>
-        <div class="stat-label">Provinsi Indonesia</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-num">2024</div>
-        <div class="stat-label">Data Terkini</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-num">HDBSCAN</div>
-        <div class="stat-label">Metode Utama</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-num">BO</div>
-        <div class="stat-label">Optimasi Parameter</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ── LATAR BELAKANG ────────────────────────────────────────────────────────
 st.markdown("""
 <div class="section-card">
     <h2 class="section-heading">
