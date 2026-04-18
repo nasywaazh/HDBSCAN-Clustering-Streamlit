@@ -102,7 +102,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
-    margin: 0 0 0.15rem 0;
+    margin: 0 0 0.05rem 0;
 }
 .method-subtitle {
     font-size: 1.1rem;
@@ -110,6 +110,7 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #7bafd4;
     margin: 0;
     font-style: italic;
+    line-height: 1.3;
 }
 .method-body {
     padding: 1.6rem 1.8rem;
@@ -147,6 +148,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.1rem;
     line-height: 1.75;
     color: #3d6b8e;
+    text-align: justify;
 }
 .step-num {
     flex-shrink: 0;
