@@ -6,7 +6,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── CSS (blok terpisah) ───────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -56,21 +55,8 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: rgba(255,255,255,0.05);
 }
-.page-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.35);
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.70rem;
-    font-weight: 700;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: #e3f2fd;
-    margin-bottom: 0.8rem;
-}
 .page-title {
-    font-size: clamp(1.3rem, 3vw, 1.9rem);
+    font-size: 2.8rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
@@ -113,7 +99,7 @@ html, body, [data-testid="stAppViewContainer"] {
     flex-shrink: 0;
 }
 .method-title {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
     margin: 0 0 0.15rem 0;
@@ -205,19 +191,18 @@ html, body, [data-testid="stAppViewContainer"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── PAGE HEADER ───────────────────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <div class="page-badge">📖 Landasan Teori</div>
     <h1 class="page-title">Metode Klasterisasi</h1>
     <p class="page-sub">
-        Penjelasan metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir,
-        meliputi algoritma HDBSCAN dan teknik optimasi Bayesian Optimization.
+        Rangkuman metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir di Indonesia,
+        yaitu algoritma HDBSCAN dan Bayesian Optimization.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# ── HDBSCAN ───────────────────────────────────────────────────────────────
+# HDBSCAN
 st.markdown("""
 <div class="method-card">
     <div class="method-header">
@@ -277,7 +262,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── BAYESIAN OPTIMIZATION ─────────────────────────────────────────────────
+# BAYESIAN OPTIMIZATION
 st.markdown("""
 <div class="method-card">
     <div class="method-header">
