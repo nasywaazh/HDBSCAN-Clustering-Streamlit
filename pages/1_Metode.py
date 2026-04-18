@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #7bafd4;
     margin: 0;
     font-style: italic;
-    line-height: 0.3;
+    line-height: 0;
 }
 .method-body {
     padding: 1.6rem 1.8rem;
