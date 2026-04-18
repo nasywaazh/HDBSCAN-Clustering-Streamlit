@@ -271,7 +271,7 @@ st.markdown("""
         <div class="method-icon">⚙️</div>
         <div>
             <h2 class="method-title" style="margin: 0 0 0.02rem 0;">Bayesian Optimization</h2>
-            <p class="method-subtitle" style="margin: 0; line-height: 1.2;">Optimasi Hyperparameter Berbasis Probabilistik</p>
+            <p>Optimasi Hyperparameter Berbasis Probabilistik</p>
     </div>
     <div class="method-body">
         <p class="body-text">
