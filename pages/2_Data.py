@@ -158,7 +158,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -286,11 +286,11 @@ if uploaded_file is not None:
                 <p class="metric-value">{n_var:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Missing Values</p>
+                <p class="metric-label">Jumlah Missing Values</p>
                 <p class="metric-value">{n_missing:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Data Duplikat</p>
+                <p class="metric-label">Jumlah Data Duplikat</p>
                 <p class="metric-value">{n_dup:,}</p>
             </div>
         </div>
