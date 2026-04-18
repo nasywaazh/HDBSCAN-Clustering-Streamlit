@@ -156,7 +156,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -210,8 +210,8 @@ st.markdown("""
     <div class="method-header">
         <div class="method-icon">🔵</div>
         <div>
-            <h2 class="method-title">HDBSCAN</h2>
-            <p class="method-subtitle">Hierarchical Density-Based Spatial Clustering of Applications with Noise</p>
+            <h2 class="method-title" style="margin: 0 0 0.02rem 0;">HDBSCAN</h2>
+            <p class="method-subtitle" style="margin: 0; line-height: 1.2;">Hierarchical Density-Based Spatial Clustering of Applications With Noise</p>
         </div>
     </div>
     <div class="method-body">
@@ -233,7 +233,7 @@ st.markdown("""
         <ol class="step-list">
             <li class="step-item">
                 <span class="step-num">1</span>
-                <span>Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan
+                <span style="text-align: justify; display: block;">Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan
                 <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan
                 dan ukuran minimum klaster.</span>
             </li>
@@ -270,9 +270,8 @@ st.markdown("""
     <div class="method-header">
         <div class="method-icon">⚙️</div>
         <div>
-            <h2 class="method-title">Bayesian Optimization</h2>
-            <p class="method-subtitle">Optimasi Hyperparameter Berbasis Probabilistik</p>
-        </div>
+            <h2 class="method-title" style="margin: 0 0 0.02rem 0;">Bayesian Optimization</h2>
+            <p class="method-subtitle" style="margin: 0; line-height: 1.2;">Optimasi Hyperparameter Berbasis Probabilistik</p>
     </div>
     <div class="method-body">
         <p class="body-text">
