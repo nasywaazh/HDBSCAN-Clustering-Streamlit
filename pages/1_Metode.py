@@ -144,7 +144,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
-    margin: 0 0 0.08rem 0;
+    margin: 0;
 }
 .method-subtitle {
     font-size: 1.1rem;
