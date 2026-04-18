@@ -70,14 +70,14 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 0.8rem;
 }
 .page-title {
-    font-size: clamp(1.3rem, 3vw, 1.9rem);
+    font-size: 2.8rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 0.88rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
@@ -222,7 +222,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── HDBSCAN ───────────────────────────────────────────────────────────────
+# HDBSCAN
 st.markdown("""
 <div class="method-card">
     <div class="method-header">
