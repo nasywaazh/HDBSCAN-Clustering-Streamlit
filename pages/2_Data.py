@@ -217,14 +217,12 @@ st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
     <p class="page-sub">
-        Unggah data indikator dampak banjir sebelum melakukan proses klasterisasi.
+        Pengguna mengunggah data indikator dampak banjir sebelum melakukan proses klasterisasi.
     </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
         <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
     </div>
-</div>
-""", unsafe_allow_html=True)
 </div>
 """, unsafe_allow_html=True)
 
@@ -242,7 +240,7 @@ st.markdown("""
             margin-bottom: 0.8rem;
             line-height: 1.6;
         ">
-        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi!
+        Upload file terlebih dahulu!
         </p>
 """, unsafe_allow_html=True)
 
@@ -335,7 +333,7 @@ if uploaded_file is not None:
         st.session_state["data"] = df
 
     except Exception as e:
-        st.error(f"❌ Terjadi error saat membaca file: {e}")
+        st.error(f"Terjadi error saat membaca file: {e}")
 
 else:
     st.markdown("""
