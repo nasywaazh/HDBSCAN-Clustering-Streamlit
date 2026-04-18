@@ -144,7 +144,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
-    margin: 0 0 0.05rem 0;
+    margin: 0 0 0.02rem 0;
 }
 .method-subtitle {
     font-size: 1.1rem;
@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #7bafd4;
     margin: 0;
     font-style: italic;
-    line-height: 1.1;
+    line-height: 1.0;
 }
 .method-body {
     padding: 1.6rem 1.8rem;
