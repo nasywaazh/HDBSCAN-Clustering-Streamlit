@@ -63,7 +63,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 0.88rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
@@ -105,7 +105,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.15rem 0;
 }
 .method-subtitle {
-    font-size: 0.75rem;
+    font-size: 1.1rem;
     font-weight: 500;
     color: #7bafd4;
     margin: 0;
@@ -163,7 +163,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .body-text {
-    font-size: 0.91rem;
+    font-size: 1.1rem;
     line-height: 1.85;
     color: #3d6b8e;
     text-align: justify;
@@ -194,7 +194,7 @@ html, body, [data-testid="stAppViewContainer"] {
 # PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">Metode Klasterisasi</h1>
+    <h1 class="page-title">METODE KLASTERISASI</h1>
     <p class="page-sub">
         Rangkuman metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir di Indonesia,
         yaitu algoritma HDBSCAN dan Bayesian Optimization.
