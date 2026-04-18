@@ -69,14 +69,14 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1rem;
 }
 .hero-title {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.9rem 0;
 }
 .hero-sub {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.75;
     max-width: 760px;
@@ -112,7 +112,7 @@ html, body, [data-testid="stAppViewContainer"] {
     box-shadow: 0 4px 20px rgba(21, 101, 192, 0.09);
 }
 .section-heading {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #1565c0;
     margin: 0 0 1rem 0;
@@ -131,7 +131,7 @@ html, body, [data-testid="stAppViewContainer"] {
     flex-shrink: 0;
 }
 .body-text {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     line-height: 1.85;
     color: #3d6b8e;
     text-align: justify;
