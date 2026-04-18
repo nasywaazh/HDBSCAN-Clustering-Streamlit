@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -160,7 +160,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
