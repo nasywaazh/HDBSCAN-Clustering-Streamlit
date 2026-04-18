@@ -102,10 +102,10 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
-    margin: 0 0 0.05rem 0;
+    margin: 0 0 0.2rem 0;
 }
 .method-subtitle {
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     font-weight: 500;
     color: #7bafd4;
     margin: 0;
@@ -117,7 +117,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .steps-label {
-    font-size: 1.1rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: #1976d2;
     letter-spacing: 0.08em;
@@ -145,18 +145,18 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 1.1rem;
+    font-size: 0.92rem;
     line-height: 1.75;
     color: #3d6b8e;
     text-align: justify;
 }
 .step-num {
     flex-shrink: 0;
-    width: 24px; height: 24px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 1.1rem;
+    font-size: 0.72rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -165,7 +165,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .body-text {
-    font-size: 1.1rem;
+    font-size: 0.92rem;
     line-height: 1.85;
     color: #3d6b8e;
     text-align: justify;
@@ -210,8 +210,8 @@ st.markdown("""
     <div class="method-header">
         <div class="method-icon">🔵</div>
         <div>
-            <h2 class="method-title" style="margin: 0 0 0.02rem 0;">HDBSCAN</h2>
-            <p class="method-subtitle" style="margin: 0; line-height: 1.2;">Hierarchical Density-Based Spatial Clustering of Applications With Noise</p>
+            <h2 class="method-title">HDBSCAN</h2>
+            <p class="method-subtitle">Hierarchical Density-Based Spatial Clustering of Applications With Noise</p>
         </div>
     </div>
     <div class="method-body">
@@ -270,8 +270,9 @@ st.markdown("""
     <div class="method-header">
         <div class="method-icon">⚙️</div>
         <div>
-            <h2 class="method-title" style="margin: 0 0 0.02rem 0;">Bayesian Optimization</h2>
-            <p>Optimasi Hyperparameter Berbasis Probabilistik</p>
+            <h2 class="method-title">Bayesian Optimization</h2>
+            <p class="method-subtitle">Optimasi Hyperparameter Berbasis Probabilistik</p>
+        </div>
     </div>
     <div class="method-body">
         <p class="body-text">
@@ -291,6 +292,7 @@ st.markdown("""
             dan memperbarui model untuk mengarahkan pencarian ke hasil yang lebih optimal. Hasil dari proses optimasi
             ini berupa kombinasi hyperparameter terbaik yang akan digunakan dalam proses klasterisasi HDBSCAN untuk
             menghasilkan klaster yang lebih akurat dan stabil.
+        </p>
     </div>
 </div>
 """, unsafe_allow_html=True)
