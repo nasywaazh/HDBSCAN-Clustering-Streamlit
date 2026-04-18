@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #7bafd4;
     margin: 0 0 0.6rem 0;
     font-style: italic;
-    line-height: 0.5;
+    line-height: 0;
 }
 .method-body {
     padding: 1.6rem 1.8rem;
@@ -187,7 +187,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     line-height: 1.75;
     color: #3d6b8e;
     text-align: justify;
