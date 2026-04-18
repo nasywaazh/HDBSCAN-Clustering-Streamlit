@@ -88,7 +88,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 999px;
     padding: 0.45rem 1.1rem 0.45rem 0.7rem;
     color: #ffffff;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
