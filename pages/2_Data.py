@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(
-    page_title="Data Indikator",
+    page_title="Data Indikator Dampak Banjir",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -63,12 +63,6 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
-}
-.page-sub {
-    font-size: 0.92rem;
-    color: #bbdefb;
-    line-height: 1.7;
-    margin: 0 0 1.4rem 0;
 }
 .badge-row {
     display: flex;
@@ -218,23 +212,14 @@ div[data-baseweb="notification"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── PAGE HEADER ──────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">DATA INDIKATOR<br>DAMPAK BANJIR</h1>
-    <p class="page-sub">
-        Upload dan eksplorasi data indikator wilayah terdampak banjir di Indonesia.
-        Mendukung format CSV dan Excel.
-    </p>
-    <div class="badge-row">
-        <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
-        <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
-        <div class="badge-pill"><span class="badge-icon">🔍</span> Tipe Variabel</div>
-    </div>
+    <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
 </div>
 """, unsafe_allow_html=True)
 
-# ── UPLOAD SECTION ────────────────────────────────────────────
+# UPLOAD SECTION
 st.markdown("""
 <div class="section-card">
     <div class="section-header">
@@ -245,14 +230,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
-    "Pilih file CSV atau Excel untuk diupload",
+    "Format file CSV atau Excel",
     type=["csv", "xlsx"],
     label_visibility="visible"
 )
 
-st.markdown("</div></div>", unsafe_allow_html=True)
+st.markdown("""
+<p style="
+    font-size: 0.85rem;
+    color: #7bafd4;
+    margin-top: 0.4rem;
+    font-style: italic;
+">
+Silahkan upload file terlebih dahulu sebelum menjalankan klasterisasi!
+</p>
+""", unsafe_allow_html=True)
 
-# ── CONTENT ───────────────────────────────────────────────────
+# CONTENT
 if uploaded_file is not None:
     try:
         if uploaded_file.name.endswith(".csv"):
@@ -260,13 +254,12 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success(f"✅ File **{uploaded_file.name}** berhasil diupload!")
+        st.success(f"File **{uploaded_file.name}** berhasil diupload!")
 
-        # ── INFORMASI DATA ────────────────────────────────────
+        # INFORMASI DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <div class="section-icon">📊</div>
                 <h2 class="section-title">Informasi Data</h2>
             </div>
             <div class="section-body">
@@ -300,11 +293,10 @@ if uploaded_file is not None:
 
         st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # ── PREVIEW DATA ──────────────────────────────────────
+        # PREVIEW DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <div class="section-icon">👁️</div>
                 <h2 class="section-title">Preview Data</h2>
             </div>
             <div class="section-body">
@@ -314,7 +306,7 @@ if uploaded_file is not None:
 
         st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # ── TIPE DATA ─────────────────────────────────────────
+        # TIPE DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
@@ -346,7 +338,7 @@ else:
                 Belum ada data yang diupload
             </p>
             <p style="font-size:0.85rem; margin:0; color:#7bafd4;">
-                Silakan upload file CSV atau Excel melalui panel di atas.
+                Silahkan upload file CSV atau Excel terlebih dahulu
             </p>
         </div>
     </div>
