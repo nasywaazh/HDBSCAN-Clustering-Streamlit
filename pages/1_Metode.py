@@ -187,7 +187,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     line-height: 1.75;
     color: #3d6b8e;
     text-align: justify;
