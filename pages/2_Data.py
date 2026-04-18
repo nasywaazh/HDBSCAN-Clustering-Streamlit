@@ -58,7 +58,7 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.05);
 }
 .page-title {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
@@ -133,7 +133,7 @@ html, body, [data-testid="stAppViewContainer"] {
     flex-shrink: 0;
 }
 .section-title {
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
     margin: 0;
@@ -158,7 +158,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.72rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -263,13 +263,12 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success(f"File **{uploaded_file.name}** berhasil diupload!")
+        st.success(f"File telah berhasil diupload!")
 
         # INFORMASI DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <div class="section-icon">📊</div>
                 <h2 class="section-title">Informasi Data</h2>
             </div>
         </div>
@@ -301,11 +300,10 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
-        # ── PREVIEW DATA ────────────────────────────────
+        # PREVIEW DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <div class="section-icon">👁️</div>
                 <h2 class="section-title">Preview Data</h2>
             </div>
         </div>
@@ -313,7 +311,7 @@ if uploaded_file is not None:
 
         st.dataframe(df, use_container_width=True)
 
-        # ── TIPE DATA ──────────────────────────────────
+        # TIPE DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
@@ -333,7 +331,7 @@ if uploaded_file is not None:
         st.session_state["data"] = df
 
     except Exception as e:
-        st.error(f"❌ Terjadi error saat membaca file: {e}")
+        st.error(f"Terjadi error saat membaca file: {e}")
 
 else:
     st.markdown("""
@@ -344,7 +342,7 @@ else:
                 Belum ada data yang diupload
             </p>
             <p style="font-size:0.85rem; margin:0; color:#7bafd4;">
-                Silakan upload file CSV atau Excel melalui panel di atas.
+                Silakan upload file CSV atau Excel terlebih dahulu
             </p>
         </div>
     </div>
