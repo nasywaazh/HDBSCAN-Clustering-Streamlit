@@ -233,7 +233,7 @@ st.markdown("""
         <ol class="step-list">
             <li class="step-item">
                 <span class="step-num">1</span>
-                <span style="text-align: justify; display: block;">Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan
+                <span>Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan
                 <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan
                 dan ukuran minimum klaster.</span>
             </li>
