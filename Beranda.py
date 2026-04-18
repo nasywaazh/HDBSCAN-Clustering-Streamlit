@@ -150,7 +150,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    font-size: 0.91rem;
+    font-size: 1.1rem;
     line-height: 1.75;
     color: #3d6b8e;
 }
