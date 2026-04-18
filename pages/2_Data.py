@@ -158,7 +158,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -264,7 +264,8 @@ if uploaded_file is not None:
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <h2 class="section-title">Informasi Data</h2>
+                <div class="section-icon">🔍</div>
+                <h2 class="section-title">Informasi Dataset</h2>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -295,11 +296,14 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
+        st.markdown("<div style='margin-bottom:1.6rem;'></div>", unsafe_allow_html=True)
+
         # PREVIEW DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <h2 class="section-title">Preview Data</h2>
+                <div class="section-icon">🔍</div>
+                <h2 class="section-title">Preview Dataset</h2>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -311,7 +315,7 @@ if uploaded_file is not None:
         <div class="section-card">
             <div class="section-header">
                 <div class="section-icon">🔍</div>
-                <h2 class="section-title">Tipe Data Variabel</h2>
+                <h2 class="section-title">Tipe Dataset</h2>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -337,7 +341,7 @@ else:
                 Belum ada data yang diupload
             </p>
             <p style="font-size:0.85rem; margin:0; color:#7bafd4;">
-                Silakan upload file CSV atau Excel terlebih dahulu
+                Silakan upload file terlebih dahulu
             </p>
         </div>
     </div>
