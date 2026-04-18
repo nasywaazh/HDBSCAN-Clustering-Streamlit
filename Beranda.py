@@ -214,11 +214,10 @@ html, body, [data-testid="stAppViewContainer"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── HERO ──────────────────────────────────────────────────────────────────
+# JUDUL HALAMAN
 st.markdown("""
 <div class="hero">
-    <div class="hero-badge">🌊 Sistem Klasterisasi Bencana</div>
-    <h1 class="hero-title">Aplikasi Klasterisasi Wilayah<br>Terdampak Banjir di Indonesia</h1>
+    <h1 class="hero-title">APLIKASI KLASTERISASI WILAYAH<br>TERDAMPAK BANJIR DI INDONESIA</h1>
     <p class="hero-sub">
         Mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode
         HDBSCAN (<em>Hierarchical Density-Based Spatial Clustering of Applications with Noise</em>)
@@ -226,14 +225,13 @@ st.markdown("""
     </p>
     <div class="pills">
         <span class="pill">⚙️ HDBSCAN</span>
-        <span class="pill">🔧 Bayesian Optimization</span>
-        <span class="pill">🗺️ Peta Interaktif</span>
-        <span class="pill">📊 34 Provinsi</span>
+        <span class="pill">🔧 BAYESIAN OPTIMIZATION</span>
+        <span class="pill">🗺️ KLASTERISASI</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── STATS ─────────────────────────────────────────────────────────────────
+# LATAR BELAKANG
 st.markdown("""
 <div class="stats-row">
     <div class="stat-card">
@@ -259,8 +257,7 @@ st.markdown("""
 st.markdown("""
 <div class="section-card">
     <h2 class="section-heading">
-        <span class="section-icon">📋</span>
-        Latar Belakang
+        LATAR BELAKANG
     </h2>
     <p class="body-text">
         Banjir merupakan salah satu bencana alam yang paling sering terjadi di Indonesia dengan ribuan kejadian
@@ -283,12 +280,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── TUJUAN ────────────────────────────────────────────────────────────────
+# TUJUAN
 st.markdown("""
 <div class="section-card">
     <h2 class="section-heading">
-        <span class="section-icon">🎯</span>
-        Tujuan
+        TUJUAN
     </h2>
     <ul class="goal-list">
         <li class="goal-item">
