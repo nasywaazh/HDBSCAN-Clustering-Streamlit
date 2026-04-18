@@ -159,7 +159,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .steps-label {
-    font-size: 0.78rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #1976d2;
     letter-spacing: 0.08em;
