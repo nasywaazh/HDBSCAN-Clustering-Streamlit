@@ -187,7 +187,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     line-height: 1.75;
     color: #3d6b8e;
     text-align: justify;
@@ -198,7 +198,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
