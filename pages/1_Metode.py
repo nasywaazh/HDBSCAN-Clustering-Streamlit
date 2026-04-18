@@ -6,6 +6,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── CSS (blok terpisah) ───────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -31,7 +32,6 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 [data-testid="stSidebar"] * { color: #1a5fa8 !important; }
 
-/* Page Header */
 .page-header {
     background: linear-gradient(135deg, #1565c0 0%, #1976d2 55%, #0288d1 100%);
     border-radius: 20px;
@@ -70,25 +70,23 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 0.8rem;
 }
 .page-title {
-    font-size: 2.8rem;
+    font-size: clamp(1.3rem, 3vw, 1.9rem);
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
 }
 
-/* Method Cards */
 .method-card {
     background: #ffffff;
     border: 1px solid #d4e8f8;
     border-radius: 18px;
-    padding: 0;
     margin-bottom: 1.4rem;
     overflow: hidden;
     transition: box-shadow 0.2s ease;
@@ -131,7 +129,6 @@ html, body, [data-testid="stAppViewContainer"] {
     padding: 1.6rem 1.8rem;
 }
 
-/* Step List */
 .steps-label {
     font-size: 0.78rem;
     font-weight: 700;
@@ -149,6 +146,7 @@ html, body, [data-testid="stAppViewContainer"] {
     height: 1px;
     background: #d4e8f8;
 }
+
 .step-list {
     list-style: none;
     padding: 0; margin: 0;
@@ -178,7 +176,6 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-top: 0.22rem;
 }
 
-/* Body Text */
 .body-text {
     font-size: 0.91rem;
     line-height: 1.85;
@@ -186,9 +183,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: justify;
     margin: 0;
 }
-.body-text + .body-text { margin-top: 1rem; }
 
-/* Highlight Box */
 .highlight-box {
     background: #e8f4fd;
     border: 1px solid #b3d9f5;
@@ -201,7 +196,6 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 .highlight-box strong { color: #1565c0; }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #e8f4fd; }
 ::-webkit-scrollbar-thumb { background: #90caf9; border-radius: 3px; }
@@ -211,18 +205,19 @@ html, body, [data-testid="stAppViewContainer"] {
 </style>
 """, unsafe_allow_html=True)
 
-# HEADER HALAMAN
+# ── PAGE HEADER ───────────────────────────────────────────────────────────
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">METODE KLASTERISASI</h1>
+    <div class="page-badge">📖 Landasan Teori</div>
+    <h1 class="page-title">Metode Klasterisasi</h1>
     <p class="page-sub">
-        Rangkuman metode yang digunakan dalam proses klasterisasi wilayah,
-        yaitu algoritma HDBSCAN dan Bayesian Optimization.
+        Penjelasan metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir,
+        meliputi algoritma HDBSCAN dan teknik optimasi Bayesian Optimization.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# HDBSCAN
+# ── HDBSCAN ───────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="method-card">
     <div class="method-header">
@@ -247,7 +242,6 @@ st.markdown("""
             kepadatan akan diklasifikasikan sebagai <i>noise</i>, sedangkan kelompok data dengan jumlah anggota di
             bawah batas minimum tidak akan dianggap sebagai klaster yang valid.
         </p>
-
         <div class="steps-label">Alur Kerja HDBSCAN</div>
         <ol class="step-list">
             <li class="step-item">
@@ -283,7 +277,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# BAYESIAN OPTIMIZATION
+# ── BAYESIAN OPTIMIZATION ─────────────────────────────────────────────────
 st.markdown("""
 <div class="method-card">
     <div class="method-header">
@@ -304,14 +298,13 @@ st.markdown("""
             eksplorasi acak.
         </p>
         <p class="body-text" style="margin-top:1rem;">
-            Proses optimasi difokuskan pada hyperparameter utama HDBSCAN, yaitu <i>min_samples</i> dan <i>min_cluster_size</i>.
-            Tujuan dari optimasi ini adalah untuk memaksimalkan kualitas klasterisasi yang diukur menggunakan indeks DBCV
-            (<i>Density-Based Clustering Validation</i>) sebagai metrik evaluasi utama. Proses ini dilakukan secara iteratif
-            dengan mengevaluasi berbagai kombinasi hyperparameter dan memperbarui model untuk mengarahkan pencarian ke
-            hasil yang lebih optimal. Hasil dari proses optimasi ini berupa kombinasi hyperparameter terbaik yang akan
-            digunakan dalam proses klasterisasi HDBSCAN untuk menghasilkan klaster yang lebih akurat dan stabil.
-        </p>
-        </div>
+            Proses optimasi difokuskan pada <i>hyperparameter</i> utama HDBSCAN, yaitu <i>min_samples</i> dan
+            <i>min_cluster_size</i>. Tujuan dari optimasi ini adalah untuk memaksimalkan kualitas klasterisasi yang
+            diukur menggunakan indeks DBCV (<i>Density-Based Clustering Validation</i>) sebagai metrik evaluasi
+            utama. Proses ini dilakukan secara iteratif dengan mengevaluasi berbagai kombinasi <i>hyperparameter</i>
+            dan memperbarui model untuk mengarahkan pencarian ke hasil yang lebih optimal. Hasil dari proses optimasi
+            ini berupa kombinasi hyperparameter terbaik yang akan digunakan dalam proses klasterisasi HDBSCAN untuk
+            menghasilkan klaster yang lebih akurat dan stabil.
     </div>
 </div>
 """, unsafe_allow_html=True)
