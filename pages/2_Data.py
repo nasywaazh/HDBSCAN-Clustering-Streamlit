@@ -237,10 +237,18 @@ st.markdown("""
         <h2 class="section-title">Upload Dataset</h2>
     </div>
     <div class="section-body">
+        <p style="
+            font-size: 0.9rem;
+            color: #3d6b8e;
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        ">
+        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi.
+        </p>
 """, unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
-    "Pilih file CSV atau Excel untuk diupload",
+    "Format file CSV atau Excel",
     type=["csv", "xlsx"],
     label_visibility="visible"
 )
