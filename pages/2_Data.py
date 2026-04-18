@@ -65,7 +65,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 0.92rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0 0 1.4rem 0;
