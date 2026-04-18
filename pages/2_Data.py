@@ -223,7 +223,7 @@ st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
     <p class="page-sub">
-        Pengguna mengunggah file dengan format CSV atau Excel terlebih dahulu sebelum menjalankan proses klasterisasi
+        Pengguna mengunggah dataset dengan format file CSV atau Excel terlebih dahulu sebelum menjalankan proses klasterisasi
     </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
