@@ -238,12 +238,12 @@ st.markdown("""
     </div>
     <div class="section-body">
         <p style="
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: #3d6b8e;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.3rem;
             line-height: 1.6;
         ">
-        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi.
+        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi!
         </p>
 """, unsafe_allow_html=True)
 
@@ -263,9 +263,9 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success(f"✅ File **{uploaded_file.name}** berhasil diupload!")
+        st.success(f"File **{uploaded_file.name}** berhasil diupload!")
 
-        # ── INFORMASI DATA ───────────────────────────────
+        # INFORMASI DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
