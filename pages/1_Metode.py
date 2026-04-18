@@ -56,7 +56,7 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.05);
 }
 .page-title {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
@@ -241,7 +241,7 @@ st.markdown("""
     <h1 class="page-title">METODE KLASTERISASI</h1>
     <p class="page-sub">
         Rangkuman metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir di Indonesia,
-        yaitu algoritma HDBSCAN dan Bayesian Optimization.
+        yaitu algoritma HDBSCAN dan <em>Bayesian Optimization</em>
     </p>
     <div class="badge-row">
         <div class="badge-pill">
