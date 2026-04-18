@@ -181,8 +181,8 @@ st.markdown("""
         yang dikombinasikan dengan <em>Bayesian Optimization</em> untuk klasterisasi yang akurat dan andal.
     </p>
     <div class="pills">
-        <span class="pill">⚙️ HDBSCAN</span>
-        <span class="pill">🔧 BAYESIAN OPTIMIZATION</span>
+        <span class="pill">🔵 HDBSCAN</span>
+        <span class="pill">⚙️ BAYESIAN OPTIMIZATION</span>
         <span class="pill">🗺️ KLASTERISASI</span>
     </div>
 </div>
