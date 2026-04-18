@@ -218,23 +218,18 @@ div[data-baseweb="notification"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── PAGE HEADER ──────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">DATA INDIKATOR<br>DAMPAK BANJIR</h1>
-    <p class="page-sub">
-        Upload dan eksplorasi data indikator wilayah terdampak banjir di Indonesia.
-        Mendukung format CSV dan Excel.
-    </p>
+    <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
         <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
-        <div class="badge-pill"><span class="badge-icon">🔍</span> Tipe Variabel</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── UPLOAD SECTION ────────────────────────────────────────────
+# UPLOAD SECTION
 st.markdown("""
 <div class="section-card">
     <div class="section-header">
