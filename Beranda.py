@@ -69,14 +69,14 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1rem;
 }
 .hero-title {
-    font-size: 2.1rem;
+    font-size: 2.5rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.9rem 0;
 }
 .hero-sub {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: #bbdefb;
     line-height: 1.75;
     max-width: 760px;
@@ -92,7 +92,7 @@ html, body, [data-testid="stAppViewContainer"] {
 .pill {
     padding: 5px 13px;
     border-radius: 20px;
-    font-size: 0.73rem;
+    font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     background: rgba(255,255,255,0.15);
@@ -112,7 +112,7 @@ html, body, [data-testid="stAppViewContainer"] {
     box-shadow: 0 4px 20px rgba(21, 101, 192, 0.09);
 }
 .section-heading {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #1565c0;
     margin: 0 0 1rem 0;
@@ -131,7 +131,7 @@ html, body, [data-testid="stAppViewContainer"] {
     flex-shrink: 0;
 }
 .body-text {
-    font-size: 0.91rem;
+    font-size: 0.95rem;
     line-height: 1.85;
     color: #3d6b8e;
     text-align: justify;
