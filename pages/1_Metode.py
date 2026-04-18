@@ -198,7 +198,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 700;
     display: flex;
     align-items: center;
