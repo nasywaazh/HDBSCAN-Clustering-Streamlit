@@ -222,6 +222,9 @@ div[data-baseweb="notification"] {
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
+    <p class="page-sub">
+        Pengguna mengunggah file dengan format CSV atau Excel terlebih dahulu sebelum menjalankan proses klasterisasi
+    </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
         <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
@@ -236,15 +239,7 @@ st.markdown("""
         <div class="section-icon">📂</div>
         <h2 class="section-title">Upload Dataset</h2>
     </div>
-    <div class="section-body">
-        <p style="
-            font-size: 1.1rem;
-            color: #3d6b8e;
-            margin-bottom: 0.3rem;
-            line-height: 1.6;
-        ">
-        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi!
-        </p>
+</div>
 """, unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
