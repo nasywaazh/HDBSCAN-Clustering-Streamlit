@@ -150,7 +150,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 1.1rem;
     font-weight: 500;
     color: #7bafd4;
-    margin: 0;
+    margin: 0 0 0.6rem 0;
     font-style: italic;
     line-height: 0.5;
 }
