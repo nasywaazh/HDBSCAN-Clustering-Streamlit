@@ -278,3 +278,73 @@ st.markdown("""
         <p class="body-text" style="margin-top:1rem;">
             Dalam prosesnya, HDBSCAN menggunakan metrik <i>mutual reachability distance</i> untuk membangun struktur
             hierarki berdasarkan tingkat kepadatan antar titik data. Titik-titik yang tidak memenuhi ambang batas
+            kepadatan akan diklasifikasikan sebagai <i>noise</i>, sedangkan kelompok data dengan jumlah anggota di
+            bawah batas minimum tidak akan dianggap sebagai klaster yang valid.
+        </p>
+        <div class="steps-label">Alur Kerja HDBSCAN</div>
+        <ol class="step-list">
+            <li class="step-item">
+                <span class="step-num">1</span>
+                <span>Inisialisasi parameter utama, yaitu <i>minimum samples</i> (<i>min_samples</i>) dan
+                <i>minimum cluster size</i> (<i>min_cluster_size</i>) sebagai dasar dalam menentukan kepadatan
+                dan ukuran minimum klaster.</span>
+            </li>
+            <li class="step-item">
+                <span class="step-num">2</span>
+                <span>Menghitung <i>core distance</i> untuk setiap titik berdasarkan nilai <i>min_samples</i>
+                dan menghitung <i>mutual reachability distance</i> antartitik data.</span>
+            </li>
+            <li class="step-item">
+                <span class="step-num">3</span>
+                <span>Membangun graf berbobot dan membentuk <i>Minimum Spanning Tree</i> (MST) berdasarkan
+                <i>mutual reachability distance</i> untuk mempresentasikan hubungan antartitik.</span>
+            </li>
+            <li class="step-item">
+                <span class="step-num">4</span>
+                <span>Mengonstruksi struktur klaster hierarkis berdasarkan variasi kepadatan dengan menghapus
+                <i>edge</i> secara bertahap dari MST sehingga terbentuk hierarki klaster dari yang paling
+                padat hingga paling renggang.</span>
+            </li>
+            <li class="step-item">
+                <span class="step-num">5</span>
+                <span>Mengekstraksi klaster datar berdasarkan stabilitas klaster dengan mempertahankan klaster
+                yang paling stabil sebagai hasil akhir, sementara titik yang tidak memenuhi kriteria stabilitas
+                dikategorikan sebagai <i>noise</i>.</span>
+            </li>
+        </ol>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# BAYESIAN OPTIMIZATION
+st.markdown("""
+<div class="method-card">
+    <div class="method-header">
+        <div class="method-icon">⚙️</div>
+        <div>
+            <h2 class="method-title">Bayesian Optimization</h2>
+            <p class="method-subtitle">Optimasi Hyperparameter Berbasis Probabilistik</p>
+        </div>
+    </div>
+    <div class="method-body">
+        <p class="body-text">
+            <i>Bayesian Optimization</i> digunakan untuk mencari <i>hyperparameter</i> optimal dari HDBSCAN secara
+            efisien. Metode optimasi ini memanfaatkan prinsip Teorema Bayes untuk membangun model probabilistik dari
+            fungsi objektif dengan menggunakan <i>Gaussian Process</i> sebagai pendekatan utama dalam memodelkan
+            hubungan antara parameter dan nilai fungsi. Keunggulan utama dari teknik optimasi ini terletak pada
+            kemampuannya dalam menemukan solusi optimal global dengan jumlah iterasi yang lebih sedikit, karena
+            proses pencarian dipandu oleh informasi probabilistik dari evaluasi sebelumnya, bukan melalui
+            eksplorasi acak.
+        </p>
+        <p class="body-text" style="margin-top:1rem;">
+            Proses optimasi difokuskan pada <i>hyperparameter</i> utama HDBSCAN, yaitu <i>min_samples</i> dan
+            <i>min_cluster_size</i>. Tujuan dari optimasi ini adalah untuk memaksimalkan kualitas klasterisasi yang
+            diukur menggunakan indeks DBCV (<i>Density-Based Clustering Validation</i>) sebagai metrik evaluasi
+            utama. Proses ini dilakukan secara iteratif dengan mengevaluasi berbagai kombinasi <i>hyperparameter</i>
+            dan memperbarui model untuk mengarahkan pencarian ke hasil yang lebih optimal. Hasil dari proses optimasi
+            ini berupa kombinasi hyperparameter terbaik yang akan digunakan dalam proses klasterisasi HDBSCAN untuk
+            menghasilkan klaster yang lebih akurat dan stabil.
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
