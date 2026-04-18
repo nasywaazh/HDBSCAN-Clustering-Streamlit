@@ -88,7 +88,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 999px;
     padding: 0.45rem 1.1rem 0.45rem 0.7rem;
     color: #ffffff;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -187,7 +187,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 0.92rem;
+    font-size: 1.1rem;
     line-height: 1.75;
     color: #3d6b8e;
     text-align: justify;
@@ -198,7 +198,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 0.72rem;
+    font-size: 1.1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
