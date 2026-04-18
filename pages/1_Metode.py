@@ -95,7 +95,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
 .method-title {
@@ -116,7 +116,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .steps-label {
-    font-size: 0.78rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #1976d2;
     letter-spacing: 0.08em;
@@ -144,7 +144,7 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: flex-start;
     gap: 0.85rem;
-    font-size: 0.88rem;
+    font-size: 1.1rem;
     line-height: 1.75;
     color: #3d6b8e;
 }
@@ -154,7 +154,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #0288d1);
     color: #ffffff;
-    font-size: 0.68rem;
+    font-size: 0.9rem;
     font-weight: 700;
     display: flex;
     align-items: center;
