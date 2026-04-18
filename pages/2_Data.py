@@ -216,6 +216,15 @@ div[data-baseweb="notification"] {
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
+    <p class="page-sub">
+        Unggah data indikator dampak banjir sebelum melakukan proses klasterisasi.
+    </p>
+    <div class="badge-row">
+        <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
+        <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 </div>
 """, unsafe_allow_html=True)
 
@@ -227,6 +236,14 @@ st.markdown("""
         <h2 class="section-title">Upload Dataset</h2>
     </div>
     <div class="section-body">
+        <p style="
+            font-size: 0.9rem;
+            color: #3d6b8e;
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        ">
+        Upload file terlebih dahulu sebelum menjalankan proses klasterisasi!
+        </p>
 """, unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
@@ -235,16 +252,7 @@ uploaded_file = st.file_uploader(
     label_visibility="visible"
 )
 
-st.markdown("""
-<p style="
-    font-size: 0.85rem;
-    color: #7bafd4;
-    margin-top: 0.4rem;
-    font-style: italic;
-">
-Silahkan upload file terlebih dahulu sebelum menjalankan klasterisasi!
-</p>
-""", unsafe_allow_html=True)
+st.markdown("</div></div>", unsafe_allow_html=True)
 
 # CONTENT
 if uploaded_file is not None:
