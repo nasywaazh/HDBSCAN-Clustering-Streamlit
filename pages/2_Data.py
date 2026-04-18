@@ -152,7 +152,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.7rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -160,7 +160,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 2.3rem;
+    font-size: 1.8rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
@@ -294,7 +294,7 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
-        # PREVIEW DATA ────────────────────────────────
+        # PREVIEW DATA
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
@@ -309,8 +309,7 @@ if uploaded_file is not None:
         st.markdown("""
         <div class="section-card">
             <div class="section-header">
-                <div class="section-icon">🔍</div>
-                <h2 class="section-title">Tipe Data Variabel</h2>
+                <h2 class="section-title">Tipe Dataset</h2>
             </div>
         </div>
         """, unsafe_allow_html=True)
