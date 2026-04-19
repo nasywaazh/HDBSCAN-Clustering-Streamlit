@@ -618,7 +618,7 @@ with menu[0]:
             f"Jumlah komponen yang digunakan berdasarkan kriteria nilai eigenvalue > 1 "
             f"dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen"
         )
-        step_label("Hasil Reduksi Data dengan PCA")
+        step_label("HASIL REDUKSI PCA")
         safe_table(pca_result)
     else:
         st.info("PCA tidak diperlukan (tidak memenuhi syarat multikolinieritas atau korelasi)")
