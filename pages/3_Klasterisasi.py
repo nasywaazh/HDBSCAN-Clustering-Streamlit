@@ -56,14 +56,14 @@ html, body, [data-testid="stAppViewContainer"] {
     overflow: hidden;
 }
 .page-title {
-    font-size: 2.6rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
@@ -153,9 +153,17 @@ html, body, [data-testid="stAppViewContainer"] {
 
 .safe-table-wrap {
     overflow-x: auto;
+    overflow-y: auto;              
+    max-height: 420px;             
     border-radius: 10px;
     border: 1px solid #d4e8f8;
     margin-bottom: 1rem;
+}
+.safe-table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(135deg, #e3f2fd, #eff8ff);
 }
 .safe-table-wrap table {
     width: 100%;
@@ -192,7 +200,7 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ───────────────────────────────────────────────────
+# HELPERS
 def sec(title):
     st.markdown(f"### {title}")
 
@@ -213,16 +221,17 @@ def metric_html(items, cols=4):
     st.markdown(f'<div class="{grid_class}">{cards}</div>', unsafe_allow_html=True)
 
 
-def safe_table(df_show, max_rows=500):
+def safe_table(df_show, max_rows=500, height=420):
     """
-    Render DataFrame sebagai pure HTML table — menghindari st.dataframe()
-    dan Arrow renderer yang menyebabkan React error #185 pada Streamlit lama.
+    Render DataFrame sebagai HTML table dengan scroll (vertical + horizontal)
     """
-    df_render = df_show.head(max_rows).copy()
-    # Reset index agar tidak ada multi-index aneh
-    df_render = df_render.reset_index(drop=True)
 
+    df_render = df_show.head(max_rows).reset_index(drop=True)
+
+    # Header
     headers = "".join(f"<th>{col}</th>" for col in df_render.columns)
+
+    # Rows
     rows = ""
     for _, row in df_render.iterrows():
         cells = "".join(
@@ -231,18 +240,19 @@ def safe_table(df_show, max_rows=500):
         )
         rows += f"<tr>{cells}</tr>"
 
-    html = (
-        '<div class="safe-table-wrap">'
-        "<table>"
-        f"<thead><tr>{headers}</tr></thead>"
-        f"<tbody>{rows}</tbody>"
-        "</table>"
-        "</div>"
-    )
+    html = f"""
+    <div class="safe-table-wrap" style="max-height:{height}px;">
+        <table>
+            <thead><tr>{headers}</tr></thead>
+            <tbody>{rows}</tbody>
+        </table>
+    </div>
+    """
+
     st.markdown(html, unsafe_allow_html=True)
+
     if len(df_show) > max_rows:
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
-
 
 # ── DCSI HELPERS ──────────────────────────────────────────────
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
