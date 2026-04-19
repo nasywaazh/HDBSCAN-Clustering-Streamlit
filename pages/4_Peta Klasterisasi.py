@@ -611,6 +611,7 @@ if geojson and feature_id_key:
         existing_labels = set(df_choropleth["label_klaster"].unique())
         for lbl in df_marker["label_klaster"].unique():
             sub = df_marker[df_marker["label_klaster"] == lbl]
+            fill_color = COLOR_MAP.get(lbl, "#999999")
             customdata = (
                 sub[selected_hover].values if selected_hover
                 else np.empty((len(sub), 0))
@@ -618,17 +619,25 @@ if geojson and feature_id_key:
             hover_lines = ["<b>%{text}</b>", "⚠️ Provinsi Pemekaran 2022"] + [
                 f"{col}: %{{customdata[{i}]}}" for i, col in enumerate(selected_hover)
             ]
+            # Layer border putih agar marker kontras di atas peta
+            fig.add_trace(
+                go.Scattermapbox(
+                    lat=sub["lat"],
+                    lon=sub["lon"],
+                    mode="markers",
+                    marker=dict(size=36, color="#ffffff", opacity=1.0),
+                    hoverinfo="skip",
+                    showlegend=False,
+                    legendgroup=lbl,
+                )
+            )
+            # Layer warna klaster
             fig.add_trace(
                 go.Scattermapbox(
                     lat=sub["lat"],
                     lon=sub["lon"],
                     mode="markers+text",
-                    marker=dict(
-                        size=24,
-                        color=COLOR_MAP.get(lbl, "#999"),
-                        opacity=0.92,
-                        symbol="circle",
-                    ),
+                    marker=dict(size=28, color=fill_color, opacity=1.0),
                     text=sub["Provinsi"],
                     textposition="top center",
                     textfont=dict(size=10, color="#1a3a5c"),
@@ -639,6 +648,7 @@ if geojson and feature_id_key:
                     showlegend=(lbl not in existing_labels),
                 )
             )
+            existing_labels.add(lbl)
 
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
