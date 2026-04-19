@@ -12,7 +12,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── CSS TEMA KONSISTEN DENGAN Klasterisasi.py ──────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -297,10 +296,9 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ───────────────────────────────────────────────────────────────────
+# HELPERS
 def sec(title):
     st.markdown(f"### {title}")
-
 
 def safe_table(df_show, max_rows=500, height=360):
     df_render = df_show.head(max_rows).reset_index(drop=True)
@@ -323,7 +321,6 @@ def safe_table(df_show, max_rows=500, height=360):
     if len(df_show) > max_rows:
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
-
 def metric_html(items, cols=4):
     grid_class = f"metric-grid-{cols}"
     cards = "".join(
@@ -335,21 +332,20 @@ def metric_html(items, cols=4):
     )
     st.markdown(f'<div class="{grid_class}">{cards}</div>', unsafe_allow_html=True)
 
-
-# ── DATA ──────────────────────────────────────────────────────────────────────
+# DATA
 if "df_clustered" not in st.session_state:
     st.markdown("""
     <div class="page-header">
-        <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR</h1>
-        <p class="page-sub">Visualisasi geospasial hasil klasterisasi HDBSCAN per provinsi di Indonesia</p>
+        <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</h1>
+        <p class="page-sub">Visualisasi geospasial hasil klasterisasi provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan algoritma HDBSCAN dan Bayesian Optimization</p>
     </div>
     """, unsafe_allow_html=True)
-    st.warning("Silakan upload dataset dan lakukan proses klasterisasi terlebih dahulu di halaman Klasterisasi!")
+    st.warning("Silakan upload dataset dan lakukan proses klasterisasi terlebih dahulu!")
     st.stop()
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
-# ── KOORDINAT CENTROID ────────────────────────────────────────────────────────
+# KOORDINAT CENTROID
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397),
     "Sumatera Utara": (2.115201, 99.544901),
@@ -384,7 +380,6 @@ CENTROIDS = {
     "Maluku": (-3.237018, 130.145440),
     "Maluku Utara": (1.570812, 127.808751),
     "Papua Barat": (-1.336248, 133.174698),
-    # Provinsi pemekaran 2022 — ditampilkan sbg marker karena belum ada polygon di GeoJSON lama
     "Papua Barat Daya": (-2.533293, 132.526978),
     "Papua": (-4.269928, 138.080353),
     "Papua Selatan": (-7.321823, 139.901685),
@@ -406,7 +401,6 @@ KODE_MAP = {
     "Sulawesi Tenggara": 74, "Gorontalo": 75, "Sulawesi Barat": 76,
     "Maluku": 81, "Maluku Utara": 82,
     "Papua Barat": 91, "Papua": 94,
-    # Pemekaran 2022 — None = tidak ada polygon di GeoJSON lama → marker saja
     "Papua Barat Daya": None,
     "Papua Selatan": None,
     "Papua Pegunungan": None,
@@ -447,9 +441,9 @@ def sort_key(lbl):
 unique_labels = sorted(df_result["label_klaster"].unique(), key=sort_key)
 
 COLOR_MAP = {
-    "Klaster 0": "#FFA500",
-    "Klaster 1": "#FF0000",
-    "Klaster 2": "#FFFF00",
+    "Klaster 0": "#E07B39",
+    "Klaster 1": "#C0392B",
+    "Klaster 2": "#D4AC0D",
     "Noise":     "#AAAAAA",
 }
 for lbl in unique_labels:
@@ -462,7 +456,7 @@ numeric_cols = (
     .tolist()
 )
 
-# ── TAMBAHKAN KOORDINAT & KODE BPS ────────────────────────────────────────────
+# KOORDINAT & KODE BPS
 df_result["lat"] = df_result["Provinsi_norm"].map(
     lambda p: CENTROIDS.get(p, (None, None))[0]
 )
@@ -471,18 +465,17 @@ df_result["lon"] = df_result["Provinsi_norm"].map(
 )
 df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
 
-# ── PAGE HEADER ───────────────────────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</h1>
     <p class="page-sub">
-        Visualisasi geospasial hasil klasterisasi HDBSCAN dan Bayesian Optimization
-        per provinsi di seluruh Indonesia
+        Visualisasi geospasial hasil klasterisasi provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan algoritma HDBSCAN dan Bayesian Optimization
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────────
+# SIDEBAR
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan Peta")
     map_style = st.selectbox(
@@ -491,52 +484,12 @@ with st.sidebar:
         index=0,
     )
     selected_hover = st.multiselect(
-        "Data yang Ditampilkan saat Hover",
+        "Data Hover",
         options=numeric_cols,
         default=numeric_cols,
     )
-    st.markdown("---")
-    st.markdown("### 🗺️ Keterangan Klaster")
-    legend_html = '<div class="legend-row">'
-    for lbl in unique_labels:
-        color = COLOR_MAP.get(lbl, "#999")
-        legend_html += (
-            f'<div class="legend-badge">'
-            f'<span class="legend-dot" style="background:{color};"></span>'
-            f'{lbl}</div>'
-        )
-    legend_html += "</div>"
-    st.markdown(legend_html, unsafe_allow_html=True)
-    st.markdown("---")
-    n_total    = len(df_result)
-    n_noise    = int((df_result["Cluster"] == -1).sum())
-    n_clustered = n_total - n_noise
-    n_klaster  = len([l for l in unique_labels if l != "Noise"])
-    st.markdown("### 📊 Ringkasan")
-    st.markdown(f"""
-    <div style="font-size:0.88rem; line-height:2; color:#1a3a5c;">
-        <b>Total Provinsi</b> : {n_total}<br>
-        <b>Tergabung Klaster</b> : {n_clustered}<br>
-        <b>Noise</b> : {n_noise}<br>
-        <b>Jumlah Klaster</b> : {n_klaster}
-    </div>
-    """, unsafe_allow_html=True)
 
-# ── RINGKASAN METRIK ──────────────────────────────────────────────────────────
-metric_html([
-    ("Total Provinsi",    n_total),
-    ("Jumlah Klaster",   n_klaster),
-    ("Terklasterisasi",  n_clustered),
-    ("Noise",            n_noise),
-], cols=4)
-
-missing_coord = df_result[df_result["lat"].isna()]["Provinsi"].tolist()
-if missing_coord:
-    st.warning(f"Provinsi tanpa koordinat: **{', '.join(missing_coord)}**")
-
-df_map = df_result.dropna(subset=["lat", "lon"]).copy()
-
-# ── LOAD GEOJSON ──────────────────────────────────────────────────────────────
+# LOAD GEOJSON
 GEOJSON_URLS = [
     "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
     "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
@@ -564,9 +517,7 @@ def load_geojson(urls):
 
 geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
-# ── INJECT POLYGON PROVINSI PEMEKARAN 2022 KE GEOJSON ────────────────────────
-# GeoJSON publik belum memiliki polygon 4 provinsi pemekaran Papua 2022.
-# Polygon approximate dibuat berdasarkan batas administratif BPS 2022.
+# INJECT POLYGON PROVINSI BARU PEMEKARAN 2022 KE GEOJSON
 PEMEKARAN_FEATURES = [
     {
         "type": "Feature",
@@ -643,27 +594,14 @@ else:
     geojson = {"type": "FeatureCollection", "features": PEMEKARAN_FEATURES}
     feature_id_key = "properties.kode"
 
-# ── PETA KLASTERISASI ─────────────────────────────────────────────────────────
-sec("1. PETA KLASTERISASI BERDASARKAN INDIKATOR DAMPAK BANJIR")
-
-# Info Papua pemekaran
-pemekaran_list = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
-pemekaran_ada  = [p for p in pemekaran_list if p in df_result["Provinsi_norm"].values]
-if pemekaran_ada:
-    st.info(
-        f"ℹ️ Provinsi pemekaran 2022 ({', '.join(pemekaran_ada)}) ditampilkan dengan polygon approximate "
-        f"berdasarkan batas administratif BPS 2022, karena GeoJSON publik belum mencakup wilayah ini."
-    )
-
-# Wrapper map dengan styling konsisten
-st.markdown('<div class="map-container"><p class="map-title">🗺️ Distribusi Klaster per Provinsi</p>', unsafe_allow_html=True)
+# PETA KLASTERISASI
+sec("1. PETA KLASTERISASI")
 
 hover_cols_cfg = {col: True for col in selected_hover}
 for c in ["kode_bps", "lat", "lon", "Provinsi_norm"]:
     hover_cols_cfg[c] = False
 
 if geojson and feature_id_key:
-    # Semua provinsi kini punya kode_bps (termasuk pemekaran 2022 yg sudah di-inject)
     df_choropleth = df_map.dropna(subset=["kode_bps"]).copy()
     df_choropleth["kode_bps"] = df_choropleth["kode_bps"].astype(int)
 
@@ -683,8 +621,6 @@ if geojson and feature_id_key:
         opacity=0.75,
         labels={"label_klaster": "Klaster"},
     )
-
-    # Semua provinsi (termasuk pemekaran 2022) sudah masuk choropleth via inject GeoJSON
 
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
@@ -706,7 +642,7 @@ if geojson and feature_id_key:
 
 else:
     # Fallback bubble map
-    st.info("GeoJSON tidak dapat dimuat — menampilkan bubble map.")
+    st.info("GeoJSON tidak dapat dimuat (menampilkan bubble map)")
     fig = go.Figure()
     for lbl in unique_labels:
         sub = df_map[df_map["label_klaster"] == lbl]
@@ -748,21 +684,9 @@ else:
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ── DISTRIBUSI KLASTER ────────────────────────────────────────────────────────
-sec("2. DISTRIBUSI KLASTER")
 
-dist_df = (
-    df_result.groupby("label_klaster")
-    .size()
-    .reset_index(name="Jumlah Provinsi")
-    .sort_values("label_klaster", key=lambda s: s.map(sort_key))
-)
-dist_df["Persentase (%)"] = (dist_df["Jumlah Provinsi"] / len(df_result) * 100).round(2)
-safe_table(dist_df, height=250)
-
-# ── DETAIL PER PROVINSI ───────────────────────────────────────────────────────
+# DETAIL PER PROVINSI
 sec("3. DETAIL INFORMASI PROVINSI")
-
 selected_prov = st.selectbox(
     "Pilih Provinsi",
     sorted(df_result["Provinsi"].unique()),
@@ -786,27 +710,8 @@ chunk_size = 3
 for i in range(0, len(items), chunk_size):
     metric_html(items[i:i+chunk_size], cols=min(chunk_size, len(items) - i))
 
-# ── RATA-RATA PER KLASTER ─────────────────────────────────────────────────────
-sec("4. RATA-RATA INDIKATOR PER KLASTER")
-
-cluster_mean = (
-    df_result.groupby("label_klaster")[numeric_cols]
-    .mean()
-    .round(3)
-    .reset_index()
-    .rename(columns={"label_klaster": "Klaster"})
-)
-safe_table(cluster_mean, height=300)
-
-# ── TABEL HASIL KLASTERISASI ──────────────────────────────────────────────────
-sec("5. TABEL HASIL KLASTERISASI")
-
-display_cols = ["Provinsi", "label_klaster"] + numeric_cols
-df_display   = df_result[display_cols].rename(columns={"label_klaster": "Klaster"})
-safe_table(df_display)
-
-# ── DOWNLOAD ──────────────────────────────────────────────────────────────────
-sec("6. UNDUH HASIL KLASTERISASI")
+# DOWNLOAD
+sec("6. DOWNLOAD HASIL KLASTERISASI")
 
 csv = (
     df_result.drop(
@@ -817,7 +722,7 @@ csv = (
     .encode("utf-8")
 )
 st.download_button(
-    label="⬇️ Download CSV Hasil Klasterisasi",
+    label="⬇️ DOWNLOAD CSV",
     data=csv,
     file_name="hasil_klasterisasi.csv",
     mime="text/csv",
