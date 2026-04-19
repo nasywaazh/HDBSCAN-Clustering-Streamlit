@@ -112,7 +112,7 @@ html, body, [data-testid="stAppViewContainer"] {
     box-shadow: 0 4px 20px rgba(21, 101, 192, 0.09);
 }
 .section-heading {
-    font-size: 1.3rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: #1565c0;
     margin: 0 0 1rem 0;
