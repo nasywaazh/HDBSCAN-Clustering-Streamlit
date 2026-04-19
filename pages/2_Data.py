@@ -248,8 +248,6 @@ uploaded_file = st.file_uploader(
     label_visibility="visible"
 )
 
-st.markdown("</div></div>", unsafe_allow_html=True)
-
 # CONTENT
 if uploaded_file is not None:
     try:
