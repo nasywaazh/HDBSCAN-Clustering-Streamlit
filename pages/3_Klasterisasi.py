@@ -55,34 +55,34 @@ html, body, [data-testid="stAppViewContainer"] {
     position: relative;
     overflow: hidden;
 }
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: -50px; right: -50px;
-    width: 220px; height: 220px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-}
-.page-header::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; left: 40%;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-}
 .page-title {
-    font-size: 3rem;
+    font-size: 2.6rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
+}
+
+.sec-divider {
+    background: linear-gradient(135deg, #e3f2fd 0%, #eff8ff 100%);
+    border: 1px solid #c2dff5;
+    border-radius: 12px;
+    padding: 0.75rem 1.2rem;
+    margin: 1.4rem 0 0.8rem 0;
+}
+.sec-divider-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1565c0;
+    margin: 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .metric-grid-4 {
@@ -105,7 +105,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -118,6 +118,17 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #1565c0;
     line-height: 1;
     margin: 0;
+}
+
+.step-lbl {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1976d2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #d4e8f8;
+    padding-bottom: 0.35rem;
+    margin: 1rem 0 0.5rem 0;
 }
 
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
@@ -143,7 +154,6 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #ffffff !important;
     box-shadow: 0 2px 8px rgba(21,101,192,0.25) !important;
 }
-
 [data-testid="stAlert"] {
     border-radius: 12px !important;
     font-size: 0.9rem !important;
@@ -158,18 +168,46 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #1565c0 !important;
     font-size: 0.88rem !important;
 }
-
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #e8f4fd; }
 ::-webkit-scrollbar-thumb { background: #90caf9; border-radius: 3px; }
-
 #MainMenu, footer, header { visibility: hidden; }
 [data-testid="stDecoration"], .stDeployButton { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── HEADER: satu-satunya unsafe_allow_html, berdiri sendiri tanpa widget di sekitarnya
+def sec(title):
+    """Section header — self-contained, aman untuk React."""
+    st.markdown(
+        f'<div class="sec-divider"><p class="sec-divider-title">{title}</p></div>',
+        unsafe_allow_html=True
+    )
+
+def step_label(text):
+    """Sub-label — pakai <p> bukan <div>, lebih aman di React."""
+    st.markdown(
+        f'<p class="step-lbl">{text}</p>',
+        unsafe_allow_html=True
+    )
+
+def metric_html(items, cols=4):
+    """Metric cards — self-contained, tidak ada widget di dalamnya."""
+    grid_class = f"metric-grid-{cols}"
+    cards = "".join(
+        f'<div class="metric-card">'
+        f'<p class="metric-label">{label}</p>'
+        f'<p class="metric-value">{value}</p>'
+        f'</div>'
+        for label, value in items
+    )
+    st.markdown(
+        f'<div class="{grid_class}">{cards}</div>',
+        unsafe_allow_html=True
+    )
+
+
+# PAGE HEADER — self-contained, tidak ada widget di sekitarnya
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION</h1>
@@ -180,25 +218,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
-# ── HELPER: semua pakai native Streamlit, nol unsafe_allow_html ──
-def sec(title):
-    st.markdown(f"### {title}")
-    
-
-def step_label(text):
-    """Sub-label menggunakan native markdown."""
-    st.markdown(f"**{text}**")
-
-
-def metric_html(items, cols=4):
-    """Metric grid menggunakan native st.columns + st.metric."""
-    columns = st.columns(cols)
-    for col, (label, value) in zip(columns, items):
-        col.metric(label=label, value=value)
-
-
-# ── SESSION STATE CHECK ──────────────────────────────────────
 if "data" not in st.session_state:
     st.warning("Silahkan upload dataset terlebih dahulu di halaman Data!")
     st.stop()
@@ -258,7 +277,7 @@ with menu[0]:
     high_vif = vif_data[vif_data["VIF"] >= 10]
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
-        st.warning(f"Variabel {variabels} memiliki nilai VIF >= 10 yang mengindikasikan adanya multikolinieritas tinggi")
+        st.warning(f"Variabel {variabels} memiliki nilai VIF >= 10 yang mengindikasikan multikolinieritas tinggi")
         multikolinieritas = True
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
@@ -459,8 +478,8 @@ with menu[1]:
 
     st.success("Parameter optimal berhasil ditemukan!")
     metric_html([
-        ("min_cluster_size", best_min_cluster_size),
-        ("min_samples",      best_min_samples),
+        ("min cluster size", best_min_cluster_size),
+        ("min samples",      best_min_samples),
         ("Best DBCV Score",  f"{best_dbcv:.4f}"),
         ("Jumlah Klaster",   n_clusters),
     ], cols=4)
