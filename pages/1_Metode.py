@@ -241,7 +241,7 @@ st.markdown("""
     <h1 class="page-title">METODE KLASTERISASI</h1>
     <p class="page-sub">
         Rangkuman metode yang digunakan dalam proses klasterisasi wilayah terdampak banjir di Indonesia,
-        yaitu algoritma HDBSCAN dan <em>Bayesian Optimization</em>
+        yaitu algoritma HDBSCAN dan Bayesian Optimization
     </p>
     <div class="badge-row">
         <div class="badge-pill">
