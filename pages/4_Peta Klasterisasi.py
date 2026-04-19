@@ -225,7 +225,7 @@ html, body, [data-testid="stAppViewContainer"] {
 
 # HELPERS
 def sec(title):
-    st.markdown(f"## {title}")
+    st.markdown(f"### {title}")
 
 def safe_table(df_show, max_rows=500, height=360):
     df_render = df_show.head(max_rows).reset_index(drop=True)
