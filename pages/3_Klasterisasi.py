@@ -20,7 +20,7 @@ from matplotlib.patches import Polygon
 import joblib
 
 st.set_page_config(
-    page_title="Klasterisasi HDBSCAN",
+    page_title="Klasterisasi HDBSCAN dan Bayesian Optimization",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -73,7 +73,7 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.05);
 }
 .page-title {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
@@ -121,7 +121,7 @@ html, body, [data-testid="stAppViewContainer"] {
     flex-shrink: 0;
 }
 
-/* SECTION DIVIDER — pengganti card header, aman untuk Streamlit */
+/* SECTION DIVIDE */
 .sec-divider {
     display: flex;
     align-items: center;
@@ -133,7 +133,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 1.4rem 0 0.8rem 0;
 }
 .sec-divider-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: #1565c0;
     margin: 0;
@@ -143,7 +143,7 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* STEP LABEL */
 .step-label {
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1976d2;
     letter-spacing: 0.08em;
@@ -181,7 +181,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -189,7 +189,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 2.1rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
@@ -273,7 +273,7 @@ def metric_html(items, cols=4):
 # PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">KLASTERISASI HDBSCAN & BAYESIAN OPTIMIZATION</h1>
+    <h1 class="page-title">KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION</h1>
     <p class="page-sub">
         Pipeline lengkap preprocessing data, pemodelan klasterisasi, dan analisis hasil klasterisasi
         menggunakan algoritma HDBSCAN Bayesian Optimization
@@ -395,8 +395,7 @@ with menu[0]:
         if kumulatif[n_components - 1] < 80:
             n_components = np.argmax(kumulatif >= 80) + 1
 
-        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1"
-                   f"dan proporsi variansi kumulatif ≥ 80% adalah **{n_components} komponen** ")
+        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria nilai eigenvalue > 1 dan proporsi variansi kumulatif ≥ 80% adalah **{n_components} komponen**")
 
         input_hash = joblib.hash(scaled_standard.values)
         if ("X_clustering" not in st.session_state or
@@ -480,7 +479,7 @@ X_clustering = st.session_state["X_clustering"].values
 with menu[1]:
 
     # 1. Bayesian Optimization
-    sec("1. PENCARIAN PARAMETET OPTIMAL — BAYESIAN OPTIMIZATION")
+    sec("1. PENCARIAN PARAMETER OPTIMAL — BAYESIAN OPTIMIZATION")
 
     with st.spinner("Mencari parameter optimal..."):
         def objective(min_cluster_size, min_samples):
