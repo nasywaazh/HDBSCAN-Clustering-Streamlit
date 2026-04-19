@@ -509,7 +509,7 @@ selected_prov = st.selectbox(
 prov_data  = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 lbl_text   = prov_data["label_klaster"]
 badge_cls  = "prov-cluster-noise" if lbl_text == "Noise" else "prov-cluster"
-is_pemekaran = prov_data["Provinsi_norm"] in pemekaran_list
+is_pemekaran = prov_data["Provinsi_norm"] in PEMEKARAN_LIST
 
 st.markdown(f"""
 <div class="prov-card">
