@@ -112,13 +112,13 @@ html, body, [data-testid="stAppViewContainer"] {
     background: #ffffff;
     border: 1px solid #d4e8f8;
     border-radius: 18px;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.2rem;
     overflow: hidden;
 }
 .section-header {
     background: linear-gradient(135deg, #e3f2fd 0%, #eff8ff 100%);
     border-bottom: 1px solid #d4e8f8;
-    padding: 1rem 1.6rem;
+    padding: 1rem 1.7rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -159,7 +159,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -238,9 +238,8 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ───────────────────────────────────────────────────
+# HELPERS
 def safe_table(df_show, max_rows=500):
-    """Render DataFrame sebagai pure HTML table — menghindari Arrow renderer."""
     df_render = df_show.head(max_rows).reset_index(drop=True)
     headers = "".join(f"<th>{col}</th>" for col in df_render.columns)
     rows = ""
@@ -274,7 +273,7 @@ def section_header(icon, title):
     """, unsafe_allow_html=True)
 
 
-# ── GUARD SESI ────────────────────────────────────────────────
+# GUARD SESSION
 def wait_for_session(max_retries=3):
     for _ in range(max_retries):
         try:
@@ -286,11 +285,11 @@ def wait_for_session(max_retries=3):
     return False
 
 if not wait_for_session():
-    st.error("Sesi belum siap, silakan refresh halaman.")
+    st.error("Sesi belum siap, silakan refresh halaman!")
     st.stop()
 
 
-# ── PAGE HEADER ───────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
@@ -306,7 +305,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ── UPLOAD SECTION ────────────────────────────────────────────
+# UPLOAD SECTION
 section_header("📂", "Upload Dataset")
 
 uploaded_file = st.file_uploader(
@@ -315,7 +314,7 @@ uploaded_file = st.file_uploader(
     label_visibility="visible"
 )
 
-# ── CONTENT ───────────────────────────────────────────────────
+# CONTENT
 if uploaded_file is not None:
     try:
         if uploaded_file.name.endswith(".csv"):
