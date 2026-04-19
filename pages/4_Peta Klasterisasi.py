@@ -43,14 +43,14 @@ html, body, [data-testid="stAppViewContainer"] {
     overflow: hidden;
 }
 .page-title {
-    font-size: 2.4rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0;
@@ -81,7 +81,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.82rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -89,7 +89,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 1.75rem;
+    font-size: 2.1rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
@@ -223,9 +223,9 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ───────────────────────────────────────────────────────────────────
+# HELPERS
 def sec(title):
-    st.markdown(f"### {title}")
+    st.markdown(f"## {title}")
 
 def safe_table(df_show, max_rows=500, height=360):
     df_render = df_show.head(max_rows).reset_index(drop=True)
@@ -245,7 +245,7 @@ def safe_table(df_show, max_rows=500, height=360):
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
 
-# ── DATA ──────────────────────────────────────────────────────────────────────
+# DATA
 if "df_clustered" not in st.session_state:
     st.markdown("""
     <div class="page-header">
@@ -259,7 +259,7 @@ if "df_clustered" not in st.session_state:
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
-# ── KOORDINAT & MAPPING ───────────────────────────────────────────────────────
+# KOORDINAT & MAPPING
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397), "Sumatera Utara": (2.115201, 99.544901),
     "Sumatera Barat": (-0.739610, 100.800018), "Riau": (0.293416, 101.706939),
@@ -356,7 +356,7 @@ numeric_cols = (
     .tolist()
 )
 
-# ── PAGE HEADER ───────────────────────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</h1>
@@ -367,7 +367,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────────
+# SIDEBAR
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan Peta")
     map_style = st.selectbox(
@@ -381,7 +381,7 @@ with st.sidebar:
         default=numeric_cols,
     )
 
-# ── LOAD GEOJSON ──────────────────────────────────────────────────────────────
+# LOAD GEOJSON
 GEOJSON_URLS = [
     "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
     "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
@@ -406,7 +406,7 @@ def load_geojson(urls):
 
 geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
-# ── INJECT POLYGON PEMEKARAN 2022 ─────────────────────────────────────────────
+# INJECT POLYGON PEMEKARAN 2022
 PEMEKARAN_FEATURES = [
     {"type": "Feature", "properties": {"kode": 92, "Propinsi": "Papua Barat Daya"},
      "geometry": {"type": "Polygon", "coordinates": [[[129.0,-2.0],[132.5,-2.0],[132.5,0.5],[131.0,1.5],[129.5,1.0],[129.0,0.0],[129.0,-2.0]]]}},
@@ -429,8 +429,8 @@ else:
 
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
-# ── PETA ──────────────────────────────────────────────────────────────────────
-sec("1. PETA KLASTERISASI BERDASARKAN INDIKATOR DAMPAK BANJIR")
+# PETA KLASTERISASI
+sec("1. PETA KLASTERISASI")
 
 hover_cols_cfg = {col: True for col in selected_hover}
 for c in ["kode_bps", "lat", "lon", "Provinsi_norm"]:
@@ -470,13 +470,8 @@ fig.update_layout(
 )
 st.plotly_chart(fig, use_container_width=True)
 
-# ── METRIK 4 KLASTER DI BAWAH PETA ───────────────────────────────────────────
-sec("2. JUMLAH PROVINSI PER KLASTER")
-
-# Hitung jumlah per klaster (termasuk noise)
+# METRIK 4 KLASTER
 klaster_counts = df_result.groupby("Cluster").size().to_dict()
-
-# Bangun kartu dinamis berdasarkan unique_labels
 card_configs = []
 for lbl in unique_labels:
     cluster_num = -1 if lbl == "Noise" else int(lbl.split()[-1])
@@ -500,9 +495,8 @@ for label_text, count, css_class in card_configs:
 cards_html += "</div>"
 st.markdown(cards_html, unsafe_allow_html=True)
 
-# ── DETAIL PROVINSI ───────────────────────────────────────────────────────────
-sec("3. DETAIL INFORMASI PROVINSI")
-
+# DETAIL PROVINSI
+sec("2. DETAIL INFORMASI PROVINSI")
 selected_prov = st.selectbox(
     "Pilih Provinsi untuk melihat detail",
     sorted(df_result["Provinsi"].unique()),
@@ -527,7 +521,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Metrik indikator — grid 3 kolom, konsisten dengan halaman Klasterisasi
+# Metrik indikator
 chunk_size = 3
 items = []
 for col in numeric_cols:
@@ -550,8 +544,8 @@ for i in range(0, len(items), chunk_size):
     )
     st.markdown(f'''<div class="metric-grid-{n}">{cards}</div>''', unsafe_allow_html=True)
 
-# ── DOWNLOAD ──────────────────────────────────────────────────────────────────
-sec("4. UNDUH HASIL KLASTERISASI")
+# DOWNLOAD HASIL
+sec("4. DOWNLOAD HASIL KLASTERISASI")
 
 csv = (
     df_result.drop(
@@ -562,7 +556,7 @@ csv = (
     .encode("utf-8")
 )
 st.download_button(
-    label="⬇️ DOWNLOAD CSV HASIL KLASTERISASI",
+    label="⬇️ DOWNLOAD CSV",
     data=csv,
     file_name="hasil_klasterisasi.csv",
     mime="text/csv",
