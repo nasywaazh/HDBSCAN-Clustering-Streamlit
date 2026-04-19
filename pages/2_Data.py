@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import time
 
 st.set_page_config(
     page_title="Data Indikator",
@@ -158,7 +159,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1.2rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -181,32 +182,50 @@ html, body, [data-testid="stAppViewContainer"] {
     padding: 0.5rem;
     transition: border-color 0.2s;
 }
-[data-testid="stFileUploader"]:hover {
-    border-color: #1976d2;
-}
+[data-testid="stFileUploader"]:hover { border-color: #1976d2; }
 [data-testid="stFileUploader"] label {
     color: #1565c0 !important;
     font-weight: 600 !important;
     font-size: 0.92rem !important;
 }
 
-/* DATAFRAME */
-[data-testid="stDataFrame"] {
+/* SAFE TABLE */
+.safe-table-wrap {
+    overflow-x: auto;
     border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #d4e8f8 !important;
+    border: 1px solid #d4e8f8;
+    margin-bottom: 1rem;
 }
+.safe-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #ffffff;
+}
+.safe-table-wrap thead tr {
+    background: linear-gradient(135deg, #e3f2fd, #eff8ff);
+}
+.safe-table-wrap th {
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    font-weight: 700;
+    color: #1565c0;
+    border-bottom: 1px solid #d4e8f8;
+    white-space: nowrap;
+}
+.safe-table-wrap td {
+    padding: 0.5rem 0.9rem;
+    color: #1a3a5c;
+    border-bottom: 1px solid #eaf4fc;
+}
+.safe-table-wrap tr:last-child td { border-bottom: none; }
+.safe-table-wrap tr:hover td { background: #f0f9ff; }
 
-/* ALERT BOXES */
 [data-testid="stAlert"] {
     border-radius: 12px !important;
     font-size: 0.9rem !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
-}
-
-/* SUCCESS / INFO / ERROR */
-div[data-baseweb="notification"] {
-    border-radius: 12px !important;
 }
 
 ::-webkit-scrollbar { width: 5px; }
@@ -218,12 +237,66 @@ div[data-baseweb="notification"] {
 </style>
 """, unsafe_allow_html=True)
 
-# PAGE HEADER
+
+# ── HELPERS ───────────────────────────────────────────────────
+def safe_table(df_show, max_rows=500):
+    """Render DataFrame sebagai pure HTML table — menghindari Arrow renderer."""
+    df_render = df_show.head(max_rows).reset_index(drop=True)
+    headers = "".join(f"<th>{col}</th>" for col in df_render.columns)
+    rows = ""
+    for _, row in df_render.iterrows():
+        cells = "".join(
+            f"<td>{round(val, 4) if isinstance(val, float) else val}</td>"
+            for val in row.values
+        )
+        rows += f"<tr>{cells}</tr>"
+    html = (
+        '<div class="safe-table-wrap">'
+        "<table>"
+        f"<thead><tr>{headers}</tr></thead>"
+        f"<tbody>{rows}</tbody>"
+        "</table>"
+        "</div>"
+    )
+    st.markdown(html, unsafe_allow_html=True)
+    if len(df_show) > max_rows:
+        st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
+
+
+def section_header(icon, title):
+    st.markdown(f"""
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-icon">{icon}</div>
+            <h2 class="section-title">{title}</h2>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ── GUARD SESI ────────────────────────────────────────────────
+def wait_for_session(max_retries=3):
+    for _ in range(max_retries):
+        try:
+            _ = st.session_state.get("_session_ready", False)
+            st.session_state["_session_ready"] = True
+            return True
+        except Exception:
+            time.sleep(0.3)
+    return False
+
+if not wait_for_session():
+    st.error("Sesi belum siap, silakan refresh halaman.")
+    st.stop()
+
+
+# ── PAGE HEADER ───────────────────────────────────────────────
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">DATA INDIKATOR DAMPAK BANJIR</h1>
     <p class="page-sub">
-        Pengguna mengunggah dataset dengan format file CSV atau Excel terlebih dahulu sebelum menjalankan proses klasterisasi
+        Pengguna mengunggah dataset dengan format file CSV atau Excel terlebih dahulu
+        sebelum menjalankan proses klasterisasi
     </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
@@ -232,15 +305,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# UPLOAD SECTION
-st.markdown("""
-<div class="section-card">
-    <div class="section-header">
-        <div class="section-icon">📂</div>
-        <h2 class="section-title">Upload Dataset</h2>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+
+# ── UPLOAD SECTION ────────────────────────────────────────────
+section_header("📂", "Upload Dataset")
 
 uploaded_file = st.file_uploader(
     "Format file CSV atau Excel",
@@ -248,7 +315,7 @@ uploaded_file = st.file_uploader(
     label_visibility="visible"
 )
 
-# CONTENT
+# ── CONTENT ───────────────────────────────────────────────────
 if uploaded_file is not None:
     try:
         if uploaded_file.name.endswith(".csv"):
@@ -256,22 +323,15 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
 
-        st.success(f"File telah berhasil diupload!")
+        st.success("File telah berhasil diupload!")
 
         # INFORMASI DATA
-        st.markdown("""
-        <div class="section-card">
-            <div class="section-header">
-                <div class="section-icon">🔍</div>
-                <h2 class="section-title">Informasi Dataset</h2>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        section_header("🔍", "Informasi Dataset")
 
-        n_obs      = df.shape[0]
-        n_var      = df.shape[1]
-        n_missing  = int(df.isnull().sum().sum())
-        n_dup      = int(df.duplicated().sum())
+        n_obs     = df.shape[0]
+        n_var     = df.shape[1]
+        n_missing = int(df.isnull().sum().sum())
+        n_dup     = int(df.duplicated().sum())
 
         st.markdown(f"""
         <div class="metric-grid">
@@ -284,11 +344,11 @@ if uploaded_file is not None:
                 <p class="metric-value">{n_var:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Jumlah Missing Values</p>
+                <p class="metric-label">Missing Values</p>
                 <p class="metric-value">{n_missing:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Jumlah Data Duplikat</p>
+                <p class="metric-label">Data Duplikat</p>
                 <p class="metric-value">{n_dup:,}</p>
             </div>
         </div>
@@ -297,32 +357,15 @@ if uploaded_file is not None:
         st.markdown("<div style='margin-bottom:1.6rem;'></div>", unsafe_allow_html=True)
 
         # PREVIEW DATA
-        st.markdown("""
-        <div class="section-card">
-            <div class="section-header">
-                <div class="section-icon">🔍</div>
-                <h2 class="section-title">Preview Dataset</h2>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.dataframe(df, use_container_width=True)
+        section_header("🔍", "Preview Dataset")
+        safe_table(df)
 
         # TIPE DATA
-        st.markdown("""
-        <div class="section-card">
-            <div class="section-header">
-                <div class="section-icon">🔍</div>
-                <h2 class="section-title">Tipe Dataset</h2>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
+        section_header("🔍", "Tipe Dataset")
         dtype_df = df.dtypes.reset_index()
         dtype_df.columns = ["Nama Variabel", "Tipe Data"]
         dtype_df["Tipe Data"] = dtype_df["Tipe Data"].astype(str)
-
-        st.dataframe(dtype_df, use_container_width=True, hide_index=True)
+        safe_table(dtype_df)
 
         # Simpan ke session state
         st.session_state["data"] = df
