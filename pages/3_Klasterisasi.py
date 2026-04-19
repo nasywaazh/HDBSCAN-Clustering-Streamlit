@@ -73,14 +73,14 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.05);
 }
 .page-title {
-    font-size: 2.4rem;
+    font-size: 2.8rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.25;
     margin: 0 0 0.6rem 0;
 }
 .page-sub {
-    font-size: 0.92rem;
+    font-size: 1.1rem;
     color: #bbdefb;
     line-height: 1.7;
     margin: 0 0 1.4rem 0;
@@ -132,18 +132,8 @@ html, body, [data-testid="stAppViewContainer"] {
     padding: 0.75rem 1.2rem;
     margin: 1.4rem 0 0.8rem 0;
 }
-.sec-divider-icon {
-    width: 32px; height: 32px;
-    border-radius: 9px;
-    background: linear-gradient(135deg, #1565c0, #0288d1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    flex-shrink: 0;
-}
 .sec-divider-title {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
     margin: 0;
@@ -191,7 +181,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.72rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -199,7 +189,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
@@ -282,42 +272,34 @@ def metric_html(items, cols=4):
     )
     st.markdown(f'<div class="{grid_class}">{cards}</div>', unsafe_allow_html=True)
 
-
-# ── PAGE HEADER ───────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
-    <h1 class="page-title">KLASTERISASI HDBSCAN<br>&amp; BAYESIAN OPTIMIZATION</h1>
+    <h1 class="page-title">KLASTERISASI HDBSCAN & BAYESIAN OPTIMIZATION</h1>
     <p class="page-sub">
-        Pipeline lengkap preprocessing data, pemodelan klasterisasi, dan analisis hasil
-        menggunakan algoritma HDBSCAN dengan optimasi hyperparameter Bayesian.
+        Pipeline lengkap preprocessing data, pemodelan klasterisasi, dan analisis hasil klasterisasi
+        menggunakan algoritma HDBSCAN Bayesian Optimization
     </p>
-    <div class="badge-row">
-        <div class="badge-pill"><span class="badge-icon">⚙️</span> Preprocessing</div>
-        <div class="badge-pill"><span class="badge-icon">🔵</span> Pemodelan</div>
-        <div class="badge-pill"><span class="badge-icon">📊</span> Hasil Klasterisasi</div>
-    </div>
 </div>
 """, unsafe_allow_html=True)
 
 if "data" not in st.session_state:
-    st.warning("⚠️ Silakan upload dataset terlebih dahulu di halaman Data!")
+    st.warning("Silahkan upload dataset terlebih dahulu di halaman Data!")
     st.stop()
 
 df = st.session_state["data"]
 
 menu = st.tabs([
-    "⚙️  PREPROCESSING DATA",
-    "🔵  PEMODELAN KLASTERISASI",
-    "📊  HASIL KLASTERISASI"
+    "PREPROCESSING DATA",
+    "PEMODELAN KLASTERISASI",
+    "HASIL KLASTERISASI"
 ])
 
-# ════════════════════════════════════════════════════════════════
-# TAB 1 — PREPROCESSING
-# ════════════════════════════════════════════════════════════════
+# TAB 1 — PREPROCESSING DATA
 with menu[0]:
 
-    # 1. Standarisasi
-    sec("📐", "1. Standarisasi Data")
+    # 1. Standarisasi Data
+    sec("1. STANDARISASI DATA")
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
     scaled_standard = pd.DataFrame(
@@ -327,7 +309,7 @@ with menu[0]:
     st.dataframe(scaled_standard, use_container_width=True)
 
     # 2. Uji Statistik
-    sec("🧪", "2. Uji Statistik")
+    sec("2. UJI STATISTIK")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
 
@@ -360,14 +342,14 @@ with menu[0]:
     high_vif = vif_data[vif_data["VIF"] >= 10]
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
-        st.warning(f"⚠️ Variabel {variabels} memiliki nilai VIF ≥ 10 — mengindikasikan multikolinieritas tinggi.")
+        st.warning(f"⚠️ Variabel {variabels} memiliki nilai VIF ≥ 10 yang mengindikasikan adanya multikolinieritas tinggi")
         multikolinieritas = True
     else:
         st.success("✅ Tidak terdapat multikolinieritas tinggi (VIF < 10)")
         multikolinieritas = False
 
     # 3. Deteksi Outlier
-    sec("🔎", "3. Deteksi Outlier — Local Outlier Factor")
+    sec("3. DETEKSI OUTLIER — LOCAL OUTLIER FACTOR")
     lof = LocalOutlierFactor(n_neighbors=20)
     lof.fit_predict(scaled_standard)
     lof_scores = -lof.negative_outlier_factor_
@@ -395,7 +377,7 @@ with menu[0]:
     plt.close(fig)
 
     # 4. Reduksi Data
-    sec("📉", "4. Reduksi Data — Principal Component Analysis")
+    sec("4. REDUKSI DATA — PRINCIPAL COMPONENT ANALYSIS")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
@@ -415,8 +397,8 @@ with menu[0]:
         if kumulatif[n_components - 1] < 80:
             n_components = np.argmax(kumulatif >= 80) + 1
 
-        st.success(f"✅ Jumlah komponen yang digunakan: **{n_components} komponen** "
-                   f"(eigenvalue > 1 & proporsi kumulatif ≥ 80%)")
+        st.success(f"Jumlah komponen yang digunakan berdasarkan kriteria eigenvalue > 1"
+                   f"dan proporsi variansi kumulatif ≥ 80% adalah **{n_components} komponen** ")
 
         input_hash = joblib.hash(scaled_standard.values)
         if ("X_clustering" not in st.session_state or
@@ -437,14 +419,12 @@ with menu[0]:
         step_label("Hasil Reduksi Data dengan PCA")
         st.dataframe(pca_result, use_container_width=True)
     else:
-        st.info("ℹ️ PCA tidak diperlukan (tidak memenuhi syarat multikolinieritas atau korelasi).")
+        st.info("ℹ️ PCA tidak diperlukan (tidak memenuhi syarat multikolinieritas atau korelasi)")
         st.session_state["X_clustering"] = scaled_standard
         st.session_state["X_plot"]       = scaled_standard
 
 
-# ════════════════════════════════════════════════════════════════
-# DCSI HELPERS
-# ════════════════════════════════════════════════════════════════
+# RUMUS DCSI
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
     n = len(X_cluster)
     if n < 2: return None
@@ -497,13 +477,12 @@ if "X_clustering" not in st.session_state:
 
 X_clustering = st.session_state["X_clustering"].values
 
-# ════════════════════════════════════════════════════════════════
+
 # TAB 2 — PEMODELAN
-# ════════════════════════════════════════════════════════════════
 with menu[1]:
 
     # 1. Bayesian Optimization
-    sec("🎯", "1. Pencarian Parameter Optimal — Bayesian Optimization")
+    sec("1. PENCARIAN PARAMETET OPTIMAL — BAYESIAN OPTIMIZATION")
 
     with st.spinner("Mencari parameter optimal..."):
         def objective(min_cluster_size, min_samples):
@@ -558,7 +537,7 @@ with menu[1]:
         best_labels = best_cl.fit_predict(X_clustering)
         n_clusters  = len(set(best_labels)) - (1 if -1 in best_labels else 0)
 
-    st.success("✅ Parameter optimal berhasil ditemukan!")
+    st.success("Parameter optimal berhasil ditemukan!")
     metric_html([
         ("min_cluster_size", best_min_cluster_size),
         ("min_samples",      best_min_samples),
@@ -595,7 +574,7 @@ with menu[1]:
             plt.close(fig_)
 
     # 2. Scatter Plot
-    sec("🗺️", "2. Visualisasi Scatter Plot Klaster")
+    sec("2. VISUALISASI SCATTER PLOT")
 
     hdbscan_model = hdbscan.HDBSCAN(min_cluster_size=best_min_cluster_size,
                                      min_samples=best_min_samples, prediction_data=True)
@@ -648,7 +627,7 @@ with menu[1]:
     plt.close(fig)
 
     # 3. Evaluasi
-    sec("📋", "3. Evaluasi Model HDBSCAN")
+    sec("3. EVALUASI MODEL")
     dbcv_score = validity_index(X_clustering, cluster_labels)
     dcsi_score = dcsi_index(X_clustering, cluster_labels, best_min_samples)
 
@@ -659,17 +638,16 @@ with menu[1]:
     st.caption("Kriteria: DBCV Score > 0.5 dan DCSI Score > 0.5")
 
     if dcsi_score is not None:
-        if   dbcv_score > 0.5 and dcsi_score > 0.5:  st.success("✅ Kualitas klaster baik — stabilitas dan pemisahan antarklaster jelas.")
-        elif dbcv_score > 0.5:                         st.warning("⚠️ Cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI.")
-        elif dcsi_score > 0.5:                         st.warning("⚠️ Cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV.")
-        else:                                           st.error("❌ Kualitas klaster buruk berdasarkan DBCV dan DCSI.")
+        if   dbcv_score > 0.5 and dcsi_score > 0.5:  st.success("Kualitas klaster sudah baik dengan stabilitas dan pemisahan yang jelas antarklaster")
+        elif dbcv_score > 0.5:                         st.warning("Kualitas klaster cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI")
+        elif dcsi_score > 0.5:                         st.warning("Kualitas klaster cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV")
+        else:                                           st.error("Kualitas klaster yang buruk berdasarkan DBCV dan DCSI")
     else:
-        st.warning("⚠️ DCSI tidak dapat dihitung.")
-        st.success("✅ Kualitas klaster baik berdasarkan DBCV.") if dbcv_score > 0.5 else st.error("❌ Kualitas klaster kurang optimal.")
+        st.warning("⚠️ DCSI tidak dapat dihitung")
+        st.success("Kualitas klaster sudah baik berdasarkan DBCV") if dbcv_score > 0.5 else st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
 
-# ════════════════════════════════════════════════════════════════
+
 # TAB 3 — HASIL KLASTERISASI
-# ════════════════════════════════════════════════════════════════
 with menu[2]:
     if "cluster_labels" not in st.session_state:
         st.warning("⚠️ Silakan jalankan proses klasterisasi terlebih dahulu!")
@@ -680,8 +658,8 @@ with menu[2]:
     df_result["Cluster"] = cluster_labels
     numeric_cols   = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
 
-    # 1. Hasil
-    sec("📄", "1. Hasil Klasterisasi")
+    # 1. Hasil Klasterisasi
+    sec("1. HASIL KLASTERISASI")
     st.dataframe(df_result, use_container_width=True)
 
     step_label("Nilai Rata-rata per Klaster")
@@ -693,7 +671,7 @@ with menu[2]:
     st.dataframe(cluster_pct, use_container_width=True)
 
     # 2. Karakteristik
-    sec("🏷️", "2. Karakteristik Setiap Klaster")
+    sec("2. KARAKTERISTIK KLASTER")
     all_clusters     = sorted(df_result["Cluster"].unique())
     selected_cluster = st.selectbox(
         "Pilih Klaster",
@@ -710,7 +688,7 @@ with menu[2]:
 
     step_label("Karakteristik")
     if selected_cluster == -1:
-        st.warning("⚠️ Klaster -1 merupakan noise.")
+        st.warning("Klaster -1 merupakan noise (tidak tergabung dalam klaster utama manapun)")
         mean_noise = df_cluster[numeric_cols].mean().round(3).to_frame("Nilai Rata-rata").T
         if not cluster_mean_all.empty:
             pct_noise = (df_cluster[numeric_cols].mean()
