@@ -191,6 +191,8 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* SAFE TABLE */
 .safe-table-wrap {
+    max-height: 400px;
+    overflow-y: auto;
     overflow-x: auto;
     border-radius: 10px;
     border: 1px solid #d4e8f8;
