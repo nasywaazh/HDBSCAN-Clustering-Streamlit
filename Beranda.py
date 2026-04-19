@@ -177,7 +177,7 @@ st.markdown("""
     <h1 class="hero-title">APLIKASI KLASTERISASI WILAYAH<br>TERDAMPAK BANJIR DI INDONESIA</h1>
     <p class="hero-sub">
         Aplikasi ini digunakan untuk mengelompokkan provinsi di Indonesia berdasarkan indikator dampak banjir menggunakan metode
-        HDBSCAN (<em>Hierarchical Density-Based Spatial Clustering of Applications with Noise</em>) dan <em>Bayesian Optimization</em>
+        HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) dan Bayesian Optimization
     </p>
     <div class="pills">
         <span class="pill">🔵 HDBSCAN</span>
