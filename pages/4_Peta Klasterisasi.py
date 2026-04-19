@@ -500,33 +500,58 @@ for label_text, count, css_class in card_configs:
 cards_html += "</div>"
 st.markdown(cards_html, unsafe_allow_html=True)
 
-# DETAIL PER PROVINSI
+# ── DETAIL PROVINSI ───────────────────────────────────────────────────────────
 sec("3. DETAIL INFORMASI PROVINSI")
+
 selected_prov = st.selectbox(
-    "Pilih Provinsi",
+    "Pilih Provinsi untuk melihat detail",
     sorted(df_result["Provinsi"].unique()),
 )
-prov_data  = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-lbl_text   = prov_data["label_klaster"]
-badge_cls  = "prov-cluster-noise" if lbl_text == "Noise" else "prov-cluster"
-is_pemekaran = prov_data["Provinsi_norm"] in PEMEKARAN_LIST
+
+prov_row      = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
+lbl_text      = prov_row["label_klaster"]
+is_noise      = lbl_text == "Noise"
+is_pemekaran  = prov_row["Provinsi_norm"] in PEMEKARAN_LIST
+badge_cls     = "badge badge-noise" if is_noise else "badge badge-klaster"
+
+pemekaran_badge = (
+    '&nbsp;<span class="badge badge-pemekaran">★ Pemekaran 2022</span>'
+    if is_pemekaran else ""
+)
 
 st.markdown(f"""
-<div class="prov-card">
+<div class="prov-header">
     <p class="prov-name">{selected_prov}</p>
     <span class="{badge_cls}">{lbl_text}</span>
-    {"&nbsp;&nbsp;<span style='font-size:0.78rem;color:#ef6c00;font-weight:700;'>★ Provinsi Pemekaran 2022</span>" if is_pemekaran else ""}
+    {pemekaran_badge}
 </div>
 """, unsafe_allow_html=True)
 
-# Grid metrik provinsi
-items = [(col.replace("_", " "), f"{prov_data[col]:,.0f}") for col in numeric_cols]
+# Metrik indikator — grid 3 kolom, konsisten dengan halaman Klasterisasi
 chunk_size = 3
-for i in range(0, len(items), chunk_size):
-    metric_html(items[i:i+chunk_size], cols=min(chunk_size, len(items) - i))
+items = []
+for col in numeric_cols:
+    val = prov_row[col]
+    if isinstance(val, float):
+        val_str = f"{val:,.2f}" if val != int(val) else f"{int(val):,}"
+    else:
+        val_str = f"{int(val):,}"
+    items.append((col.replace("_", " "), val_str))
 
-# DOWNLOAD
-sec("6. DOWNLOAD HASIL KLASTERISASI")
+for i in range(0, len(items), chunk_size):
+    chunk = items[i:i+chunk_size]
+    n = len(chunk)
+    cards = "".join(
+        f'''<div class="metric-card">
+            <p class="metric-label">{label}</p>
+            <p class="metric-value" style="font-size:1.3rem;">{value}</p>
+        </div>'''
+        for label, value in chunk
+    )
+    st.markdown(f'''<div class="metric-grid-{n}">{cards}</div>''', unsafe_allow_html=True)
+
+# ── DOWNLOAD ──────────────────────────────────────────────────────────────────
+sec("4. UNDUH HASIL KLASTERISASI")
 
 csv = (
     df_result.drop(
@@ -537,7 +562,7 @@ csv = (
     .encode("utf-8")
 )
 st.download_button(
-    label="⬇️ DOWNLOAD CSV",
+    label="⬇️ DOWNLOAD CSV HASIL KLASTERISASI",
     data=csv,
     file_name="hasil_klasterisasi.csv",
     mime="text/csv",
