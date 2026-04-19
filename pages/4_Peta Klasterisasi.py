@@ -596,6 +596,8 @@ else:
 
 # PETA KLASTERISASI
 sec("1. PETA KLASTERISASI")
+pemekaran_list = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
+pemekaran_ada  = [p for p in pemekaran_list if p in df_result["Provinsi_norm"].values]
 
 hover_cols_cfg = {col: True for col in selected_hover}
 for c in ["kode_bps", "lat", "lon", "Provinsi_norm"]:
