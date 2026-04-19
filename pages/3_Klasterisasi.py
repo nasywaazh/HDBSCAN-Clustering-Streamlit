@@ -584,7 +584,7 @@ with menu[0]:
     safe_table(vif_data.round(4))
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
-        st.warning(f"Variabel {variabels} memiliki nilai VIF ≥ 10 yang mengindikasikan multikolinieritas tinggi")
+        st.warning(f"Variabel {variabels} memiliki nilai VIF ≥ 10 yang mengindikasikan adanya multikolinieritas tinggi")
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
 
