@@ -329,7 +329,7 @@ with menu[0]:
             st.warning("⚠️ Tidak terdapat korelasi signifikan antarvariabel")
             korelasi_ok = False
 
-    step_label("Uji Multikolinieritas — Variance Inflation Factor (VIF)")
+    step_label("Uji Multikolinieritas (Variance Inflation Factor)")
     X_vif = scaled_standard.copy()
     vif_data = pd.DataFrame({
         "Variabel": X_vif.columns,
