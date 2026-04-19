@@ -522,9 +522,12 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Metrik indikator
+EXCLUDE_COLS = {"lat", "lon", "kode_bps"} 
 chunk_size = 3
 items = []
 for col in numeric_cols:
+    if col in EXCLUDE_COLS:
+        continue
     val = prov_row[col]
     if isinstance(val, float):
         val_str = f"{val:,.2f}" if val != int(val) else f"{int(val):,}"
