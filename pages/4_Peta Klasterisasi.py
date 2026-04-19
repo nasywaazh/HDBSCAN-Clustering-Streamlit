@@ -564,6 +564,85 @@ def load_geojson(urls):
 
 geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
 
+# ── INJECT POLYGON PROVINSI PEMEKARAN 2022 KE GEOJSON ────────────────────────
+# GeoJSON publik belum memiliki polygon 4 provinsi pemekaran Papua 2022.
+# Polygon approximate dibuat berdasarkan batas administratif BPS 2022.
+PEMEKARAN_FEATURES = [
+    {
+        "type": "Feature",
+        "properties": {"kode": 92, "Propinsi": "Papua Barat Daya"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [129.0, -2.0], [132.5, -2.0], [132.5,  0.5],
+                [131.0,  1.5], [129.5,  1.0], [129.0,  0.0],
+                [129.0, -2.0]
+            ]]
+        }
+    },
+    {
+        "type": "Feature",
+        "properties": {"kode": 93, "Propinsi": "Papua Pegunungan"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [137.5, -3.0], [141.0, -3.0], [141.0, -5.5],
+                [139.5, -5.5], [138.0, -5.0], [137.0, -4.5],
+                [137.0, -3.5], [137.5, -3.0]
+            ]]
+        }
+    },
+    {
+        "type": "Feature",
+        "properties": {"kode": 95, "Propinsi": "Papua Selatan"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [138.5, -5.5], [141.0, -5.5], [141.0, -8.5],
+                [139.0, -8.5], [137.5, -7.5], [137.5, -6.0],
+                [138.5, -5.5]
+            ]]
+        }
+    },
+    {
+        "type": "Feature",
+        "properties": {"kode": 96, "Propinsi": "Papua Tengah"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [134.5, -2.5], [137.5, -2.5], [137.5, -4.5],
+                [136.0, -5.0], [134.5, -4.5], [133.5, -3.5],
+                [134.5, -2.5]
+            ]]
+        }
+    },
+]
+
+# Update KODE_MAP agar 4 provinsi pemekaran punya kode numerik
+KODE_MAP.update({
+    "Papua Barat Daya": 92,
+    "Papua Selatan":    95,
+    "Papua Pegunungan": 93,
+    "Papua Tengah":     96,
+})
+
+# Tambahkan kode_bps yang sudah diupdate ke df_result & df_map
+df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
+df_map = df_result.dropna(subset=["lat", "lon"]).copy()
+
+# Inject features ke GeoJSON yang sudah dimuat
+if geojson is not None:
+    # Deteksi key yang dipakai (misal "properties.kode")
+    _id_key = feature_id_key.replace("properties.", "") if feature_id_key else "kode"
+    # Pastikan setiap feature pemekaran pakai key yang sama
+    for feat in PEMEKARAN_FEATURES:
+        feat["properties"][_id_key] = feat["properties"]["kode"]
+    geojson["features"].extend(PEMEKARAN_FEATURES)
+else:
+    # Jika GeoJSON gagal dimuat, buat GeoJSON minimal hanya dari pemekaran
+    geojson = {"type": "FeatureCollection", "features": PEMEKARAN_FEATURES}
+    feature_id_key = "properties.kode"
+
 # ── PETA KLASTERISASI ─────────────────────────────────────────────────────────
 sec("1. PETA KLASTERISASI BERDASARKAN INDIKATOR DAMPAK BANJIR")
 
@@ -572,9 +651,8 @@ pemekaran_list = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papu
 pemekaran_ada  = [p for p in pemekaran_list if p in df_result["Provinsi_norm"].values]
 if pemekaran_ada:
     st.info(
-        f"ℹ️ Provinsi pemekaran 2022 ({', '.join(pemekaran_ada)}) ditampilkan sebagai **marker titik** "
-        f"karena belum tersedia data poligon wilayah pada GeoJSON yang digunakan. "
-        f"Warna marker tetap mewakili klaster masing-masing provinsi."
+        f"ℹ️ Provinsi pemekaran 2022 ({', '.join(pemekaran_ada)}) ditampilkan dengan polygon approximate "
+        f"berdasarkan batas administratif BPS 2022, karena GeoJSON publik belum mencakup wilayah ini."
     )
 
 # Wrapper map dengan styling konsisten
@@ -585,9 +663,9 @@ for c in ["kode_bps", "lat", "lon", "Provinsi_norm"]:
     hover_cols_cfg[c] = False
 
 if geojson and feature_id_key:
+    # Semua provinsi kini punya kode_bps (termasuk pemekaran 2022 yg sudah di-inject)
     df_choropleth = df_map.dropna(subset=["kode_bps"]).copy()
     df_choropleth["kode_bps"] = df_choropleth["kode_bps"].astype(int)
-    df_marker = df_map[df_map["kode_bps"].isna()].copy()
 
     fig = px.choropleth_mapbox(
         df_choropleth,
@@ -606,49 +684,7 @@ if geojson and feature_id_key:
         labels={"label_klaster": "Klaster"},
     )
 
-    # Overlay marker untuk provinsi pemekaran (kode_bps = None)
-    if not df_marker.empty:
-        existing_labels = set(df_choropleth["label_klaster"].unique())
-        for lbl in df_marker["label_klaster"].unique():
-            sub = df_marker[df_marker["label_klaster"] == lbl]
-            fill_color = COLOR_MAP.get(lbl, "#999999")
-            customdata = (
-                sub[selected_hover].values if selected_hover
-                else np.empty((len(sub), 0))
-            )
-            hover_lines = ["<b>%{text}</b>", "⚠️ Provinsi Pemekaran 2022"] + [
-                f"{col}: %{{customdata[{i}]}}" for i, col in enumerate(selected_hover)
-            ]
-            # Layer border putih agar marker kontras di atas peta
-            fig.add_trace(
-                go.Scattermapbox(
-                    lat=sub["lat"],
-                    lon=sub["lon"],
-                    mode="markers",
-                    marker=dict(size=36, color="#ffffff", opacity=1.0),
-                    hoverinfo="skip",
-                    showlegend=False,
-                    legendgroup=lbl,
-                )
-            )
-            # Layer warna klaster
-            fig.add_trace(
-                go.Scattermapbox(
-                    lat=sub["lat"],
-                    lon=sub["lon"],
-                    mode="markers+text",
-                    marker=dict(size=28, color=fill_color, opacity=1.0),
-                    text=sub["Provinsi"],
-                    textposition="top center",
-                    textfont=dict(size=10, color="#1a3a5c"),
-                    customdata=customdata,
-                    hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
-                    name=lbl,
-                    legendgroup=lbl,
-                    showlegend=(lbl not in existing_labels),
-                )
-            )
-            existing_labels.add(lbl)
+    # Semua provinsi (termasuk pemekaran 2022) sudah masuk choropleth via inject GeoJSON
 
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
