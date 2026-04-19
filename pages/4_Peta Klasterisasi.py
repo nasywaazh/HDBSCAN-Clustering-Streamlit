@@ -134,6 +134,7 @@ hr {
     border-radius: 16px;
     padding: 1.2rem 1.4rem;
     margin-bottom: 1.2rem;
+    box-shadow: 0 2px 12px rgba(21,101,192,0.07);
 }
 
 [data-testid="stSidebar"] h1,
@@ -149,6 +150,34 @@ hr {
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
     margin-bottom: 1rem !important;
+}
+
+/* Legend chips di bawah peta */
+.legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0.8rem 0 0.4rem 0;
+}
+.legend-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #f4f9ff;
+    border: 1px solid #d0e4f7;
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem 0.3rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1a3a5c;
+}
+.legend-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(0,0,0,0.12);
 }
 
 ::-webkit-scrollbar { width: 5px; }
@@ -230,7 +259,6 @@ CENTROIDS = {
     "Papua Tengah": (-3.800000, 135.500000),
 }
 
-# Kode BPS resmi — termasuk 4 provinsi pemekaran 2022
 KODE_MAP = {
     "Aceh": 11, "Sumatera Utara": 12, "Sumatera Barat": 13,
     "Riau": 14, "Jambi": 15, "Sumatera Selatan": 16,
@@ -245,7 +273,6 @@ KODE_MAP = {
     "Sulawesi Tenggara": 74, "Gorontalo": 75, "Sulawesi Barat": 76,
     "Maluku": 81, "Maluku Utara": 82,
     "Papua Barat": 91, "Papua": 94,
-    # Provinsi pemekaran 2022 — kode BPS resmi
     "Papua Barat Daya": 92,
     "Papua Selatan":    95,
     "Papua Pegunungan": 96,
@@ -278,13 +305,9 @@ def normalize_province(name: str) -> str:
 
 
 # ── POLYGON MANUAL 4 PROVINSI PEMEKARAN PAPUA 2022 ───────────────────────────
-# Koordinat batas wilayah berdasarkan UU No.14–17 Tahun 2022
-# Format GeoJSON: [lon, lat]
 
 PAPUA_NEW_FEATURES = [
     {
-        # Papua Barat Daya (92) — Sorong Raya, Raja Ampat, Sorong Selatan,
-        # Maybrat, Tambrauw, Kota Sorong
         "type": "Feature",
         "properties": {"kode": 92, "Provinsi": "Papua Barat Daya"},
         "geometry": {
@@ -298,8 +321,6 @@ PAPUA_NEW_FEATURES = [
         },
     },
     {
-        # Papua Tengah (97) — Nabire, Paniai, Puncak Jaya, Puncak,
-        # Dogiyai, Intan Jaya, Deiyai
         "type": "Feature",
         "properties": {"kode": 97, "Provinsi": "Papua Tengah"},
         "geometry": {
@@ -313,8 +334,6 @@ PAPUA_NEW_FEATURES = [
         },
     },
     {
-        # Papua Pegunungan (96) — Jayawijaya, Pegunungan Bintang, Yahukimo,
-        # Tolikara, Mamberamo Tengah, Yalimo, Lanny Jaya, Nduga
         "type": "Feature",
         "properties": {"kode": 96, "Provinsi": "Papua Pegunungan"},
         "geometry": {
@@ -327,7 +346,6 @@ PAPUA_NEW_FEATURES = [
         },
     },
     {
-        # Papua Selatan (95) — Merauke, Boven Digoel, Mappi, Asmat
         "type": "Feature",
         "properties": {"kode": 95, "Provinsi": "Papua Selatan"},
         "geometry": {
@@ -345,10 +363,6 @@ PAPUA_NEW_FEATURES = [
 
 @st.cache_data(show_spinner="Memuat GeoJSON…")
 def load_geojson_with_papua(urls):
-    """
-    Load GeoJSON dari URL, lalu inject polygon manual
-    untuk 4 provinsi pemekaran Papua 2022.
-    """
     geojson = None
     feature_id_key = None
 
@@ -376,13 +390,9 @@ def load_geojson_with_papua(urls):
     if geojson is None:
         return None, None
 
-    # Tentukan key properti kode di GeoJSON asal
     prop_key = feature_id_key.replace("properties.", "")
-
-    # Buat deep copy agar tidak memodifikasi objek cache
     geojson = json.loads(json.dumps(geojson))
 
-    # Inject 4 feature baru, sesuaikan key properti dengan GeoJSON asal
     for feat in PAPUA_NEW_FEATURES:
         new_feat = json.loads(json.dumps(feat))
         new_feat["properties"][prop_key] = new_feat["properties"]["kode"]
@@ -408,15 +418,28 @@ def sort_key(lbl):
 
 unique_labels = sorted(df_result["label_klaster"].unique(), key=sort_key)
 
-color_map = {
-    "Klaster 0": "#FFA500",
-    "Klaster 1": "#FF0000",
-    "Klaster 2": "#FFFF00",
-}
+# ── PALET WARNA PROFESIONAL ───────────────────────────────────────────────────
+# Warna dipilih agar kontras satu sama lain, nyaman di mata, dan berbeda jelas
+# dari background peta carto-positron (abu terang)
+
+# Palet default untuk klaster yang sudah diketahui
+COLOR_PALETTE = [
+    "#E07B39",   # Klaster 0 — oranye terakota hangat
+    "#C0392B",   # Klaster 1 — merah tua (bukan neon)
+    "#D4AC0D",   # Klaster 2 — kuning emas gelap (bukan neon kuning)
+    "#2471A3",   # Klaster 3 — biru medium
+    "#1E8449",   # Klaster 4 — hijau tua
+    "#7D3C98",   # Klaster 5 — ungu
+]
+
+color_map: dict[str, str] = {}
+cluster_idx = 0
 for lbl in unique_labels:
-    if lbl not in color_map:
-        color_map[lbl] = "#3498DB"
-color_map["Noise"] = "#AAAAAA"
+    if lbl == "Noise":
+        color_map[lbl] = "#95A5A6"   # abu netral, tidak terlalu gelap/terang
+    else:
+        color_map[lbl] = COLOR_PALETTE[cluster_idx % len(COLOR_PALETTE)]
+        cluster_idx += 1
 
 numeric_cols = (
     df_result.select_dtypes(include=np.number)
@@ -432,12 +455,25 @@ with st.sidebar:
         "Gaya Peta",
         ["carto-positron", "carto-darkmatter", "open-street-map", "white-bg"],
         index=0,
+        help="carto-positron memberikan tampilan paling bersih untuk visualisasi klaster"
     )
     selected_hover = st.multiselect(
         "Data Hover",
         options=numeric_cols,
         default=numeric_cols
     )
+    st.markdown("---")
+    st.markdown("### 🎨 Legenda Klaster")
+    for lbl in unique_labels:
+        dot_color = color_map.get(lbl, "#999")
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+            f'<div style="width:14px;height:14px;border-radius:50%;background:{dot_color};'
+            f'border:1.5px solid rgba(0,0,0,0.15);flex-shrink:0;"></div>'
+            f'<span style="font-size:0.85rem;font-weight:600;color:#1a3a5c;">{lbl}</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
 # ── KOORDINAT & KODE BPS ──────────────────────────────────────────────────────
 
@@ -484,13 +520,19 @@ if geojson and feature_id_key:
         hover_name="Provinsi",
         hover_data=hover_cols,
         mapbox_style=map_style,
-        zoom=3.8,
+        zoom=4.0,
         center={"lat": -2.5, "lon": 118},
-        opacity=0.75,
+        opacity=0.82,          # lebih solid agar warna terlihat jelas
         labels={"label_klaster": "Klaster"},
     )
 
-    # Fallback marker untuk provinsi yang mungkin masih tidak match polygon
+    # Perbarui style garis batas provinsi agar lebih tegas
+    fig.update_traces(
+        marker_line_color="rgba(255,255,255,0.6)",
+        marker_line_width=0.8,
+    )
+
+    # Fallback marker untuk provinsi yang masih tidak match
     if not df_marker.empty:
         existing_labels = set(df_choropleth["label_klaster"].unique())
         for lbl in df_marker["label_klaster"].unique():
@@ -506,10 +548,14 @@ if geojson and feature_id_key:
                 go.Scattermapbox(
                     lat=sub["lat"], lon=sub["lon"],
                     mode="markers+text",
-                    marker=dict(size=22, color=color_map.get(lbl, "#999"), opacity=0.9),
+                    marker=dict(
+                        size=24,
+                        color=color_map.get(lbl, "#999"),
+                        opacity=0.9,
+                    ),
                     text=sub["Provinsi"],
                     textposition="top center",
-                    textfont=dict(size=10, color="#333"),
+                    textfont=dict(size=10, color="#1a3a5c", family="Plus Jakarta Sans"),
                     customdata=customdata,
                     hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
                     name=lbl,
@@ -519,23 +565,39 @@ if geojson and feature_id_key:
             )
 
     fig.update_layout(
-        margin={"r": 0, "t": 10, "l": 0, "b": 0},
-        height=600,
-        legend=dict(
-            title="Klaster",
-            orientation="v",
-            x=0.01,
-            y=0.98,
-            bgcolor="rgba(255,255,255,0.85)",
-            bordercolor="#CCC",
-            borderwidth=1,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        height=620,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        # Sembunyikan legend bawaan Plotly — diganti legend custom di sidebar
+        showlegend=False,
+        hoverlabel=dict(
+            bgcolor="white",
+            bordercolor="#c2dff5",
+            font_size=12,
+            font_family="Plus Jakarta Sans",
+            font_color="#1a3a5c",
         ),
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Legend custom di bawah peta sebagai chips
+    chips_html = '<div class="legend-row">'
+    for lbl in unique_labels:
+        dot_color = color_map.get(lbl, "#999")
+        n_prov = int((df_result["label_klaster"] == lbl).sum())
+        chips_html += (
+            f'<div class="legend-chip">'
+            f'<span class="legend-dot" style="background:{dot_color};"></span>'
+            f'{lbl} <span style="color:#7bafd4;font-weight:500;">({n_prov} provinsi)</span>'
+            f'</div>'
+        )
+    chips_html += '</div>'
+    st.markdown(chips_html, unsafe_allow_html=True)
+
     if not df_marker.empty:
         nama_sisa = ", ".join(sorted(df_marker["Provinsi"].tolist()))
-        st.info(f"🗺️ Provinsi ditampilkan sebagai marker (polygon tidak tersedia): **{nama_sisa}**")
+        st.info(f"🗺️ Provinsi ditampilkan sebagai marker: **{nama_sisa}**")
     else:
         st.success("✅ Seluruh 38 provinsi berhasil ditampilkan sebagai polygon di peta.")
 
@@ -566,9 +628,16 @@ else:
     fig.update_layout(
         mapbox_style=map_style,
         mapbox=dict(zoom=3.8, center={"lat": -2.5, "lon": 118}),
-        margin={"r": 0, "t": 10, "l": 0, "b": 0},
-        height=600,
-        legend=dict(title="Klaster", bgcolor="rgba(255,255,255,0.85)"),
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        height=620,
+        showlegend=True,
+        legend=dict(title="Klaster", bgcolor="rgba(255,255,255,0.9)"),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=12,
+            font_family="Plus Jakarta Sans",
+            font_color="#1a3a5c",
+        ),
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -585,7 +654,19 @@ selected_prov = st.selectbox(
 )
 prov_data = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 
-st.markdown(f"#### {prov_data['label_klaster']}")
+# Badge klaster di atas metric
+badge_color = color_map.get(prov_data["label_klaster"], "#999")
+st.markdown(
+    f'<div style="display:inline-flex;align-items:center;gap:8px;'
+    f'background:{badge_color}22;border:1.5px solid {badge_color}55;'
+    f'border-radius:20px;padding:0.35rem 1rem;margin:0.5rem 0 1rem 0;">'
+    f'<div style="width:12px;height:12px;border-radius:50%;background:{badge_color};'
+    f'border:1.5px solid rgba(0,0,0,0.15);"></div>'
+    f'<span style="font-weight:700;font-size:0.9rem;color:#1a3a5c;">'
+    f'{prov_data["label_klaster"]}</span>'
+    f'</div>',
+    unsafe_allow_html=True,
+)
 
 cols = st.columns(3)
 for i, col in enumerate(numeric_cols):
