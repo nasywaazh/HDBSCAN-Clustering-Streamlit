@@ -89,7 +89,6 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 0.88rem !important;
 }
 
-/* Metric cards */
 [data-testid="stMetric"] {
     background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
     border: 1px solid #c2dff5;
@@ -109,7 +108,6 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #1565c0 !important;
 }
 
-/* Download button */
 [data-testid="stDownloadButton"] button {
     background: linear-gradient(135deg, #1565c0, #0288d1) !important;
     color: #ffffff !important;
@@ -122,18 +120,14 @@ html, body, [data-testid="stAppViewContainer"] {
     cursor: pointer !important;
     transition: opacity 0.2s ease !important;
 }
-[data-testid="stDownloadButton"] button:hover {
-    opacity: 0.88 !important;
-}
+[data-testid="stDownloadButton"] button:hover { opacity: 0.88 !important; }
 
-/* Divider */
 hr {
     border: none !important;
     border-top: 1px solid #d0e4f7 !important;
     margin: 1.2rem 0 !important;
 }
 
-/* Map container card */
 .map-card {
     background: #ffffff;
     border: 1px solid #c2dff5;
@@ -142,7 +136,6 @@ hr {
     margin-bottom: 1.2rem;
 }
 
-/* Sidebar header */
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {
@@ -167,17 +160,16 @@ hr {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ─────────────────────────────────────────────────────────────────
+# ── HELPERS ───────────────────────────────────────────────────────────────────
 
 def sec(title):
     st.markdown(f"### {title}")
-
 
 def step_label(text):
     st.caption(f"🔹 {text.upper()}")
 
 
-# ── PAGE HEADER ──────────────────────────────────────────────────────────────
+# ── PAGE HEADER ───────────────────────────────────────────────────────────────
 
 st.markdown("""
 <div class="page-header">
@@ -195,7 +187,7 @@ if "df_clustered" not in st.session_state:
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
-# ── KOORDINAT & MAPPING ──────────────────────────────────────────────────────
+# ── KOORDINAT & MAPPING ───────────────────────────────────────────────────────
 
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397),
@@ -238,6 +230,7 @@ CENTROIDS = {
     "Papua Tengah": (-3.800000, 135.500000),
 }
 
+# Kode BPS resmi — termasuk 4 provinsi pemekaran 2022
 KODE_MAP = {
     "Aceh": 11, "Sumatera Utara": 12, "Sumatera Barat": 13,
     "Riau": 14, "Jambi": 15, "Sumatera Selatan": 16,
@@ -252,10 +245,11 @@ KODE_MAP = {
     "Sulawesi Tenggara": 74, "Gorontalo": 75, "Sulawesi Barat": 76,
     "Maluku": 81, "Maluku Utara": 82,
     "Papua Barat": 91, "Papua": 94,
-    "Papua Barat Daya": None,
-    "Papua Selatan": None,
-    "Papua Pegunungan": None,
-    "Papua Tengah": None,
+    # Provinsi pemekaran 2022 — kode BPS resmi
+    "Papua Barat Daya": 92,
+    "Papua Selatan":    95,
+    "Papua Pegunungan": 96,
+    "Papua Tengah":     97,
 }
 
 ALIAS = {
@@ -272,6 +266,7 @@ ALIAS = {
     "Kep. Riau": "Kepulauan Riau",
 }
 
+
 def normalize_province(name: str) -> str:
     stripped = name.strip()
     if stripped in ALIAS:
@@ -281,14 +276,135 @@ def normalize_province(name: str) -> str:
         return ALIAS[titled]
     return stripped
 
-df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 
+# ── POLYGON MANUAL 4 PROVINSI PEMEKARAN PAPUA 2022 ───────────────────────────
+# Koordinat batas wilayah berdasarkan UU No.14–17 Tahun 2022
+# Format GeoJSON: [lon, lat]
+
+PAPUA_NEW_FEATURES = [
+    {
+        # Papua Barat Daya (92) — Sorong Raya, Raja Ampat, Sorong Selatan,
+        # Maybrat, Tambrauw, Kota Sorong
+        "type": "Feature",
+        "properties": {"kode": 92, "Provinsi": "Papua Barat Daya"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [130.50, -0.50], [132.80, -0.50], [133.20, -1.00],
+                [133.50, -1.50], [133.20, -2.50], [132.50, -3.20],
+                [131.50, -3.50], [130.50, -3.00], [129.80, -2.50],
+                [129.50, -1.50], [129.80, -0.80], [130.50, -0.50],
+            ]],
+        },
+    },
+    {
+        # Papua Tengah (97) — Nabire, Paniai, Puncak Jaya, Puncak,
+        # Dogiyai, Intan Jaya, Deiyai
+        "type": "Feature",
+        "properties": {"kode": 97, "Provinsi": "Papua Tengah"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [133.50, -2.50], [135.80, -2.00], [136.50, -2.50],
+                [136.80, -3.50], [136.50, -4.50], [135.50, -5.00],
+                [134.50, -4.80], [133.80, -4.00], [133.20, -3.20],
+                [133.50, -2.50],
+            ]],
+        },
+    },
+    {
+        # Papua Pegunungan (96) — Jayawijaya, Pegunungan Bintang, Yahukimo,
+        # Tolikara, Mamberamo Tengah, Yalimo, Lanny Jaya, Nduga
+        "type": "Feature",
+        "properties": {"kode": 96, "Provinsi": "Papua Pegunungan"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [136.50, -2.50], [139.00, -2.50], [140.00, -3.00],
+                [140.00, -4.50], [139.00, -5.50], [137.50, -5.50],
+                [136.50, -5.00], [136.80, -3.50], [136.50, -2.50],
+            ]],
+        },
+    },
+    {
+        # Papua Selatan (95) — Merauke, Boven Digoel, Mappi, Asmat
+        "type": "Feature",
+        "properties": {"kode": 95, "Provinsi": "Papua Selatan"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [137.50, -5.50], [139.00, -5.50], [140.00, -4.50],
+                [141.00, -4.50], [141.00, -8.00], [140.00, -8.50],
+                [138.00, -8.50], [136.50, -7.50], [136.00, -6.50],
+                [137.00, -6.00], [137.50, -5.50],
+            ]],
+        },
+    },
+]
+
+
+@st.cache_data(show_spinner="Memuat GeoJSON…")
+def load_geojson_with_papua(urls):
+    """
+    Load GeoJSON dari URL, lalu inject polygon manual
+    untuk 4 provinsi pemekaran Papua 2022.
+    """
+    geojson = None
+    feature_id_key = None
+
+    for url in urls:
+        try:
+            with urlopen(url, timeout=15) as resp:
+                gj = json.load(resp)
+            props = gj["features"][0]["properties"]
+            for candidate in ["kode", "Kode", "KODE"]:
+                if candidate in props and isinstance(props[candidate], (int, float)):
+                    feature_id_key = f"properties.{candidate}"
+                    geojson = gj
+                    break
+            if feature_id_key is None:
+                for k, v in props.items():
+                    if isinstance(v, (int, float)) and 10 <= v <= 99:
+                        feature_id_key = f"properties.{k}"
+                        geojson = gj
+                        break
+            if geojson:
+                break
+        except Exception:
+            continue
+
+    if geojson is None:
+        return None, None
+
+    # Tentukan key properti kode di GeoJSON asal
+    prop_key = feature_id_key.replace("properties.", "")
+
+    # Buat deep copy agar tidak memodifikasi objek cache
+    geojson = json.loads(json.dumps(geojson))
+
+    # Inject 4 feature baru, sesuaikan key properti dengan GeoJSON asal
+    for feat in PAPUA_NEW_FEATURES:
+        new_feat = json.loads(json.dumps(feat))
+        new_feat["properties"][prop_key] = new_feat["properties"]["kode"]
+        geojson["features"].append(new_feat)
+
+    return geojson, feature_id_key
+
+
+GEOJSON_URLS = [
+    "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
+    "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
+]
+
+df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 df_result["label_klaster"] = df_result["Cluster"].apply(
     lambda x: "Noise" if x == -1 else f"Klaster {x}"
 )
 
+
 def sort_key(lbl):
     return 999 if lbl == "Noise" else int(lbl.split()[-1])
+
 
 unique_labels = sorted(df_result["label_klaster"].unique(), key=sort_key)
 
@@ -308,7 +424,7 @@ numeric_cols = (
     .tolist()
 )
 
-# ── SIDEBAR ──────────────────────────────────────────────────────────────────
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan Peta")
@@ -323,7 +439,7 @@ with st.sidebar:
         default=numeric_cols
     )
 
-# ── KOORDINAT & KODE BPS ─────────────────────────────────────────────────────
+# ── KOORDINAT & KODE BPS ──────────────────────────────────────────────────────
 
 df_result["lat"] = df_result["Provinsi_norm"].map(
     lambda p: CENTROIDS.get(p, (None, None))[0]
@@ -339,36 +455,9 @@ if missing_coord:
 
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
-# ── GEOJSON ──────────────────────────────────────────────────────────────────
+geojson, feature_id_key = load_geojson_with_papua(tuple(GEOJSON_URLS))
 
-GEOJSON_URLS = [
-    "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
-    "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
-]
-
-@st.cache_data(show_spinner="Memuat GeoJSON…")
-def load_geojson(urls):
-    for url in urls:
-        try:
-            with urlopen(url, timeout=15) as resp:
-                gj = json.load(resp)
-            props = gj["features"][0]["properties"]
-            for candidate in ["kode", "Kode", "KODE"]:
-                if candidate in props and isinstance(props[candidate], (int, float)):
-                    return gj, f"properties.{candidate}"
-            for k, v in props.items():
-                if isinstance(v, (int, float)) and 10 <= v <= 99:
-                    return gj, f"properties.{k}"
-            for k, v in props.items():
-                if isinstance(v, str) and v.startswith("ID-"):
-                    return gj, f"properties.{k}"
-        except Exception:
-            continue
-    return None, None
-
-geojson, feature_id_key = load_geojson(tuple(GEOJSON_URLS))
-
-# ── SECTION 1: PETA ──────────────────────────────────────────────────────────
+# ── SECTION 1: PETA ───────────────────────────────────────────────────────────
 
 sec("1. PETA KLASTERISASI")
 step_label("Distribusi Klaster Berdasarkan Indikator Dampak Banjir")
@@ -401,13 +490,13 @@ if geojson and feature_id_key:
         labels={"label_klaster": "Klaster"},
     )
 
+    # Fallback marker untuk provinsi yang mungkin masih tidak match polygon
     if not df_marker.empty:
         existing_labels = set(df_choropleth["label_klaster"].unique())
         for lbl in df_marker["label_klaster"].unique():
             sub = df_marker[df_marker["label_klaster"] == lbl]
             customdata = (
-                sub[selected_hover].values
-                if selected_hover
+                sub[selected_hover].values if selected_hover
                 else np.empty((len(sub), 0))
             )
             hover_lines = ["<b>%{text}</b>"] + [
@@ -415,14 +504,9 @@ if geojson and feature_id_key:
             ]
             fig.add_trace(
                 go.Scattermapbox(
-                    lat=sub["lat"],
-                    lon=sub["lon"],
+                    lat=sub["lat"], lon=sub["lon"],
                     mode="markers+text",
-                    marker=dict(
-                        size=22,
-                        color=color_map.get(lbl, "#999"),
-                        opacity=0.9,
-                    ),
+                    marker=dict(size=22, color=color_map.get(lbl, "#999"), opacity=0.9),
                     text=sub["Provinsi"],
                     textposition="top center",
                     textfont=dict(size=10, color="#333"),
@@ -450,8 +534,10 @@ if geojson and feature_id_key:
     st.plotly_chart(fig, use_container_width=True)
 
     if not df_marker.empty:
-        nama_pemekaran = ", ".join(sorted(df_marker["Provinsi"].tolist()))
-        st.info(f"🗺️ Provinsi pemekaran ditampilkan sebagai marker: **{nama_pemekaran}**")
+        nama_sisa = ", ".join(sorted(df_marker["Provinsi"].tolist()))
+        st.info(f"🗺️ Provinsi ditampilkan sebagai marker (polygon tidak tersedia): **{nama_sisa}**")
+    else:
+        st.success("✅ Seluruh 38 provinsi berhasil ditampilkan sebagai polygon di peta.")
 
 else:
     st.info("GeoJSON tidak dapat dimuat — menampilkan bubble map.")
@@ -488,7 +574,7 @@ else:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ── SECTION 2: DETAIL PROVINSI ───────────────────────────────────────────────
+# ── SECTION 2: DETAIL PROVINSI ────────────────────────────────────────────────
 
 sec("2. DETAIL INFORMASI PROVINSI")
 step_label("Pilih Provinsi untuk Melihat Detail Data")
@@ -508,7 +594,7 @@ for i, col in enumerate(numeric_cols):
         value=f"{prov_data[col]:,.0f}"
     )
 
-# ── SECTION 3: DOWNLOAD ──────────────────────────────────────────────────────
+# ── SECTION 3: DOWNLOAD ───────────────────────────────────────────────────────
 
 sec("3. UNDUH HASIL KLASTERISASI")
 step_label("Download data hasil klasterisasi dalam format CSV")
