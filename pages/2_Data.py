@@ -170,7 +170,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 2rem;
     font-weight: 800;
     color: #1565c0;
-    line-height: 0.5;
+    line-height: 1;
     margin: 0;
 }
 
