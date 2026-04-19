@@ -631,7 +631,7 @@ if geojson and feature_id_key:
                     ),
                     text=sub["Provinsi"],
                     textposition="top center",
-                    textfont=dict(size=10, color="#1a3a5c", weight=700),
+                    textfont=dict(size=10, color="#1a3a5c"),
                     customdata=customdata,
                     hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
                     name=lbl,
