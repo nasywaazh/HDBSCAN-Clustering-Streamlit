@@ -47,6 +47,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 [data-testid="stSidebar"] * { color: #1a5fa8 !important; }
 
+/* PAGE HEADER */
 .page-header {
     background: linear-gradient(135deg, #1565c0 0%, #1976d2 55%, #0288d1 100%);
     border-radius: 20px;
@@ -69,22 +70,21 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0;
 }
 
-.sec-divider {
+/* SEC — styling h3 native agar estetik tanpa unsafe_allow_html */
+[data-testid="stMarkdownContainer"] h3 {
     background: linear-gradient(135deg, #e3f2fd 0%, #eff8ff 100%);
     border: 1px solid #c2dff5;
     border-radius: 12px;
     padding: 0.75rem 1.2rem;
     margin: 1.4rem 0 0.8rem 0;
-}
-.sec-divider-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    color: #1565c0;
-    margin: 0;
+    color: #1565c0 !important;
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
+/* METRIC GRID */
 .metric-grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -120,17 +120,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0;
 }
 
-.step-lbl {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #1976d2;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border-bottom: 1px solid #d4e8f8;
-    padding-bottom: 0.35rem;
-    margin: 1rem 0 0.5rem 0;
-}
-
+/* TABS */
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
     background: #e3f2fd !important;
     border-radius: 12px !important;
@@ -168,6 +158,7 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #1565c0 !important;
     font-size: 0.88rem !important;
 }
+
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #e8f4fd; }
 ::-webkit-scrollbar-thumb { background: #90caf9; border-radius: 3px; }
@@ -178,21 +169,17 @@ html, body, [data-testid="stAppViewContainer"] {
 
 
 def sec(title):
-    """Section header — self-contained, aman untuk React."""
-    st.markdown(
-        f'<div class="sec-divider"><p class="sec-divider-title">{title}</p></div>',
-        unsafe_allow_html=True
-    )
+    """Native h3 — di-style via CSS global, nol unsafe_allow_html."""
+    st.markdown(f"### {title}")
+
 
 def step_label(text):
-    """Sub-label — pakai <p> bukan <div>, lebih aman di React."""
-    st.markdown(
-        f'<p class="step-lbl">{text}</p>',
-        unsafe_allow_html=True
-    )
+    """Native caption — aman 100%."""
+    st.caption(f"🔹 {text.upper()}")
+
 
 def metric_html(items, cols=4):
-    """Metric cards — self-contained, tidak ada widget di dalamnya."""
+    """Murni HTML statis tanpa widget — aman."""
     grid_class = f"metric-grid-{cols}"
     cards = "".join(
         f'<div class="metric-card">'
@@ -201,13 +188,10 @@ def metric_html(items, cols=4):
         f'</div>'
         for label, value in items
     )
-    st.markdown(
-        f'<div class="{grid_class}">{cards}</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown(f'<div class="{grid_class}">{cards}</div>', unsafe_allow_html=True)
 
 
-# PAGE HEADER — self-contained, tidak ada widget di sekitarnya
+# PAGE HEADER — di luar tab, berdiri sendiri, aman
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION</h1>
@@ -235,7 +219,7 @@ menu = st.tabs([
 # ════════════════════════════════════════════════════════════
 with menu[0]:
 
-    sec("1. STANDARISASI DATA")
+    sec("1. Standarisasi Data")
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
     scaled_standard = pd.DataFrame(
@@ -244,7 +228,7 @@ with menu[0]:
     )
     st.dataframe(scaled_standard, use_container_width=True)
 
-    sec("2. UJI STATISTIK")
+    sec("2. Uji Statistik")
     kmo_all, kmo_model = calculate_kmo(scaled_standard)
     chi_square_value, p_value = calculate_bartlett_sphericity(scaled_standard)
 
@@ -283,7 +267,7 @@ with menu[0]:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
         multikolinieritas = False
 
-    sec("3. DETEKSI OUTLIER (LOCAL OUTLIER FACTOR)")
+    sec("3. Deteksi Outlier (Local Outlier Factor)")
     lof = LocalOutlierFactor(n_neighbors=20)
     lof.fit_predict(scaled_standard)
     lof_scores = -lof.negative_outlier_factor_
@@ -312,7 +296,7 @@ with menu[0]:
     st.pyplot(fig)
     plt.close(fig)
 
-    sec("4. REDUKSI DATA (PRINCIPAL COMPONENT ANALYSIS)")
+    sec("4. Reduksi Data (Principal Component Analysis)")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
@@ -419,7 +403,7 @@ X_clustering = st.session_state["X_clustering"].values
 # ════════════════════════════════════════════════════════════
 with menu[1]:
 
-    sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
+    sec("1. Pencarian Parameter Optimal (Bayesian Optimization)")
 
     with st.spinner("Mencari parameter optimal..."):
         def objective(min_cluster_size, min_samples):
@@ -512,7 +496,7 @@ with menu[1]:
             st.pyplot(fig_)
             plt.close(fig_)
 
-    sec("2. VISUALISASI SCATTER PLOT")
+    sec("2. Visualisasi Scatter Plot Klaster")
 
     hdbscan_model = hdbscan.HDBSCAN(min_cluster_size=best_min_cluster_size,
                                      min_samples=best_min_samples, prediction_data=True)
@@ -564,7 +548,7 @@ with menu[1]:
     st.pyplot(fig)
     plt.close(fig)
 
-    sec("3. EVALUASI MODEL")
+    sec("3. Evaluasi Model HDBSCAN")
     dbcv_score = validity_index(X_clustering, cluster_labels)
     dcsi_score = dcsi_index(X_clustering, cluster_labels, best_min_samples)
 
@@ -598,7 +582,7 @@ with menu[2]:
     df_result["Cluster"] = cluster_labels
     numeric_cols   = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
 
-    sec("1. HASIL KLASTERISASI")
+    sec("1. Hasil Klasterisasi")
     st.dataframe(df_result, use_container_width=True)
 
     step_label("Nilai Rata-rata per Klaster")
@@ -609,7 +593,7 @@ with menu[2]:
     cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
     st.dataframe(cluster_pct, use_container_width=True)
 
-    sec("2. KARAKTERISTIK KLASTER")
+    sec("2. Karakteristik Setiap Klaster")
     all_clusters     = sorted(df_result["Cluster"].unique())
     selected_cluster = st.selectbox(
         "Pilih Klaster",
