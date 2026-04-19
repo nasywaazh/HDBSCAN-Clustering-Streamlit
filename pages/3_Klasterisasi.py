@@ -142,7 +142,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 /* STEP LABEL */
-p.step-label {
+.step-label {
     font-size: 1rem;
     font-weight: 700;
     color: #1976d2;
@@ -153,7 +153,7 @@ p.step-label {
     align-items: center;
     gap: 0.5rem;
 }
-p.step-label::after {
+.step-label::after {
     content: '';
     flex: 1;
     height: 1px;
@@ -347,7 +347,7 @@ with menu[0]:
         multikolinieritas = False
 
     # 3. Deteksi Outlier
-    sec("3. DETEKSI OUTLIER &mdash; LOCAL OUTLIER FACTOR")
+    sec("3. DETEKSI OUTLIER (LOCAL OUTLIER FACTOR)")
     lof = LocalOutlierFactor(n_neighbors=20)
     lof.fit_predict(scaled_standard)
     lof_scores = -lof.negative_outlier_factor_
@@ -375,7 +375,7 @@ with menu[0]:
     plt.close(fig)
 
     # 4. Reduksi Data
-    sec("4. REDUKSI DATA &mdash; PRINCIPAL COMPONENT ANALYSIS")
+    sec("4. REDUKSI DATA (PRINCIPAL COMPONENT ANALYSIS)")
     if multikolinieritas and korelasi_ok:
         pca = PCA()
         pca.fit(scaled_standard)
@@ -479,7 +479,7 @@ X_clustering = st.session_state["X_clustering"].values
 with menu[1]:
 
     # 1. Bayesian Optimization
-    sec("1. PENCARIAN PARAMETER OPTIMAL &mdash; BAYESIAN OPTIMIZATION")
+    sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
 
     with st.spinner("Mencari parameter optimal..."):
         def objective(min_cluster_size, min_samples):
@@ -677,7 +677,7 @@ with menu[2]:
     )
     df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
     label_text = "Noise" if selected_cluster == -1 else f"Klaster {selected_cluster}"
-    step_label(f'{label_text} &mdash; {len(df_cluster)} Provinsi')
+    step_label(f'{label_text} ({len(df_cluster)} Provinsi)')
     st.dataframe(df_cluster, use_container_width=True, hide_index=True)
 
     cluster_mean_all = (df_result[df_result["Cluster"] != -1]
