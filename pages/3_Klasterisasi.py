@@ -246,11 +246,9 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-def sec(icon, title):
-    """Render section divider — self-contained, no unclosed tags."""
+def sec(title):
     st.markdown(
         f'<div class="sec-divider">'
-        f'<div class="sec-divider-icon">{icon}</div>'
         f'<p class="sec-divider-title">{title}</p>'
         f'</div>',
         unsafe_allow_html=True
