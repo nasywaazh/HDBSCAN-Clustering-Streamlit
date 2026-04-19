@@ -89,7 +89,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0 0 0.5rem 0;
 }
 .metric-value {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: #1565c0;
     line-height: 1;
