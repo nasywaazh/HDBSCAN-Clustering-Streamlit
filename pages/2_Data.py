@@ -227,7 +227,7 @@ st.markdown("""
     </p>
     <div class="badge-row">
         <div class="badge-pill"><span class="badge-icon">📂</span> Upload Data</div>
-        <div class="badge-pill"><span class="badge-icon">📊</span> Eksplorasi Data</div>
+        <div class="badge-pill"><span class="badge-icon">🔍</span> Eksplorasi Data</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
