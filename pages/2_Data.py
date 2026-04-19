@@ -159,7 +159,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -170,7 +170,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 2rem;
     font-weight: 800;
     color: #1565c0;
-    line-height: 1;
+    line-height: 0.5;
     margin: 0;
 }
 
@@ -347,7 +347,7 @@ if uploaded_file is not None:
                 <p class="metric-value">{n_missing:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Jumlag Data Duplikat</p>
+                <p class="metric-label">Jumlah Data Duplikat</p>
                 <p class="metric-value">{n_dup:,}</p>
             </div>
         </div>
