@@ -183,10 +183,8 @@ st.markdown("""
 
 # ── HELPER: semua pakai native Streamlit, nol unsafe_allow_html ──
 def sec(title):
-    """Section divider menggunakan native markdown."""
     st.markdown(f"### {title}")
-    st.divider()
-
+    
 
 def step_label(text):
     """Sub-label menggunakan native markdown."""
