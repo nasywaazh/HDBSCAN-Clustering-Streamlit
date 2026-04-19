@@ -343,11 +343,11 @@ if uploaded_file is not None:
                 <p class="metric-value">{n_var:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Missing Values</p>
+                <p class="metric-label">Jumlah Missing Values</p>
                 <p class="metric-value">{n_missing:,}</p>
             </div>
             <div class="metric-card">
-                <p class="metric-label">Data Duplikat</p>
+                <p class="metric-label">Jumlag Data Duplikat</p>
                 <p class="metric-value">{n_dup:,}</p>
             </div>
         </div>
