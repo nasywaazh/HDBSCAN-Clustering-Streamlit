@@ -102,7 +102,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
@@ -254,7 +254,7 @@ def safe_table(df_show, max_rows=500, height=420):
     if len(df_show) > max_rows:
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
-# ── DCSI HELPERS ──────────────────────────────────────────────
+# DCSI HELPERS
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
     n = len(X_cluster)
     if n < 2:
@@ -310,7 +310,7 @@ def dcsi_index(X, labels, min_samples):
     return total / weight_sum if weight_sum > 0 else None
 
 
-# ── PREPROCESSING ─────────────────────────────────────────────
+# PREPROCESSING DATA
 def run_preprocessing(df):
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
@@ -389,14 +389,12 @@ def run_preprocessing(df):
     }
 
 
-# ══════════════════════════════════════════════════════════════
 # PAGE HEADER
-# ══════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">KLASTERISASI HDBSCAN DAN BAYESIAN OPTIMIZATION</h1>
     <p class="page-sub">
-        Pipeline lengkap preprocessing data, pemodelan klasterisasi, dan analisis hasil
+        Pipeline lengkap preprocessing data, pemodelan klasterisasi, dan analisis hasil klasterisasi
         menggunakan algoritma HDBSCAN dan Bayesian Optimization
     </p>
 </div>
@@ -409,7 +407,7 @@ if "data" not in st.session_state:
 df = st.session_state["data"]
 data_hash = joblib.hash(df.values)
 
-# ── PREPROCESSING — sekali, atomik ────────────────────────────
+# PREPROCESSING
 if st.session_state.get("_prep_hash") != data_hash:
     with st.spinner("Memproses data..."):
         prep = run_preprocessing(df)
@@ -445,7 +443,7 @@ n_components      = st.session_state["_n_comp"]
 pca_result        = st.session_state["_pca_result"]
 X_clustering      = st.session_state["X_clustering"].values
 
-# ── BAYESIAN OPT + HDBSCAN — sekali, atomik ──────────────────
+# PEMODELAN KLASTERISASI
 if st.session_state.get("_bo_hash") != data_hash:
     with st.spinner("Mencari parameter optimal dengan Bayesian Optimization..."):
 
@@ -552,24 +550,20 @@ df_result      = st.session_state["df_clustered"]
 dbcv_score     = st.session_state["_dbcv_score"]
 dcsi_score     = st.session_state["_dcsi_score"]
 
-# ══════════════════════════════════════════════════════════════
 # TABS — pure render, zero session_state write
-# ══════════════════════════════════════════════════════════════
 menu = st.tabs([
     "PREPROCESSING DATA",
     "PEMODELAN KLASTERISASI",
     "HASIL KLASTERISASI"
 ])
 
-# ════════════════════════════════════════════════════════════
-# TAB 1
-# ════════════════════════════════════════════════════════════
+# TAB PREPROCESSING DATA
 with menu[0]:
 
-    sec("1. Standarisasi Data")
+    sec("1. STANDARISASI DATA")
     safe_table(scaled_standard.round(6))
 
-    sec("2. Uji Statistik")
+    sec("2. UJI STATISTIK")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
@@ -590,11 +584,11 @@ with menu[0]:
     safe_table(vif_data.round(4))
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
-        st.warning(f"Variabel {variabels} memiliki nilai VIF >= 10 yang mengindikasikan multikolinieritas tinggi")
+        st.warning(f"Variabel {variabels} memiliki nilai VIF ≥ 10 yang mengindikasikan multikolinieritas tinggi")
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
 
-    sec("3. Deteksi Outlier (Local Outlier Factor)")
+    sec("3. DETEKSI OUTLIER (LOCAL OUTLIER FACTOR)")
     safe_table(df_lof[["Provinsi", "LOF Score", "Label"]])
 
     fig, ax = plt.subplots(figsize=(10, 4))
@@ -617,12 +611,12 @@ with menu[0]:
     st.pyplot(fig)
     plt.close(fig)
 
-    sec("4. Reduksi Data (Principal Component Analysis)")
+    sec("4. REDUKSI DATA (PRINCIPAL COMPONENT ANALYSIS)")
     if multikolinieritas and korelasi_ok and pca_df is not None:
         safe_table(pca_df)
         st.success(
             f"Jumlah komponen yang digunakan berdasarkan kriteria nilai eigenvalue > 1 "
-            f"dan proporsi variansi kumulatif >= 80% adalah {n_components} komponen"
+            f"dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen"
         )
         step_label("Hasil Reduksi Data dengan PCA")
         safe_table(pca_result)
@@ -630,12 +624,10 @@ with menu[0]:
         st.info("PCA tidak diperlukan (tidak memenuhi syarat multikolinieritas atau korelasi)")
 
 
-# ════════════════════════════════════════════════════════════
-# TAB 2
-# ════════════════════════════════════════════════════════════
+# TAB PEMODELAN KLASTERISASI
 with menu[1]:
 
-    sec("1. Pencarian Parameter Optimal (Bayesian Optimization)")
+    sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
     st.success("Parameter optimal berhasil ditemukan!")
     metric_html([
         ("min cluster size", best_mcs),
@@ -670,7 +662,7 @@ with menu[1]:
             st.pyplot(fig_)
             plt.close(fig_)
 
-    sec("2. Visualisasi Scatter Plot Klaster")
+    sec("2. VISUALISASI SCATTER PLOT")
     X_plot        = st.session_state["X_plot"]
     xcol, ycol    = X_plot.columns[0], X_plot.columns[1]
     unique_labels = sorted(set(cluster_labels))
@@ -716,7 +708,7 @@ with menu[1]:
     st.pyplot(fig)
     plt.close(fig)
 
-    sec("3. Evaluasi Model HDBSCAN")
+    sec("3. EVALUASI MODEL")
     metric_html([
         ("DBCV Score", f"{dbcv_score:.4f}"),
         ("DCSI Score", "N/A" if dcsi_score is None else f"{dcsi_score:.4f}"),
@@ -740,14 +732,12 @@ with menu[1]:
             st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
 
 
-# ════════════════════════════════════════════════════════════
-# TAB 3
-# ════════════════════════════════════════════════════════════
+# TAB HASIL KLASTERISASI
 with menu[2]:
 
     numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
 
-    sec("1. Hasil Klasterisasi")
+    sec("1. HASIL KLASTERISASI")
     safe_table(df_result)
 
     step_label("Nilai Rata-rata per Klaster")
@@ -758,7 +748,7 @@ with menu[2]:
     cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
     safe_table(cluster_pct.reset_index())
 
-    sec("2. Karakteristik Setiap Klaster")
+    sec("2. KARAKTERISTIK KLASTER")
     all_clusters     = sorted(df_result["Cluster"].unique())
     selected_cluster = st.selectbox(
         "Pilih Klaster",
