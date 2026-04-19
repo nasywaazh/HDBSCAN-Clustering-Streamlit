@@ -256,7 +256,13 @@ def sec(title):
 
 
 def step_label(text):
-    st.markdown(f'<div class="step-label">{text}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<p style="font-size:1rem; font-weight:700; color:#1976d2; '
+        f'letter-spacing:0.08em; text-transform:uppercase; '
+        f'margin:1rem 0 0.5rem 0; border-bottom: 1px solid #d4e8f8; '
+        f'padding-bottom:0.4rem;">{text}</p>',
+        unsafe_allow_html=True
+    )
 
 
 def metric_html(items, cols=4):
