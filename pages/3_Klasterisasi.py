@@ -569,9 +569,9 @@ with menu[0]:
         st.metric("Uji Kaiser-Meyer-Olkin (KMO)", f"{kmo_model:.4f}")
         st.caption("Kriteria Nilai KMO > 0.5")
         if kmo_model > 0.5:
-            st.success("Data sudah sesuai untuk dilakukan pemodelan")
+            st.success("Data sudah layak untuk dilakukan pemodelan")
         else:
-            st.error("Data belum sesuai untuk dilakukan pemodelan")
+            st.error("Data belum layak untuk dilakukan pemodelan")
     with col2:
         st.metric("Uji Bartlett (p-value)", f"{p_value:.6f}")
         st.caption("Kriteria p-value < 0.05")
@@ -616,7 +616,7 @@ with menu[0]:
         safe_table(pca_df)
         st.success(
             f"Jumlah komponen yang digunakan berdasarkan kriteria nilai eigenvalue > 1 "
-            f"dan proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen"
+            f"dan minimal proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen"
         )
         step_label("HASIL REDUKSI PCA")
         safe_table(pca_result)
