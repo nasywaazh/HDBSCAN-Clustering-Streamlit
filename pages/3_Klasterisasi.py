@@ -982,7 +982,7 @@ with menu[2]:
                         "ekstrem</strong> yang ditinjau dari proporsi yang sangat tinggi pada "
                         "seluruh indikator dampak banjir."
                     )
-                    return kategori, interp, "error"
+                    return kategori, interp, "noise"
                 else:
                     kategori = "Noise / Atipikal"
                     interp   = (
@@ -990,7 +990,7 @@ with menu[2]:
                         "karakteristik dampak banjir yang atipikal dan tidak membentuk pola "
                         "klaster yang jelas."
                     )
-                    return kategori, interp, "warning"
+                    return kategori, interp, "noise"
 
             # ── Klaster utama ──────────────────────────────────────────────────
             if cluster_pct_all_df.empty:
@@ -1040,7 +1040,7 @@ with menu[2]:
             if a_dom and n_higher_than_all > 4:
                 kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi tinggi pada variabel korban meninggal dan hilang "
+                    f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
                     f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
                     f"klaster utama lainnya. Hal ini menunjukkan bahwa provinsi dalam "
                     f"Klaster {cl_id} cenderung mengalami dampak banjir yang lebih serius dari "
@@ -1054,13 +1054,13 @@ with menu[2]:
             if n_higher_than_all > 4:
                 kategori = "Dampak Banjir Tinggi"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi indikator dampak banjir yang "
-                    f"lebih tinggi dibandingkan dengan seluruh klaster utama lainnya. "
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
+                    f"proporsi lebih tinggi dibandingkan seluruh klaster utama lainnya. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
                     f"mengalami dampak banjir yang berat secara menyeluruh, baik dari sisi "
-                    f"korban jiwa, korban luka dan pengungsi, kerusakan maupun genangan "
+                    f"korban jiwa, korban luka dan pengungsi, maupun kerusakan dan genangan "
                     f"permukiman. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir tinggi</strong>."
+                    f"<strong>dampak banjir tinggi</strong> dibandingkan klaster utama lainnya."
                 )
                 return kategori, interp, "error"
 
@@ -1068,14 +1068,13 @@ with menu[2]:
             if n_lower_than_all > 4:
                 kategori = "Dampak Banjir Rendah"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi yang relatif rendah pada seluruh "
-                    f"indikator dampak banjir dibandingkan dengan seluruh klaster utama lainnya,. "
-                    f"tanpa adanya indikator dampak banjir yang dominan. "
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
+                    f"proporsi lebih rendah dibandingkan seluruh klaster utama lainnya. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
-                    f"mengalami dampak banjir yang relatif rendah, baik dari segi korban jiwa, "
-                    f"korban luka dan pengungsi, kerusakan, maupun genangan permukiman. "
+                    f"relatif tidak terdampak parah oleh banjir, baik dari sisi korban jiwa, "
+                    f"korban luka dan pengungsi, maupun kerusakan dan genangan permukiman. "
                     f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir rendah</strong>."
+                    f"<strong>dampak banjir rendah</strong> dibandingkan klaster utama lainnya."
                 )
                 return kategori, interp, "success"
 
@@ -1099,13 +1098,13 @@ with menu[2]:
             if n_mixed > 4:
                 kategori = "Dampak Banjir Moderat"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi indikator dampak banjir yang "
-                    f"moderat di antara klaster utama lainnya — lebih tinggi dari sebagian "
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dengan proporsi yang "
+                    f"berada di antara klaster utama lainnya — lebih tinggi dari sebagian "
                     f"klaster dan lebih rendah dari klaster lainnya. Hal ini menunjukkan bahwa "
                     f"provinsi-provinsi dalam Klaster {cl_id} mengalami dampak banjir yang "
                     f"tidak ekstrem di salah satu ujung, melainkan berada pada tingkat menengah "
                     f"antarklaster. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir moderat</strong>."
+                    f"<strong>dampak banjir moderat</strong> dibandingkan klaster utama lainnya."
                 )
                 return kategori, interp, "warning"
 
@@ -1113,13 +1112,11 @@ with menu[2]:
             if a_dom:
                 kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi tinggi pada variabel korban meninggal dan hilang "
+                    f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
                     f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
-                    f"klaster utama lainnya. Hal ini menunjukkan bahwa provinsi dalam "
-                    f"Klaster {cl_id} cenderung mengalami dampak banjir yang lebih serius dari "
-                    f"segi kerusakan struktural dan fatalitas (korban jiwa). Oleh karena itu, "
-                    f"klaster ini dapat dikategorikan sebagai <strong>dampak banjir tinggi "
-                    f"dengan risiko kerusakan struktural dan fatalitas yang tinggi</strong>."
+                    f"klaster utama lainnya. Oleh karena itu, klaster ini dapat dikategorikan "
+                    f"sebagai <strong>dampak banjir tinggi dengan risiko kerusakan struktural "
+                    f"dan fatalitas yang tinggi</strong>."
                 )
                 return kategori, interp, "error"
 
@@ -1127,27 +1124,20 @@ with menu[2]:
                 kategori = "Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
-                    f"serta rumah terendam dibandingkan dengan klaster utama lainnya. Namun, "
-                    f"kontribusinya terhadap korban meninggal dan hilang serta kerusakan rumah "
-                    f"relatif rendah. Hal ini menunjukkan bahwa provinsi-provinsi dalam "
-                    f"Klaster {cl_id} cenderung mengalami bencana banjir yang menyebabkan "
-                    f"pengungsian massal dan genangan luas, namun tidak diikuti oleh korban "
-                    f"jiwa dan kerusakan struktural yang tinggi. Oleh karena itu, klaster ini "
-                    f"dapat dikategorikan sebagai <strong>dampak banjir moderat dengan risiko "
-                    f"pengungsian dan genangan permukiman yang tinggi</strong>."
+                    f"serta rumah terendam dibandingkan dengan klaster utama lainnya, namun "
+                    f"kontribusi pada fatalitas dan kerusakan struktural relatif rendah. "
+                    f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
+                    f"<strong>dampak banjir moderat dengan risiko pengungsian dan genangan "
+                    f"permukiman yang tinggi</strong>."
                 )
                 return kategori, interp, "warning"
 
             # ── Fallback terakhir ─────────────────────────────────────────────
             kategori = "Dampak Banjir Moderat"
             interp = (
-                f"Klaster {cl_id} memiliki proporsi indikator dampak banjir yang "
-                    f"moderat di antara klaster utama lainnya — lebih tinggi dari sebagian "
-                    f"klaster dan lebih rendah dari klaster lainnya. Hal ini menunjukkan bahwa "
-                    f"provinsi-provinsi dalam Klaster {cl_id} mengalami dampak banjir yang "
-                    f"tidak ekstrem di salah satu ujung, melainkan berada pada tingkat menengah "
-                    f"antarklaster. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir moderat</strong>."
+                f"Klaster {cl_id} memiliki karakteristik campuran pada indikator dampak banjir "
+                f"dibandingkan klaster utama lainnya. Oleh karena itu, klaster ini dapat "
+                f"dikategorikan sebagai <strong>dampak banjir moderat</strong>."
             )
             return kategori, interp, "warning"
 
@@ -1202,6 +1192,7 @@ with menu[2]:
             "warning": ("#fff8e1", "#e65100", "#ffcc80"),
             "success": ("#e8f5e9", "#1b5e20", "#a5d6a7"),
             "info":    ("#e3f2fd", "#0d47a1", "#90caf9"),
+            "noise":   ("#f5f5f5", "#424242", "#bdbdbd"),
         }.get(alert_t, ("#f3e5f5", "#4a148c", "#ce93d8"))
 
         st.markdown(
