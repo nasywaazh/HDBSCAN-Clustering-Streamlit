@@ -22,7 +22,7 @@ import joblib
 st.set_page_config(
     page_title="Klasterisasi HDBSCAN dan Bayesian Optimization",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
@@ -145,7 +145,8 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 0.9rem !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
-[data-testid="stSelectbox"] label {
+[data-testid="stSelectbox"] label,
+[data-testid="stNumberInput"] label {
     font-weight: 700 !important;
     color: #1565c0 !important;
     font-size: 0.88rem !important;
@@ -189,22 +190,28 @@ html, body, [data-testid="stAppViewContainer"] {
     border-bottom: 1px solid #eaf4fc;
 }
 .safe-table-wrap tr:last-child td { border-bottom: none; }
-.safe-table-wrap tr:hover td { background: #f0f9ff; }
+.safe-table-wrap tr:hover td    { background: #f0f9ff; }
 
-.param-range-box {
+.bo-param-panel {
     background: linear-gradient(135deg, #e3f2fd 0%, #eff8ff 100%);
-    border: 1px solid #c2dff5;
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 1rem;
+    border: 1.5px solid #c2dff5;
+    border-radius: 16px;
+    padding: 1.4rem 1.6rem 0.8rem;
+    margin-bottom: 1.2rem;
 }
-.param-range-title {
-    font-size: 0.85rem;
+.bo-param-panel-title {
+    font-size: 0.82rem;
     font-weight: 800;
     color: #1565c0;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    margin: 0 0 0.8rem 0;
+    margin: 0 0 1rem 0;
+}
+.param-group-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1565c0;
+    margin-bottom: 0.4rem;
 }
 
 ::-webkit-scrollbar { width: 5px; }
@@ -220,10 +227,8 @@ html, body, [data-testid="stAppViewContainer"] {
 def sec(title):
     st.markdown(f"### {title}")
 
-
 def step_label(text):
     st.caption(f"🔹 {text.upper()}")
-
 
 def metric_html(items, cols=4):
     grid_class = f"metric-grid-{cols}"
@@ -235,7 +240,6 @@ def metric_html(items, cols=4):
         for label, value in items
     )
     st.markdown(f'<div class="{grid_class}">{cards}</div>', unsafe_allow_html=True)
-
 
 def safe_table(df_show, max_rows=500, height=420):
     df_render = df_show.head(max_rows).reset_index(drop=True)
@@ -260,7 +264,7 @@ def safe_table(df_show, max_rows=500, height=420):
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
 
-# ── DCSI HELPERS (identik dengan Colab) ────────────────────────────────────────
+# ── DCSI (identik baris-per-baris dengan Colab) ────────────────────────────────
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
     n = len(X_cluster)
     if n < 2:
@@ -269,7 +273,6 @@ def get_eps_i(X_cluster, min_samples, quantile=0.5):
     nbrs = NearestNeighbors(n_neighbors=k).fit(X_cluster)
     distances, _ = nbrs.kneighbors(X_cluster)
     return np.quantile(distances[:, -1], quantile)
-
 
 def get_core_points(X_cluster, min_samples, eps_i):
     n = len(X_cluster)
@@ -280,7 +283,6 @@ def get_core_points(X_cluster, min_samples, eps_i):
     core_mask = np.array([len(nb) >= min_samples for nb in neighbor_counts])
     return np.where(core_mask)[0]
 
-
 def compute_connectedness(X_cluster, min_samples, eps_i):
     core_idx = get_core_points(X_cluster, min_samples, eps_i)
     if len(core_idx) < 2:
@@ -289,7 +291,6 @@ def compute_connectedness(X_cluster, min_samples, eps_i):
     eucl   = cdist(X_core, X_core)
     mst    = minimum_spanning_tree(eucl).toarray()
     return np.max(mst)
-
 
 def compute_separation(X_ci, X_cj, min_samples, eps_i, eps_j):
     core_idx_i = get_core_points(X_ci, min_samples, eps_i)
@@ -300,9 +301,7 @@ def compute_separation(X_ci, X_cj, min_samples, eps_i, eps_j):
     X_core_j = X_cj[core_idx_j]
     return np.min(cdist(X_core_i, X_core_j))
 
-
 def dcsi_index(X, labels, min_samples, eps_quantile=0.5):
-    """Identik dengan fungsi DCSI di Colab."""
     mask            = labels != -1
     X_valid         = X[mask]
     lbl_valid       = labels[mask]
@@ -321,14 +320,15 @@ def dcsi_index(X, labels, min_samples, eps_quantile=0.5):
     dcsi_weighted_sum = 0.0
     total_weight      = 0
     for ci, cj in combinations(unique_clusters, 2):
-        X_ci     = X_valid[lbl_valid == ci]
-        X_cj     = X_valid[lbl_valid == cj]
-        sep      = compute_separation(X_ci, X_cj, min_samples, eps_dict[ci], eps_dict[cj])
+        X_ci_arr = X_valid[lbl_valid == ci]
+        X_cj_arr = X_valid[lbl_valid == cj]
+        sep      = compute_separation(X_ci_arr, X_cj_arr, min_samples,
+                                      eps_dict[ci], eps_dict[cj])
         max_conn = max(conn_dict[ci], conn_dict[cj])
         if np.isinf(sep) or np.isinf(max_conn) or (sep + max_conn) == 0:
             continue
         dcsi_ij            = sep / (sep + max_conn)
-        weight             = len(X_ci) + len(X_cj)
+        weight             = len(X_ci_arr) + len(X_cj_arr)
         dcsi_weighted_sum += dcsi_ij * weight
         total_weight      += weight
 
@@ -416,6 +416,88 @@ def run_preprocessing(df):
     }
 
 
+# ── FUNGSI OPTIMASI ────────────────────────────────────────────────────────────
+def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
+    """
+    Jalankan BO lalu fit HDBSCAN + hitung DBCV & DCSI.
+    Identik dengan alur Colab: best_params diambil dari optimizer.max,
+    tidak ada grid search tambahan.
+    """
+    def hdbscan_objective_dbcv(min_cluster_size, min_samples):
+        mcs = int(np.floor(min_cluster_size))
+        ms  = int(np.floor(min_samples))
+        if mcs < 2 or ms < 1 or ms > mcs:
+            return -1.0
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=mcs,
+            min_samples=ms,
+            metric="euclidean"
+        )
+        labels  = clusterer.fit_predict(X_clust)
+        n_valid = len(set(labels)) - (1 if -1 in labels else 0)
+        if n_valid < 2:
+            return -1.0
+        try:
+            return validity_index(X_clust, labels)
+        except Exception:
+            return -1.0
+
+    pbounds = {
+        "min_cluster_size": (mcs_min, mcs_max),
+        "min_samples":      (ms_min,  ms_max),
+    }
+
+    optimizer = BayesianOptimization(
+        f=hdbscan_objective_dbcv,
+        pbounds=pbounds,
+        random_state=42,
+        verbose=0
+    )
+    optimizer.maximize(init_points=8, n_iter=20)
+
+    # Ambil langsung dari optimizer.max — identik dengan Colab
+    best_params = optimizer.max["params"]
+    best_dbcv   = float(optimizer.max["target"])
+    best_mcs    = int(np.floor(best_params["min_cluster_size"]))
+    best_ms     = int(np.floor(best_params["min_samples"]))
+
+    # Fit model final dengan parameter terbaik
+    hdbscan_model = hdbscan.HDBSCAN(
+        min_cluster_size=best_mcs,
+        min_samples=best_ms,
+        metric="euclidean",
+        prediction_data=True
+    )
+    hdbscan_model.fit(X_clust)
+    cluster_labels = hdbscan_model.labels_
+    n_clusters     = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
+
+    # DBCV pada model final
+    dbcv_score = float(validity_index(X_clust, cluster_labels))
+
+    # DCSI — gunakan best_ms (sama persis dengan Colab)
+    _dcsi      = dcsi_index(X_clust, cluster_labels, best_ms)
+    dcsi_score = float(_dcsi) if _dcsi is not None else None
+
+    bo_targets     = [float(v) for v in optimizer.space.target]
+    bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
+    bo_iterations  = list(range(1, len(bo_targets) + 1))
+
+    return {
+        "best_mcs":       best_mcs,
+        "best_ms":        best_ms,
+        "best_dbcv":      best_dbcv,
+        "n_clusters":     int(n_clusters),
+        "cluster_labels": cluster_labels,
+        "dbcv_score":     dbcv_score,
+        "dcsi_score":     dcsi_score,
+        "bo_targets":     bo_targets,
+        "bo_best_so_far": bo_best_so_far,
+        "bo_iterations":  bo_iterations,
+        "pbounds":        pbounds,
+    }
+
+
 # ── PAGE HEADER ────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="page-header">
@@ -434,10 +516,17 @@ if "data" not in st.session_state:
 df        = st.session_state["data"]
 data_hash = joblib.hash(df.values)
 
-# ── PREPROCESSING ──────────────────────────────────────────────────────────────
+# ── PREPROCESSING (cache per data_hash) ───────────────────────────────────────
 if st.session_state.get("_prep_hash") != data_hash:
+    # Reset hasil BO agar tidak stale saat data berganti
+    for k in ["_bo_run_hash", "_best_mcs", "_best_ms", "_best_dbcv",
+              "_n_clusters", "_bo_targets", "_bo_best_so_far", "_bo_iterations",
+              "cluster_labels", "df_clustered", "_dbcv_score", "_dcsi_score", "_pbounds"]:
+        st.session_state.pop(k, None)
+
     with st.spinner("Memproses data..."):
         prep = run_preprocessing(df)
+
     st.session_state.update({
         "_prep_hash":         data_hash,
         "_scaled":            prep["scaled_standard"],
@@ -470,147 +559,7 @@ n_components      = st.session_state["_n_comp"]
 pca_result        = st.session_state["_pca_result"]
 X_clustering      = st.session_state["X_clustering"].values
 
-# ── PARAMETER RENTANG BAYESIAN OPTIMIZATION (sidebar) ─────────────────────────
-with st.sidebar:
-    st.markdown("## ⚙️ Parameter Bayesian Optimization")
-    st.markdown("Atur rentang pencarian parameter HDBSCAN:")
-
-    st.markdown("**min_cluster_size**")
-    mcs_min = st.number_input("Minimum", min_value=2, max_value=20, value=2,
-                              key="mcs_min", help="Batas bawah min_cluster_size")
-    mcs_max = st.number_input("Maximum", min_value=2, max_value=20, value=7,
-                              key="mcs_max", help="Batas atas min_cluster_size")
-    if mcs_min > mcs_max:
-        st.warning("Minimum harus ≤ Maximum untuk min_cluster_size")
-        mcs_min = mcs_max
-
-    st.markdown("**min_samples**")
-    ms_min = st.number_input("Minimum", min_value=1, max_value=20, value=1,
-                             key="ms_min", help="Batas bawah min_samples")
-    ms_max = st.number_input("Maximum", min_value=1, max_value=20, value=6,
-                             key="ms_max", help="Batas atas min_samples")
-    if ms_min > ms_max:
-        st.warning("Minimum harus ≤ Maximum untuk min_samples")
-        ms_min = ms_max
-
-    st.markdown("**Iterasi**")
-    bo_init_points = st.number_input("Init Points", min_value=2, max_value=50, value=8,
-                                     key="bo_init", help="Jumlah titik eksplorasi awal")
-    bo_n_iter      = st.number_input("n_iter", min_value=5, max_value=100, value=20,
-                                     key="bo_iter", help="Jumlah iterasi optimasi")
-
-    run_bo = st.button("🚀 Jalankan Optimasi", use_container_width=True)
-
-# Buat hash parameter BO agar re-run otomatis saat parameter berubah
-bo_param_hash = joblib.hash((data_hash, mcs_min, mcs_max, ms_min, ms_max,
-                              bo_init_points, bo_n_iter))
-
-# ── PEMODELAN KLASTERISASI ─────────────────────────────────────────────────────
-# Jalankan ulang jika: parameter berubah, data berubah, atau tombol ditekan
-needs_run = (
-    st.session_state.get("_bo_param_hash") != bo_param_hash
-    or run_bo
-)
-
-if needs_run:
-    with st.spinner("Mencari parameter optimal dengan Bayesian Optimization..."):
-
-        # --- Objective function (identik dengan Colab) ---
-        def hdbscan_objective_dbcv(min_cluster_size, min_samples):
-            min_cluster_size = int(np.floor(min_cluster_size))
-            min_samples      = int(np.floor(min_samples))
-            if min_cluster_size < 2 or min_samples < 1:
-                return -1.0
-            if min_samples > min_cluster_size:
-                return -1.0
-            clusterer = hdbscan.HDBSCAN(
-                min_cluster_size=min_cluster_size,
-                min_samples=min_samples,
-                metric="euclidean"
-            )
-            labels    = clusterer.fit_predict(X_clustering)
-            n_valid   = len(set(labels)) - (1 if -1 in labels else 0)
-            if n_valid < 2:
-                return -1.0
-            try:
-                return validity_index(X_clustering, labels)
-            except:
-                return -1.0
-
-        pbounds = {
-            "min_cluster_size": (mcs_min, mcs_max),
-            "min_samples":      (ms_min,  ms_max),
-        }
-
-        optimizer = BayesianOptimization(
-            f=hdbscan_objective_dbcv,
-            pbounds=pbounds,
-            random_state=42,
-            verbose=0
-        )
-        optimizer.maximize(init_points=bo_init_points, n_iter=bo_n_iter)
-
-        # --- Ambil parameter terbaik LANGSUNG dari BO (sama seperti Colab) ---
-        best_params = optimizer.max["params"]
-        best_dbcv   = float(optimizer.max["target"])
-        best_mcs    = int(np.floor(best_params["min_cluster_size"]))
-        best_ms     = int(np.floor(best_params["min_samples"]))
-
-        # --- Fit model final dengan parameter terbaik ---
-        hdbscan_model = hdbscan.HDBSCAN(
-            min_cluster_size=best_mcs,
-            min_samples=best_ms,
-            metric="euclidean",
-            prediction_data=True
-        )
-        hdbscan_model.fit(X_clustering)
-        cluster_labels = hdbscan_model.labels_
-        n_clusters     = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
-
-        df_result = df.copy()
-        df_result["Cluster"] = cluster_labels
-
-        # --- Evaluasi: DBCV & DCSI (fungsi DCSI identik dengan Colab) ---
-        dbcv_score = float(validity_index(X_clustering, cluster_labels))
-        _dcsi      = dcsi_index(X_clustering, cluster_labels, best_ms)
-        dcsi_score = float(_dcsi) if _dcsi is not None else None
-
-        # --- Data konvergensi BO ---
-        bo_targets     = [float(v) for v in optimizer.space.target]
-        bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
-        bo_iterations  = list(range(1, len(bo_targets) + 1))
-
-        st.session_state.update({
-            "_bo_param_hash":  bo_param_hash,
-            "_best_mcs":       best_mcs,
-            "_best_ms":        best_ms,
-            "_best_dbcv":      best_dbcv,
-            "_n_clusters":     int(n_clusters),
-            "_bo_targets":     bo_targets,
-            "_bo_best_so_far": bo_best_so_far,
-            "_bo_iterations":  bo_iterations,
-            "cluster_labels":  cluster_labels,
-            "df_clustered":    df_result,
-            "_dbcv_score":     dbcv_score,
-            "_dcsi_score":     dcsi_score,
-            "_pbounds":        pbounds,
-        })
-
-best_mcs       = st.session_state["_best_mcs"]
-best_ms        = st.session_state["_best_ms"]
-best_dbcv      = st.session_state["_best_dbcv"]
-n_clusters     = st.session_state["_n_clusters"]
-bo_targets     = st.session_state["_bo_targets"]
-bo_best_so_far = st.session_state["_bo_best_so_far"]
-bo_iterations  = st.session_state["_bo_iterations"]
-cluster_labels = st.session_state["cluster_labels"]
-df_result      = st.session_state["df_clustered"]
-dbcv_score     = st.session_state["_dbcv_score"]
-dcsi_score     = st.session_state["_dcsi_score"]
-pbounds        = st.session_state.get("_pbounds", {
-    "min_cluster_size": (mcs_min, mcs_max),
-    "min_samples":      (ms_min,  ms_max),
-})
+bo_done = "_best_mcs" in st.session_state
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
 menu = st.tabs([
@@ -619,7 +568,10 @@ menu = st.tabs([
     "HASIL KLASTERISASI"
 ])
 
-# ── TAB 1: PREPROCESSING DATA ─────────────────────────────────────────────────
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 1 — PREPROCESSING DATA
+# ══════════════════════════════════════════════════════════════════════════════
 with menu[0]:
 
     sec("1. STANDARISASI DATA")
@@ -646,7 +598,10 @@ with menu[0]:
     safe_table(vif_data.round(4))
     if not high_vif.empty:
         variabels = ", ".join(high_vif["Variabel"].tolist())
-        st.warning(f"Variabel {variabels} memiliki nilai VIF ≥ 10 yang mengindikasikan adanya multikolinieritas tinggi")
+        st.warning(
+            f"Variabel {variabels} memiliki nilai VIF ≥ 10 "
+            f"yang mengindikasikan adanya multikolinieritas tinggi"
+        )
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
 
@@ -686,191 +641,292 @@ with menu[0]:
         st.info("PCA tidak diperlukan (tidak memenuhi syarat multikolinieritas atau korelasi)")
 
 
-# ── TAB 2: PEMODELAN KLASTERISASI ─────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 2 — PEMODELAN KLASTERISASI
+# ══════════════════════════════════════════════════════════════════════════════
 with menu[1]:
 
     sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
 
-    # Tampilkan rentang parameter yang digunakan
+    # ── Panel input rentang parameter ─────────────────────────────────────────
     st.markdown(
-        f"""
-        <div class="param-range-box">
-            <p class="param-range-title">Rentang Parameter yang Digunakan</p>
-            <table style="width:100%;font-size:0.85rem;font-family:'Plus Jakarta Sans',sans-serif;">
-                <tr>
-                    <th style="color:#1565c0;padding:4px 12px 4px 0;text-align:left;">Parameter</th>
-                    <th style="color:#1565c0;padding:4px 12px;text-align:center;">Minimum</th>
-                    <th style="color:#1565c0;padding:4px 0;text-align:center;">Maximum</th>
-                </tr>
-                <tr>
-                    <td style="padding:4px 12px 4px 0;color:#1a3a5c;">min_cluster_size</td>
-                    <td style="padding:4px 12px;text-align:center;color:#1976d2;font-weight:700;">{int(pbounds['min_cluster_size'][0])}</td>
-                    <td style="padding:4px 0;text-align:center;color:#1976d2;font-weight:700;">{int(pbounds['min_cluster_size'][1])}</td>
-                </tr>
-                <tr>
-                    <td style="padding:4px 12px 4px 0;color:#1a3a5c;">min_samples</td>
-                    <td style="padding:4px 12px;text-align:center;color:#1976d2;font-weight:700;">{int(pbounds['min_samples'][0])}</td>
-                    <td style="padding:4px 0;text-align:center;color:#1976d2;font-weight:700;">{int(pbounds['min_samples'][1])}</td>
-                </tr>
-            </table>
-        </div>
-        """,
+        '<div class="bo-param-panel">'
+        '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter Pencarian</p>',
         unsafe_allow_html=True
     )
 
-    st.success("Parameter optimal berhasil ditemukan!")
-    metric_html([
-        ("min cluster size", best_mcs),
-        ("min samples",      best_ms),
-        ("Best DBCV Score",  f"{best_dbcv:.4f}"),
-        ("Jumlah Klaster",   n_clusters),
-    ], cols=4)
+    col_mcs, col_ms = st.columns(2)
 
-    col1, col2 = st.columns(2)
-    plot_specs = [
-        (col1, bo_best_so_far, "Best DBCV Over Time",              "Best DBCV Score", False),
-        (col2, bo_targets,     "Bayesian Optimization Convergence", "DBCV Score",      True),
-    ]
-    for fig_col, y_data, title, ylabel, show_hline in plot_specs:
-        with fig_col:
-            fig_, ax_ = plt.subplots(figsize=(7, 4))
-            fig_.patch.set_facecolor('#f7fbff')
-            ax_.set_facecolor('#f7fbff')
-            ax_.plot(bo_iterations, y_data, marker='o', color='#1976d2',
-                     linewidth=2, markersize=5)
-            if show_hline:
-                ax_.axhline(best_dbcv, color='#ef5350', linestyle="--",
-                            linewidth=1.5, label=f"Best = {best_dbcv:.4f}")
-                ax_.legend(fontsize=8)
-            ax_.set_title(title, fontsize=11, fontweight='bold', color='#1565c0')
-            ax_.set_xlabel("Iterasi", fontsize=9, color='#3d6b8e')
-            ax_.set_ylabel(ylabel, fontsize=9, color='#3d6b8e')
-            ax_.grid(True, linestyle='--', alpha=0.3)
-            for sp in ax_.spines.values():
-                sp.set_edgecolor('#d4e8f8')
-            plt.tight_layout()
-            st.pyplot(fig_)
-            plt.close(fig_)
+    with col_mcs:
+        st.markdown('<p class="param-group-label">min_cluster_size</p>',
+                    unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            mcs_min = st.number_input("Minimum", min_value=2, max_value=50,
+                                      value=2, step=1, key="mcs_min")
+        with c2:
+            mcs_max = st.number_input("Maximum", min_value=2, max_value=50,
+                                      value=7, step=1, key="mcs_max")
+        if mcs_min > mcs_max:
+            st.warning("Minimum harus ≤ Maximum")
+            mcs_min = mcs_max
 
-    sec("2. VISUALISASI SCATTER PLOT")
-    X_plot        = st.session_state["X_plot"]
-    xcol, ycol    = X_plot.columns[0], X_plot.columns[1]
-    unique_labels = sorted(set(cluster_labels))
-    palette       = sns.color_palette("Set2", sum(1 for l in unique_labels if l != -1))
-    color_map, pi = {}, 0
-    for lbl in unique_labels:
-        if lbl == -1:
-            color_map[lbl] = "#b0bec5"
-        else:
-            color_map[lbl] = palette[pi]; pi += 1
+    with col_ms:
+        st.markdown('<p class="param-group-label">min_samples</p>',
+                    unsafe_allow_html=True)
+        c3, c4 = st.columns(2)
+        with c3:
+            ms_min = st.number_input("Minimum", min_value=1, max_value=50,
+                                     value=1, step=1, key="ms_min")
+        with c4:
+            ms_max = st.number_input("Maximum", min_value=1, max_value=50,
+                                     value=6, step=1, key="ms_max")
+        if ms_min > ms_max:
+            st.warning("Minimum harus ≤ Maximum")
+            ms_min = ms_max
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    fig.patch.set_facecolor('#f7fbff')
-    ax.set_facecolor('#f7fbff')
-    for lbl in unique_labels:
-        idx   = cluster_labels == lbl
-        pts   = X_plot[idx].reset_index(drop=True)
-        color = color_map[lbl]
-        ax.scatter(pts[xcol], pts[ycol], s=70,
-                   c='#b0bec5' if lbl == -1 else [color],
-                   label='Noise' if lbl == -1 else f'Klaster {lbl}',
-                   edgecolor='white', linewidth=0.8,
-                   alpha=0.55 if lbl == -1 else 0.92)
-        if lbl != -1 and len(pts) >= 3:
-            try:
-                hull = ConvexHull(pts[[xcol, ycol]])
-                ax.add_patch(Polygon(pts.iloc[hull.vertices][[xcol, ycol]].values,
-                                     closed=True, facecolor=color, alpha=0.15,
-                                     edgecolor=color, linewidth=2))
-            except:
-                pass
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    ax.set_title("Distribusi Klaster HDBSCAN + Bayesian Optimization",
-                 fontsize=13, fontweight='bold', color='#1565c0', pad=12)
-    ax.set_xlabel(xcol, fontsize=9, color='#3d6b8e')
-    ax.set_ylabel(ycol, fontsize=9, color='#3d6b8e')
-    ax.set_xticks([]); ax.set_yticks([])
-    ax.legend(title="Klaster", fontsize=9, title_fontsize=9)
-    ax.grid(True, linestyle='--', alpha=0.3)
-    for sp in ax.spines.values():
-        sp.set_edgecolor('#d4e8f8')
-    plt.tight_layout()
-    st.pyplot(fig)
-    plt.close(fig)
+    run_bo = st.button("🚀 Jalankan Optimasi", use_container_width=True,
+                       type="primary")
 
-    sec("3. EVALUASI MODEL")
-    metric_html([
-        ("DBCV Score", f"{dbcv_score:.4f}"),
-        ("DCSI Score", "N/A" if dcsi_score is None else f"{dcsi_score:.4f}"),
-    ], cols=2)
-    st.caption("Kriteria: DBCV Score > 0.5 dan DCSI Score > 0.5")
+    # Hash unik: data + parameter rentang
+    bo_run_hash = joblib.hash((data_hash, int(mcs_min), int(mcs_max),
+                               int(ms_min), int(ms_max)))
 
-    if dcsi_score is not None:
-        if dbcv_score > 0.5 and dcsi_score > 0.5:
-            st.success("Kualitas klaster sudah baik dengan stabilitas dan pemisahan yang jelas antarklaster")
-        elif dbcv_score > 0.5:
-            st.warning("Kualitas klaster cukup baik berdasarkan DBCV, namun kurang optimal berdasarkan DCSI")
-        elif dcsi_score > 0.5:
-            st.warning("Kualitas klaster cukup baik berdasarkan DCSI, namun kurang optimal berdasarkan DBCV")
-        else:
-            st.error("Kualitas klaster yang buruk berdasarkan DBCV dan DCSI")
+    # Jalankan BO hanya saat tombol diklik DAN hash belum tersimpan
+    if run_bo and st.session_state.get("_bo_run_hash") != bo_run_hash:
+        with st.spinner("Mencari parameter optimal dengan Bayesian Optimization..."):
+            result = run_bayesian_optimization(
+                X_clustering,
+                int(mcs_min), int(mcs_max),
+                int(ms_min),  int(ms_max)
+            )
+
+        df_result = df.copy()
+        df_result["Cluster"] = result["cluster_labels"]
+
+        st.session_state.update({
+            "_bo_run_hash":    bo_run_hash,
+            "_best_mcs":       result["best_mcs"],
+            "_best_ms":        result["best_ms"],
+            "_best_dbcv":      result["best_dbcv"],
+            "_n_clusters":     result["n_clusters"],
+            "_bo_targets":     result["bo_targets"],
+            "_bo_best_so_far": result["bo_best_so_far"],
+            "_bo_iterations":  result["bo_iterations"],
+            "cluster_labels":  result["cluster_labels"],
+            "df_clustered":    df_result,
+            "_dbcv_score":     result["dbcv_score"],
+            "_dcsi_score":     result["dcsi_score"],
+            "_pbounds":        result["pbounds"],
+        })
+        bo_done = True
+        st.rerun()
+
+    # ── Tampilkan hasil ────────────────────────────────────────────────────────
+    if not bo_done:
+        st.info("Atur rentang parameter di atas lalu klik **Jalankan Optimasi** untuk memulai.")
     else:
-        st.warning("DCSI tidak dapat dihitung")
-        if dbcv_score > 0.5:
-            st.success("Kualitas klaster sudah baik berdasarkan DBCV")
+        best_mcs       = st.session_state["_best_mcs"]
+        best_ms        = st.session_state["_best_ms"]
+        best_dbcv      = st.session_state["_best_dbcv"]
+        n_clusters     = st.session_state["_n_clusters"]
+        bo_targets     = st.session_state["_bo_targets"]
+        bo_best_so_far = st.session_state["_bo_best_so_far"]
+        bo_iterations  = st.session_state["_bo_iterations"]
+        cluster_labels = st.session_state["cluster_labels"]
+        dbcv_score     = st.session_state["_dbcv_score"]
+        dcsi_score     = st.session_state["_dcsi_score"]
+
+        st.success("Parameter optimal berhasil ditemukan!")
+        metric_html([
+            ("min cluster size", best_mcs),
+            ("min samples",      best_ms),
+            ("Best DBCV Score",  f"{best_dbcv:.4f}"),
+            ("Jumlah Klaster",   n_clusters),
+        ], cols=4)
+
+        # Grafik konvergensi BO
+        col1, col2 = st.columns(2)
+        plot_specs = [
+            (col1, bo_best_so_far, "Best DBCV Over Time",
+             "Best DBCV Score", False),
+            (col2, bo_targets,     "Bayesian Optimization Convergence",
+             "DBCV Score",      True),
+        ]
+        for fig_col, y_data, title, ylabel, show_hline in plot_specs:
+            with fig_col:
+                fig_, ax_ = plt.subplots(figsize=(7, 4))
+                fig_.patch.set_facecolor('#f7fbff')
+                ax_.set_facecolor('#f7fbff')
+                ax_.plot(bo_iterations, y_data, marker='o', color='#1976d2',
+                         linewidth=2, markersize=5)
+                if show_hline:
+                    ax_.axhline(best_dbcv, color='#ef5350', linestyle="--",
+                                linewidth=1.5, label=f"Best = {best_dbcv:.4f}")
+                    ax_.legend(fontsize=8)
+                ax_.set_title(title, fontsize=11, fontweight='bold', color='#1565c0')
+                ax_.set_xlabel("Iterasi", fontsize=9, color='#3d6b8e')
+                ax_.set_ylabel(ylabel, fontsize=9, color='#3d6b8e')
+                ax_.grid(True, linestyle='--', alpha=0.3)
+                for sp in ax_.spines.values():
+                    sp.set_edgecolor('#d4e8f8')
+                plt.tight_layout()
+                st.pyplot(fig_)
+                plt.close(fig_)
+
+        # ── Scatter Plot ──────────────────────────────────────────────────────
+        sec("2. VISUALISASI SCATTER PLOT")
+        X_plot        = st.session_state["X_plot"]
+        xcol, ycol    = X_plot.columns[0], X_plot.columns[1]
+        unique_labels = sorted(set(cluster_labels))
+        palette       = sns.color_palette(
+            "Set2", sum(1 for l in unique_labels if l != -1)
+        )
+        color_map, pi = {}, 0
+        for lbl in unique_labels:
+            if lbl == -1:
+                color_map[lbl] = "#b0bec5"
+            else:
+                color_map[lbl] = palette[pi]; pi += 1
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        fig.patch.set_facecolor('#f7fbff')
+        ax.set_facecolor('#f7fbff')
+        for lbl in unique_labels:
+            idx   = cluster_labels == lbl
+            pts   = X_plot[idx].reset_index(drop=True)
+            color = color_map[lbl]
+            ax.scatter(
+                pts[xcol], pts[ycol], s=70,
+                c='#b0bec5' if lbl == -1 else [color],
+                label='Noise' if lbl == -1 else f'Klaster {lbl}',
+                edgecolor='white', linewidth=0.8,
+                alpha=0.55 if lbl == -1 else 0.92
+            )
+            if lbl != -1 and len(pts) >= 3:
+                try:
+                    hull = ConvexHull(pts[[xcol, ycol]])
+                    ax.add_patch(Polygon(
+                        pts.iloc[hull.vertices][[xcol, ycol]].values,
+                        closed=True, facecolor=color, alpha=0.15,
+                        edgecolor=color, linewidth=2
+                    ))
+                except Exception:
+                    pass
+
+        ax.set_title("Distribusi Klaster HDBSCAN + Bayesian Optimization",
+                     fontsize=13, fontweight='bold', color='#1565c0', pad=12)
+        ax.set_xlabel(xcol, fontsize=9, color='#3d6b8e')
+        ax.set_ylabel(ycol, fontsize=9, color='#3d6b8e')
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.legend(title="Klaster", fontsize=9, title_fontsize=9)
+        ax.grid(True, linestyle='--', alpha=0.3)
+        for sp in ax.spines.values():
+            sp.set_edgecolor('#d4e8f8')
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
+
+        # ── Evaluasi ──────────────────────────────────────────────────────────
+        sec("3. EVALUASI MODEL")
+        metric_html([
+            ("DBCV Score", f"{dbcv_score:.4f}"),
+            ("DCSI Score", "N/A" if dcsi_score is None else f"{dcsi_score:.4f}"),
+        ], cols=2)
+        st.caption("Kriteria: DBCV Score > 0.5 dan DCSI Score > 0.5")
+
+        if dcsi_score is not None:
+            if dbcv_score > 0.5 and dcsi_score > 0.5:
+                st.success(
+                    "Kualitas klaster sudah baik dengan stabilitas dan "
+                    "pemisahan yang jelas antarklaster"
+                )
+            elif dbcv_score > 0.5:
+                st.warning(
+                    "Kualitas klaster cukup baik berdasarkan DBCV, "
+                    "namun kurang optimal berdasarkan DCSI"
+                )
+            elif dcsi_score > 0.5:
+                st.warning(
+                    "Kualitas klaster cukup baik berdasarkan DCSI, "
+                    "namun kurang optimal berdasarkan DBCV"
+                )
+            else:
+                st.error("Kualitas klaster yang buruk berdasarkan DBCV dan DCSI")
         else:
-            st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
+            st.warning("DCSI tidak dapat dihitung")
+            if dbcv_score > 0.5:
+                st.success("Kualitas klaster sudah baik berdasarkan DBCV")
+            else:
+                st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
 
 
-# ── TAB 3: HASIL KLASTERISASI ─────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 3 — HASIL KLASTERISASI
+# ══════════════════════════════════════════════════════════════════════════════
 with menu[2]:
 
-    numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
-
-    sec("1. HASIL KLASTERISASI")
-    safe_table(df_result)
-
-    step_label("Nilai Rata-rata per Klaster")
-    cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
-    safe_table(cluster_mean.reset_index())
-
-    step_label("Rata-Rata Persentase per Klaster (%)")
-    cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
-    safe_table(cluster_pct.reset_index())
-
-    sec("2. KARAKTERISTIK KLASTER")
-    all_clusters     = sorted(df_result["Cluster"].unique())
-    selected_cluster = st.selectbox(
-        "Pilih Klaster",
-        all_clusters,
-        format_func=lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
-    )
-    df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
-    label_text = "Noise" if selected_cluster == -1 else f"Klaster {selected_cluster}"
-    step_label(f"{label_text} ({len(df_cluster)} Provinsi)")
-    safe_table(df_cluster)
-
-    cluster_mean_all = (df_result[df_result["Cluster"] != -1]
-                        .groupby("Cluster")[numeric_cols].mean().round(3))
-    cluster_pct_all  = cluster_mean_all.div(cluster_mean_all.sum(axis=0), axis=1).mul(100).round(2)
-
-    step_label("Karakteristik")
-    if selected_cluster == -1:
-        st.warning("Klaster -1 merupakan noise (tidak tergabung dalam klaster utama manapun)")
-        mean_noise = df_cluster[numeric_cols].mean().round(3).to_frame("Nilai Rata-rata").T
-        if not cluster_mean_all.empty:
-            pct_noise = (df_cluster[numeric_cols].mean()
-                         .div(cluster_mean_all.sum(axis=0)) * 100).round(2).to_frame("Rata-Rata Persentase (%)").T
-            combined  = pd.concat([mean_noise, pct_noise])
-            combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-        else:
-            combined = mean_noise
-            combined.index = ["Nilai Rata-rata"]
-        safe_table(combined.reset_index())
+    if not bo_done:
+        st.info("Jalankan optimasi di tab **Pemodelan Klasterisasi** terlebih dahulu.")
     else:
-        combined = pd.concat([
-            cluster_mean_all.loc[selected_cluster].to_frame("Nilai Rata-rata").T,
-            cluster_pct_all.loc[selected_cluster].to_frame("Rata-Rata Persentase (%)").T
-        ])
-        combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-        safe_table(combined.reset_index())
+        df_result    = st.session_state["df_clustered"]
+        numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+
+        sec("1. HASIL KLASTERISASI")
+        safe_table(df_result)
+
+        step_label("Nilai Rata-rata per Klaster")
+        cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
+        safe_table(cluster_mean.reset_index())
+
+        step_label("Rata-Rata Persentase per Klaster (%)")
+        cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
+        safe_table(cluster_pct.reset_index())
+
+        sec("2. KARAKTERISTIK KLASTER")
+        all_clusters     = sorted(df_result["Cluster"].unique())
+        selected_cluster = st.selectbox(
+            "Pilih Klaster",
+            all_clusters,
+            format_func=lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
+        )
+        df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
+        label_text = "Noise" if selected_cluster == -1 else f"Klaster {selected_cluster}"
+        step_label(f"{label_text} ({len(df_cluster)} Provinsi)")
+        safe_table(df_cluster)
+
+        cluster_mean_all = (
+            df_result[df_result["Cluster"] != -1]
+            .groupby("Cluster")[numeric_cols].mean().round(3)
+        )
+        cluster_pct_all = cluster_mean_all.div(
+            cluster_mean_all.sum(axis=0), axis=1
+        ).mul(100).round(2)
+
+        step_label("Karakteristik")
+        if selected_cluster == -1:
+            st.warning(
+                "Klaster -1 merupakan noise "
+                "(tidak tergabung dalam klaster utama manapun)"
+            )
+            mean_noise = df_cluster[numeric_cols].mean().round(3).to_frame("Nilai Rata-rata").T
+            if not cluster_mean_all.empty:
+                pct_noise = (
+                    df_cluster[numeric_cols].mean()
+                    .div(cluster_mean_all.sum(axis=0)) * 100
+                ).round(2).to_frame("Rata-Rata Persentase (%)").T
+                combined  = pd.concat([mean_noise, pct_noise])
+                combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
+            else:
+                combined = mean_noise
+                combined.index = ["Nilai Rata-rata"]
+            safe_table(combined.reset_index())
+        else:
+            combined = pd.concat([
+                cluster_mean_all.loc[selected_cluster].to_frame("Nilai Rata-rata").T,
+                cluster_pct_all.loc[selected_cluster].to_frame("Rata-Rata Persentase (%)").T
+            ])
+            combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
+            safe_table(combined.reset_index())
