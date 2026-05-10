@@ -200,7 +200,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1.2rem;
 }
 .bo-param-panel-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: #1565c0;
     letter-spacing: 0.09em;
@@ -973,7 +973,7 @@ with menu[2]:
                     all_high = True
 
                 if all_high:
-                    kategori = "Dampak Banjir Ekstrem (Noise)"
+                    kategori = "Dampak Banjir Ekstrem"
                     interp   = (
                         "Klaster -1 merupakan noise yang terdiri dari provinsi-provinsi dengan "
                         "karakteristik dampak banjir yang atipikal. Meskipun model HDBSCAN "
