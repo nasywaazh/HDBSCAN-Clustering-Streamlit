@@ -472,7 +472,7 @@ if geojson and feature_id_key:
 
     fig.update_traces(
         marker_line_color="#4A2C0A",
-        marker_line_width=1.1,
+        marker_line_width=1,
     )
 else:
     fig = go.Figure()
@@ -502,8 +502,8 @@ fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     legend=dict(
-        # lEGEND KLASTER
-        title=dict(text="Label Klaster", font=dict(size=14, color="#1565c0", weight="bold")),
+        # LEGEND KLASTER
+        title=dict(text="Label Klaster", font=dict(size=13, color="#1565c0", weight="bold")),
         orientation="v",
         x=0.01,
         y=0.02,
@@ -543,13 +543,11 @@ st.markdown(cards_html, unsafe_allow_html=True)
 sec("2. DETAIL INFORMASI PROVINSI")
 
 selected_prov = st.selectbox(
-    "Pilih Provinsi untuk melihat detail",
+    "PILIH PROVINSI UNTUK MELIHAT DETAIL",
     sorted(df_result["Provinsi"].unique()),
 )
 
-prov_row     = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 cluster_n    = int(prov_row["cluster_num"])
-short_lbl    = SHORT_LABEL.get(cluster_n, f"Klaster {cluster_n}")
 full_lbl     = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
 is_noise     = cluster_n == -1
 badge_cls    = "badge badge-noise" if is_noise else "badge badge-klaster"
