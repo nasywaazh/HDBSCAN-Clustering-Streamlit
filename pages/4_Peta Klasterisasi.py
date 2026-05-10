@@ -467,12 +467,12 @@ if geojson and feature_id_key:
         zoom=3.8,
         center={"lat": -2.5, "lon": 118},
         opacity=0.80,
-        labels={"label_klaster": "Label Klaster"},
+        labels={"label_klaster"},
     )
 
     fig.update_traces(
         marker_line_color="#2C2C2A",
-        marker_line_width=1,
+        marker_line_width=0.9,
     )
 else:
     fig = go.Figure()
