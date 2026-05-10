@@ -156,9 +156,11 @@ html, body, [data-testid="stAppViewContainer"] {
     border-radius: 14px;
     padding: 1.2rem 1.6rem;
     margin-bottom: 1rem;
-    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
-.prov-name { font-size: 1.4rem; font-weight: 800; color: #1565c0; margin: 0; flex: 1; }
+.prov-name { font-size: 1.4rem; font-weight: 800; color: #1565c0; margin: 0 0 0.75rem 0; }
+.prov-meta {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+}
 .badge {
     display: inline-block; font-size: 0.78rem; font-weight: 700;
     letter-spacing: 0.06em; padding: 0.3rem 0.9rem;
@@ -166,7 +168,12 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 .badge-klaster   { background: linear-gradient(135deg, #1565c0, #0288d1); color: #fff; }
 .badge-noise     { background: #b0bec5; color: #fff; }
-.badge-pemekaran { background: #fff3e0; color: #e07b39; border: 1px solid #e07b39; }
+.badge-label     {
+    background: #e3f2fd; color: #1565c0;
+    border: 1px solid #c2dff5; font-weight: 600;
+    text-transform: none; letter-spacing: 0;
+    font-size: 0.82rem; padding: 0.3rem 0.9rem;
+}
 
 /* DOWNLOAD */
 [data-testid="stDownloadButton"] button {
@@ -188,14 +195,11 @@ html, body, [data-testid="stAppViewContainer"] {
 
 
 # ── HELPERS ───────────────────────────────────────────────────────────────────
-
 def sec(title):
     st.markdown(f"### {title}")
 
 
 # ── LABEL CONFIGS ─────────────────────────────────────────────────────────────
-
-# Label lengkap untuk LEGEND PETA saja
 LEGEND_LABEL = {
     0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
     1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
@@ -203,7 +207,6 @@ LEGEND_LABEL = {
     -1: "Noise – Ekstrem",
 }
 
-# Label pendek untuk KARTU METRIK & BADGE DETAIL
 SHORT_LABEL = {
     0:  "Klaster 0",
     1:  "Klaster 1",
@@ -211,7 +214,14 @@ SHORT_LABEL = {
     -1: "Noise (-1)",
 }
 
-# Warna per klaster (sama seperti versi sebelumnya)
+# Label lengkap untuk detail provinsi: "Klaster 0 - Moderat ..."
+FULL_LABEL = {
+    0:  "Klaster 0 - Moderat (Pengungsian & Genangan Tinggi)",
+    1:  "Klaster 1 - Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
+    2:  "Klaster 2 - Rendah",
+    -1: "Noise - Ekstrem",
+}
+
 COLOR_PALETTE = {
     0:  "#E07B39",
     1:  "#C0392B",
@@ -219,7 +229,6 @@ COLOR_PALETTE = {
     -1: "#95A5A6",
 }
 
-# CSS class kartu per klaster
 CARD_CLASS = {
     0:  "klaster-0",
     1:  "klaster-1",
@@ -230,8 +239,7 @@ CARD_CLASS = {
 PEMEKARAN_LIST = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
 
 
-# ── PAGE HEADER ───────────────────────────────────────────────────────────────
-
+# ── PAGE HEADER (guard) ───────────────────────────────────────────────────────
 if "df_clustered" not in st.session_state:
     st.markdown("""
     <div class="page-header">
@@ -245,7 +253,6 @@ if "df_clustered" not in st.session_state:
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
 # ── KOORDINAT & MAPPING ───────────────────────────────────────────────────────
-
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397), "Sumatera Utara": (2.115201, 99.544901),
     "Sumatera Barat": (-0.739610, 100.800018), "Riau": (0.293416, 101.706939),
@@ -319,20 +326,15 @@ def normalize_province(name: str) -> str:
 
 
 # ── DATA PREP ─────────────────────────────────────────────────────────────────
-
 df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 df_result["cluster_num"]   = df_result["Cluster"]
-
-# label_klaster = label PANJANG (untuk peta/legend)
 df_result["label_klaster"] = df_result["cluster_num"].apply(
     lambda n: LEGEND_LABEL.get(n, f"Klaster {n}")
 )
-
-df_result["lat"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p,(None,None))[0])
-df_result["lon"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p,(None,None))[1])
+df_result["lat"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p, (None, None))[0])
+df_result["lon"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p, (None, None))[1])
 df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
 
-# Urutan: Klaster 0,1,2,..., Noise terakhir
 all_cluster_nums = sorted(df_result["cluster_num"].unique(), key=lambda x: (x == -1, x))
 unique_labels    = [LEGEND_LABEL.get(n, f"Klaster {n}") for n in all_cluster_nums]
 COLOR_MAP        = {LEGEND_LABEL.get(n, f"Klaster {n}"): COLOR_PALETTE.get(n, "#3498DB")
@@ -345,7 +347,6 @@ numeric_cols = (
 )
 
 # ── PAGE HEADER ───────────────────────────────────────────────────────────────
-
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</h1>
@@ -357,7 +358,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
-
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan Peta")
     map_style = st.selectbox(
@@ -371,8 +371,7 @@ with st.sidebar:
         default=numeric_cols,
     )
 
-# ── LOAD & PATCH GEOJSON ─────────────────────────────────────────────────────
-
+# ── LOAD & PATCH GEOJSON ──────────────────────────────────────────────────────
 GEOJSON_URLS = [
     "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
     "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
@@ -415,17 +414,14 @@ def load_and_patch_geojson(urls, papua_geom_available: bool):
         return geojson, feature_id_key
 
     from papua_geom import PAPUA_GEOM
-
     geojson = json.loads(json.dumps(geojson))
     new_features = []
-
     for feat in geojson["features"]:
         kode = int(feat["properties"].get(prop_key, 0))
         if kode in (91, 94) and kode in PAPUA_GEOM:
             feat = json.loads(json.dumps(feat))
             feat["geometry"] = PAPUA_GEOM[kode]
         new_features.append(feat)
-
     for kode, nama in {92: "Papua Barat Daya", 95: "Papua Selatan",
                        96: "Papua Pegunungan", 97: "Papua Tengah"}.items():
         if kode in PAPUA_GEOM:
@@ -434,7 +430,6 @@ def load_and_patch_geojson(urls, papua_geom_available: bool):
                 "properties": {prop_key: kode, "kode": kode, "Provinsi": nama},
                 "geometry": PAPUA_GEOM[kode],
             })
-
     geojson["features"] = new_features
     return geojson, feature_id_key
 
@@ -450,7 +445,6 @@ if not PAPUA_GEOM_AVAILABLE:
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
 # ── SECTION 1: PETA ───────────────────────────────────────────────────────────
-
 sec("1. PETA KLASTERISASI")
 
 hover_cols_cfg = {col: True for col in selected_hover}
@@ -474,12 +468,13 @@ if geojson and feature_id_key:
         mapbox_style=map_style,
         zoom=3.8,
         center={"lat": -2.5, "lon": 118},
-        opacity=0.75,
-        labels={"label_klaster": "Klaster"},
+        opacity=0.80,
+        labels={"label_klaster": "Label Klaster"},
     )
+    # Batas wilayah warna coklat tua
     fig.update_traces(
-        marker_line_color="rgba(255,255,255,0.5)",
-        marker_line_width=0.6,
+        marker_line_color="#4A2C0A",
+        marker_line_width=0.8,
     )
 else:
     fig = go.Figure()
@@ -509,10 +504,17 @@ fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     legend=dict(
-        title=dict(text="Klaster", font=dict(size=12, color="#1565c0")),
-        orientation="v", x=0.01, y=0.98,
+        # Judul legend diubah menjadi "Label Klaster"
+        title=dict(text="Label Klaster", font=dict(size=12, color="#1565c0", weight="bold")),
+        orientation="v",
+        # Pojok kiri bawah
+        x=0.01,
+        y=0.02,
+        xanchor="left",
+        yanchor="bottom",
         bgcolor="rgba(255,255,255,0.92)",
-        bordercolor="#c2dff5", borderwidth=1,
+        bordercolor="#c2dff5",
+        borderwidth=1,
         font=dict(size=11, family="Plus Jakarta Sans", color="#1a3a5c"),
     ),
     hoverlabel=dict(
@@ -523,8 +525,7 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-# ── KARTU RINGKASAN KLASTER (label pendek saja) ───────────────────────────────
-
+# ── KARTU RINGKASAN KLASTER ───────────────────────────────────────────────────
 klaster_counts = df_result.groupby("cluster_num").size().to_dict()
 n_cards = len(all_cluster_nums)
 
@@ -542,7 +543,6 @@ cards_html += "</div>"
 st.markdown(cards_html, unsafe_allow_html=True)
 
 # ── SECTION 2: DETAIL PROVINSI ────────────────────────────────────────────────
-
 sec("2. DETAIL INFORMASI PROVINSI")
 
 selected_prov = st.selectbox(
@@ -553,22 +553,21 @@ selected_prov = st.selectbox(
 prov_row     = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 cluster_n    = int(prov_row["cluster_num"])
 short_lbl    = SHORT_LABEL.get(cluster_n, f"Klaster {cluster_n}")
+full_lbl     = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
 is_noise     = cluster_n == -1
-is_pemekaran = prov_row["Provinsi_norm"] in PEMEKARAN_LIST
 badge_cls    = "badge badge-noise" if is_noise else "badge badge-klaster"
-pemekaran_badge = (
-    '&nbsp;<span class="badge badge-pemekaran">★ Pemekaran 2022</span>'
-    if is_pemekaran else ""
-)
 
 st.markdown(f"""
 <div class="prov-header">
     <p class="prov-name">{selected_prov}</p>
-    <span class="{badge_cls}">{short_lbl}</span>
-    {pemekaran_badge}
+    <div class="prov-meta">
+        <span class="{badge_cls}">{short_lbl}</span>
+        <span class="badge badge-label">{full_lbl}</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
+# Metrik indikator
 EXCLUDE_COLS = {"lat", "lon", "kode_bps", "cluster_num"}
 items = []
 for col in numeric_cols:
@@ -591,7 +590,6 @@ for i in range(0, len(items), chunk_size):
     st.markdown(f'<div class="metric-grid-{len(chunk)}">{cards}</div>', unsafe_allow_html=True)
 
 # ── SECTION 3: DOWNLOAD ───────────────────────────────────────────────────────
-
 sec("3. DOWNLOAD HASIL KLASTERISASI")
 
 csv = (
