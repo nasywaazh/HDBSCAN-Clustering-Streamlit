@@ -87,19 +87,12 @@ html, body, [data-testid="stAppViewContainer"] {
     text-align: center;
 }
 .metric-label {
-    font-size: 0.82rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #7bafd4;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    margin: 0 0 0.4rem 0;
-}
-.metric-sublabel {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #a0bfd4;
     margin: 0 0 0.5rem 0;
-    font-style: italic;
 }
 .metric-value {
     font-size: 1.4rem;
@@ -108,23 +101,18 @@ html, body, [data-testid="stAppViewContainer"] {
     line-height: 1;
     margin: 0;
 }
-/* Per-klaster theming */
 .metric-card.klaster-0  { border-color: #E07B39; background: linear-gradient(135deg, #fff3e0, #fff8f0); }
-.metric-card.klaster-0 .metric-value  { color: #bf5f1a; }
-.metric-card.klaster-0 .metric-label  { color: #e07b39; }
-.metric-card.klaster-0 .metric-sublabel { color: #c88050; }
+.metric-card.klaster-0 .metric-value { color: #bf5f1a; }
+.metric-card.klaster-0 .metric-label { color: #e07b39; }
 .metric-card.klaster-1  { border-color: #C0392B; background: linear-gradient(135deg, #fdecea, #fff5f5); }
-.metric-card.klaster-1 .metric-value  { color: #922b21; }
-.metric-card.klaster-1 .metric-label  { color: #c0392b; }
-.metric-card.klaster-1 .metric-sublabel { color: #a84032; }
+.metric-card.klaster-1 .metric-value { color: #922b21; }
+.metric-card.klaster-1 .metric-label { color: #c0392b; }
 .metric-card.klaster-2  { border-color: #c8a800; background: linear-gradient(135deg, #fffde7, #fffff5); }
-.metric-card.klaster-2 .metric-value  { color: #9a7d0a; }
-.metric-card.klaster-2 .metric-label  { color: #b8960c; }
-.metric-card.klaster-2 .metric-sublabel { color: #9e8830; }
-.metric-card.noise  { border-color: #90a4ae; background: linear-gradient(135deg, #eceff1, #f5f7f8); }
-.metric-card.noise .metric-value  { color: #546e7a; }
-.metric-card.noise .metric-label  { color: #78909c; }
-.metric-card.noise .metric-sublabel { color: #90a4ae; }
+.metric-card.klaster-2 .metric-value { color: #9a7d0a; }
+.metric-card.klaster-2 .metric-label { color: #b8960c; }
+.metric-card.noise { border-color: #90a4ae; background: linear-gradient(135deg, #eceff1, #f5f7f8); }
+.metric-card.noise .metric-value { color: #546e7a; }
+.metric-card.noise .metric-label { color: #78909c; }
 
 [data-testid="stAlert"] {
     border-radius: 12px !important;
@@ -176,9 +164,9 @@ html, body, [data-testid="stAppViewContainer"] {
     letter-spacing: 0.06em; padding: 0.3rem 0.9rem;
     border-radius: 20px; text-transform: uppercase; white-space: nowrap;
 }
-.badge-klaster     { background: linear-gradient(135deg, #1565c0, #0288d1); color: #fff; }
-.badge-noise       { background: #b0bec5; color: #fff; }
-.badge-pemekaran   { background: #fff3e0; color: #e07b39; border: 1px solid #e07b39; }
+.badge-klaster   { background: linear-gradient(135deg, #1565c0, #0288d1); color: #fff; }
+.badge-noise     { background: #b0bec5; color: #fff; }
+.badge-pemekaran { background: #fff3e0; color: #e07b39; border: 1px solid #e07b39; }
 
 /* DOWNLOAD */
 [data-testid="stDownloadButton"] button {
@@ -204,53 +192,42 @@ html, body, [data-testid="stAppViewContainer"] {
 def sec(title):
     st.markdown(f"### {title}")
 
-def safe_table(df_show, max_rows=500, height=360):
-    df_render = df_show.head(max_rows).reset_index(drop=True)
-    headers = "".join(f"<th>{col}</th>" for col in df_render.columns)
-    rows = ""
-    for _, row in df_render.iterrows():
-        cells = "".join(
-            f"<td>{round(val,4) if isinstance(val,float) else val}</td>"
-            for val in row.values
-        )
-        rows += f"<tr>{cells}</tr>"
-    html = f"""<div class="safe-table-wrap" style="max-height:{height}px;">
-        <table><thead><tr>{headers}</tr></thead><tbody>{rows}</tbody></table></div>"""
-    st.markdown(html, unsafe_allow_html=True)
-    if len(df_show) > max_rows:
-        st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
+# ── LABEL CONFIGS ─────────────────────────────────────────────────────────────
 
-# ── LABEL MAPPING (cluster number → display name) ─────────────────────────────
-# Nama label ditampilkan di peta, legend, kartu, dan badge detail provinsi
-
-CLUSTER_NAMES = {
-    0:  "Klaster 0 – Moderat",
-    1:  "Klaster 1 – Tinggi",
+# Label lengkap untuk LEGEND PETA saja
+LEGEND_LABEL = {
+    0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
+    1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
     2:  "Klaster 2 – Rendah",
     -1: "Noise – Ekstrem",
 }
-# Deskripsi singkat untuk subtitle kartu
-CLUSTER_DESC = {
-    0:  "Pengungsian & Genangan Tinggi",
-    1:  "Fatalitas & Kerusakan Struktural Tinggi",
-    2:  "Rendah",
-    -1: "Ekstrem",
+
+# Label pendek untuk KARTU METRIK & BADGE DETAIL
+SHORT_LABEL = {
+    0:  "Klaster 0",
+    1:  "Klaster 1",
+    2:  "Klaster 2",
+    -1: "Noise (-1)",
 }
-# Warna per klaster
+
+# Warna per klaster (sama seperti versi sebelumnya)
 COLOR_PALETTE = {
     0:  "#E07B39",
     1:  "#C0392B",
     2:  "#D4AC0D",
     -1: "#95A5A6",
 }
+
 # CSS class kartu per klaster
 CARD_CLASS = {
-    0: "klaster-0",
-    1: "klaster-1",
-    2: "klaster-2",
+    0:  "klaster-0",
+    1:  "klaster-1",
+    2:  "klaster-2",
     -1: "noise",
 }
+
+PEMEKARAN_LIST = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
 
 
 # ── PAGE HEADER ───────────────────────────────────────────────────────────────
@@ -300,7 +277,6 @@ CENTROIDS = {
     "Papua Tengah": (-3.800000, 135.500000),
 }
 
-# Kode BPS resmi 38 provinsi — Papua pemekaran pakai kode resmi
 KODE_MAP = {
     "Aceh": 11, "Sumatera Utara": 12, "Sumatera Barat": 13,
     "Riau": 14, "Jambi": 15, "Sumatera Selatan": 16,
@@ -333,8 +309,6 @@ ALIAS = {
     "Kep. Riau": "Kepulauan Riau",
 }
 
-PEMEKARAN_LIST = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
-
 
 def normalize_province(name: str) -> str:
     stripped = name.strip()
@@ -347,24 +321,22 @@ def normalize_province(name: str) -> str:
 # ── DATA PREP ─────────────────────────────────────────────────────────────────
 
 df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
+df_result["cluster_num"]   = df_result["Cluster"]
 
-# Buat label_klaster menggunakan nama lengkap (dengan deskripsi)
-def make_label(cluster_num):
-    return CLUSTER_NAMES.get(cluster_num, f"Klaster {cluster_num}")
-
-df_result["label_klaster"]  = df_result["Cluster"].apply(make_label)
-df_result["cluster_num"]    = df_result["Cluster"]   # simpan angka asli
+# label_klaster = label PANJANG (untuk peta/legend)
+df_result["label_klaster"] = df_result["cluster_num"].apply(
+    lambda n: LEGEND_LABEL.get(n, f"Klaster {n}")
+)
 
 df_result["lat"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p,(None,None))[0])
 df_result["lon"]      = df_result["Provinsi_norm"].map(lambda p: CENTROIDS.get(p,(None,None))[1])
 df_result["kode_bps"] = df_result["Provinsi_norm"].map(KODE_MAP)
 
-# Urutan legend: Klaster 0, 1, 2, ..., lalu Noise
+# Urutan: Klaster 0,1,2,..., Noise terakhir
 all_cluster_nums = sorted(df_result["cluster_num"].unique(), key=lambda x: (x == -1, x))
-unique_labels    = [make_label(n) for n in all_cluster_nums]
-
-# Color map & card config berdasarkan nama label
-COLOR_MAP = {make_label(n): COLOR_PALETTE.get(n, "#3498DB") for n in all_cluster_nums}
+unique_labels    = [LEGEND_LABEL.get(n, f"Klaster {n}") for n in all_cluster_nums]
+COLOR_MAP        = {LEGEND_LABEL.get(n, f"Klaster {n}"): COLOR_PALETTE.get(n, "#3498DB")
+                    for n in all_cluster_nums}
 
 numeric_cols = (
     df_result.select_dtypes(include=np.number)
@@ -398,21 +370,6 @@ with st.sidebar:
         options=numeric_cols,
         default=numeric_cols,
     )
-    st.markdown("---")
-    st.markdown("### 🎨 Legenda Klaster")
-    for n in all_cluster_nums:
-        lbl   = make_label(n)
-        color = COLOR_PALETTE.get(n, "#3498DB")
-        desc  = CLUSTER_DESC.get(n, "")
-        st.markdown(
-            f'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">'
-            f'<div style="width:13px;height:13px;border-radius:50%;background:{color};'
-            f'border:1.5px solid rgba(0,0,0,0.15);flex-shrink:0;margin-top:3px;"></div>'
-            f'<div><span style="font-size:0.82rem;font-weight:700;color:#1a3a5c;">{lbl}</span>'
-            f'<br><span style="font-size:0.72rem;color:#7bafd4;font-style:italic;">{desc}</span>'
-            f'</div></div>',
-            unsafe_allow_html=True,
-        )
 
 # ── LOAD & PATCH GEOJSON ─────────────────────────────────────────────────────
 
@@ -469,14 +426,8 @@ def load_and_patch_geojson(urls, papua_geom_available: bool):
             feat["geometry"] = PAPUA_GEOM[kode]
         new_features.append(feat)
 
-    # Inject 4 provinsi pemekaran
-    NEW_PROV_META = {
-        92: "Papua Barat Daya",
-        95: "Papua Selatan",
-        96: "Papua Pegunungan",
-        97: "Papua Tengah",
-    }
-    for kode, nama in NEW_PROV_META.items():
+    for kode, nama in {92: "Papua Barat Daya", 95: "Papua Selatan",
+                       96: "Papua Pegunungan", 97: "Papua Tengah"}.items():
         if kode in PAPUA_GEOM:
             new_features.append({
                 "type": "Feature",
@@ -523,29 +474,28 @@ if geojson and feature_id_key:
         mapbox_style=map_style,
         zoom=3.8,
         center={"lat": -2.5, "lon": 118},
-        opacity=0.82,
+        opacity=0.75,
         labels={"label_klaster": "Klaster"},
     )
     fig.update_traces(
-        marker_line_color="rgba(255,255,255,0.6)",
-        marker_line_width=0.8,
+        marker_line_color="rgba(255,255,255,0.5)",
+        marker_line_width=0.6,
     )
 else:
-    # Fallback: bubble map
     fig = go.Figure()
     for n in all_cluster_nums:
-        lbl = make_label(n)
+        lbl = LEGEND_LABEL.get(n, f"Klaster {n}")
         sub = df_map[df_map["cluster_num"] == n]
-        customdata = sub[selected_hover].values if selected_hover else np.empty((len(sub),0))
-        hover_lines = ["<b>%{text}</b>", f"{lbl}"] + [
+        customdata = sub[selected_hover].values if selected_hover else np.empty((len(sub), 0))
+        hover_lines = ["<b>%{text}</b>"] + [
             f"{col}: %{{customdata[{i}]}}" for i, col in enumerate(selected_hover)
         ]
         fig.add_trace(go.Scattermapbox(
             lat=sub["lat"], lon=sub["lon"], mode="markers+text",
-            marker=dict(size=18, color=COLOR_PALETTE.get(n,"#3498DB"), opacity=0.85),
+            marker=dict(size=18, color=COLOR_PALETTE.get(n, "#3498DB"), opacity=0.85),
             text=sub["Provinsi"], textposition="top center",
             customdata=customdata,
-            hovertemplate="<br>".join(hover_lines)+"<extra></extra>",
+            hovertemplate="<br>".join(hover_lines) + "<extra></extra>",
             name=lbl,
         ))
     fig.update_layout(
@@ -573,24 +523,19 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-if PAPUA_GEOM_AVAILABLE:
-    st.success("✅ Seluruh 38 provinsi ditampilkan sebagai polygon akurat di peta.")
-
-# ── KARTU RINGKASAN KLASTER ───────────────────────────────────────────────────
+# ── KARTU RINGKASAN KLASTER (label pendek saja) ───────────────────────────────
 
 klaster_counts = df_result.groupby("cluster_num").size().to_dict()
 n_cards = len(all_cluster_nums)
 
 cards_html = f'<div class="metric-grid-{min(n_cards, 4)}">'
 for n in all_cluster_nums:
-    lbl        = make_label(n)
-    desc       = CLUSTER_DESC.get(n, "")
-    count      = klaster_counts.get(n, 0)
-    css_class  = CARD_CLASS.get(n, "")
+    short_lbl = SHORT_LABEL.get(n, f"Klaster {n}")
+    count     = klaster_counts.get(n, 0)
+    css_class = CARD_CLASS.get(n, "")
     cards_html += f"""
     <div class="metric-card {css_class}">
-        <p class="metric-label">{lbl}</p>
-        <p class="metric-sublabel">{desc}</p>
+        <p class="metric-label">{short_lbl}</p>
         <p class="metric-value">{count} Provinsi</p>
     </div>"""
 cards_html += "</div>"
@@ -605,13 +550,12 @@ selected_prov = st.selectbox(
     sorted(df_result["Provinsi"].unique()),
 )
 
-prov_row      = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-cluster_n     = int(prov_row["cluster_num"])
-lbl_text      = make_label(cluster_n)
-desc_text     = CLUSTER_DESC.get(cluster_n, "")
-is_noise      = cluster_n == -1
-is_pemekaran  = prov_row["Provinsi_norm"] in PEMEKARAN_LIST
-badge_cls     = "badge badge-noise" if is_noise else "badge badge-klaster"
+prov_row     = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
+cluster_n    = int(prov_row["cluster_num"])
+short_lbl    = SHORT_LABEL.get(cluster_n, f"Klaster {cluster_n}")
+is_noise     = cluster_n == -1
+is_pemekaran = prov_row["Provinsi_norm"] in PEMEKARAN_LIST
+badge_cls    = "badge badge-noise" if is_noise else "badge badge-klaster"
 pemekaran_badge = (
     '&nbsp;<span class="badge badge-pemekaran">★ Pemekaran 2022</span>'
     if is_pemekaran else ""
@@ -620,12 +564,11 @@ pemekaran_badge = (
 st.markdown(f"""
 <div class="prov-header">
     <p class="prov-name">{selected_prov}</p>
-    <span class="{badge_cls}">{lbl_text}</span>
+    <span class="{badge_cls}">{short_lbl}</span>
     {pemekaran_badge}
 </div>
 """, unsafe_allow_html=True)
 
-# Indikator dalam kartu 3-kolom
 EXCLUDE_COLS = {"lat", "lon", "kode_bps", "cluster_num"}
 items = []
 for col in numeric_cols:
@@ -637,7 +580,7 @@ for col in numeric_cols:
 
 chunk_size = 3
 for i in range(0, len(items), chunk_size):
-    chunk = items[i:i+chunk_size]
+    chunk = items[i:i + chunk_size]
     cards = "".join(
         f'<div class="metric-card">'
         f'<p class="metric-label">{label}</p>'
@@ -651,18 +594,14 @@ for i in range(0, len(items), chunk_size):
 
 sec("3. DOWNLOAD HASIL KLASTERISASI")
 
-# Tambah kolom nama klaster lengkap di CSV
-df_download = df_result.drop(
-    columns=["Provinsi_norm", "lat", "lon", "kode_bps", "label_klaster", "cluster_num"],
-    errors="ignore",
-).copy()
-df_download.insert(
-    df_download.columns.get_loc("Cluster") + 1,
-    "Kategori",
-    df_result["cluster_num"].apply(lambda n: CLUSTER_DESC.get(n, f"Klaster {n}"))
+csv = (
+    df_result.drop(
+        columns=["Provinsi_norm", "lat", "lon", "kode_bps", "label_klaster", "cluster_num"],
+        errors="ignore",
+    )
+    .to_csv(index=False)
+    .encode("utf-8")
 )
-
-csv = df_download.to_csv(index=False).encode("utf-8")
 st.download_button(
     label="⬇️ DOWNLOAD CSV",
     data=csv,
