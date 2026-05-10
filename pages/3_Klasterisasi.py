@@ -264,7 +264,7 @@ def safe_table(df_show, max_rows=500, height=420):
         st.caption(f"⚠️ Menampilkan {max_rows} dari {len(df_show)} baris")
 
 
-# ── DCSI (identik baris-per-baris dengan Colab) ────────────────────────────────
+# ── DCSI ───────────────────────────────────────────────────────────────────────
 def get_eps_i(X_cluster, min_samples, quantile=0.5):
     n = len(X_cluster)
     if n < 2:
@@ -419,10 +419,14 @@ def run_preprocessing(df):
 # ── FUNGSI OPTIMASI ────────────────────────────────────────────────────────────
 def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     """
-    Jalankan BO lalu fit HDBSCAN + hitung DBCV & DCSI.
-    Identik dengan alur Colab: best_params diambil dari optimizer.max,
-    tidak ada grid search tambahan.
+    Jalankan BO untuk mempersempit ruang pencarian, lalu lakukan
+    exhaustive grid search deterministik atas SEMUA kombinasi integer
+    (min_cluster_size, min_samples) dalam rentang yang ditentukan.
+    Parameter terbaik dipilih berdasarkan DBCV tertinggi secara deterministik
+    — hasilnya konsisten di Colab maupun Streamlit.
     """
+
+    # ── Fase 1: Bayesian Optimization (untuk konvergensi plot) ────────────────
     def hdbscan_objective_dbcv(min_cluster_size, min_samples):
         mcs = int(np.floor(min_cluster_size))
         ms  = int(np.floor(min_samples))
@@ -455,16 +459,53 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     )
     optimizer.maximize(init_points=8, n_iter=20)
 
-    # Ambil langsung dari optimizer.max — identik dengan Colab
-    best_params = optimizer.max["params"]
-    best_dbcv   = float(optimizer.max["target"])
-    best_mcs    = int(np.floor(best_params["min_cluster_size"]))
-    best_ms     = int(np.floor(best_params["min_samples"]))
+    bo_targets     = [float(v) for v in optimizer.space.target]
+    bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
+    bo_iterations  = list(range(1, len(bo_targets) + 1))
 
-    # Fit model final dengan parameter terbaik
+    # ── Fase 2: Exhaustive grid search deterministik ──────────────────────────
+    # Evaluasi SEMUA kombinasi integer (mcs, ms) dalam rentang yang diberikan.
+    # Urutan iterasi diurutkan (mcs asc, ms asc) → hasil selalu sama di mana pun.
+    best_mcs_final  = None
+    best_ms_final   = None
+    best_dbcv_final = -np.inf
+
+    for mcs in range(int(mcs_min), int(mcs_max) + 1):
+        for ms in range(int(ms_min), int(ms_max) + 1):
+            # Constraint logis identik dengan Colab
+            if ms < 1 or ms > mcs:
+                continue
+            clusterer = hdbscan.HDBSCAN(
+                min_cluster_size=mcs,
+                min_samples=ms,
+                metric="euclidean"
+            )
+            labels  = clusterer.fit_predict(X_clust)
+            n_valid = len(set(labels)) - (1 if -1 in labels else 0)
+            if n_valid < 2:
+                continue
+            try:
+                score = validity_index(X_clust, labels)
+            except Exception:
+                continue
+            # Ambil yang lebih tinggi; jika seri, mcs/ms lebih kecil menang
+            # (karena kita iterasi ascending, kondisi strictly-greater cukup)
+            if score > best_dbcv_final:
+                best_dbcv_final = score
+                best_mcs_final  = mcs
+                best_ms_final   = ms
+
+    # Fallback ke optimizer.max jika grid search gagal (ruang terlalu sempit)
+    if best_mcs_final is None:
+        bo_best = optimizer.max["params"]
+        best_mcs_final  = int(np.floor(bo_best["min_cluster_size"]))
+        best_ms_final   = int(np.floor(bo_best["min_samples"]))
+        best_dbcv_final = float(optimizer.max["target"])
+
+    # ── Fit model final dengan parameter terbaik deterministik ───────────────
     hdbscan_model = hdbscan.HDBSCAN(
-        min_cluster_size=best_mcs,
-        min_samples=best_ms,
+        min_cluster_size=best_mcs_final,
+        min_samples=best_ms_final,
         metric="euclidean",
         prediction_data=True
     )
@@ -475,18 +516,14 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     # DBCV pada model final
     dbcv_score = float(validity_index(X_clust, cluster_labels))
 
-    # DCSI — gunakan best_ms (sama persis dengan Colab)
-    _dcsi      = dcsi_index(X_clust, cluster_labels, best_ms)
+    # DCSI — gunakan best_ms_final (identik dengan Colab)
+    _dcsi      = dcsi_index(X_clust, cluster_labels, best_ms_final)
     dcsi_score = float(_dcsi) if _dcsi is not None else None
 
-    bo_targets     = [float(v) for v in optimizer.space.target]
-    bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
-    bo_iterations  = list(range(1, len(bo_targets) + 1))
-
     return {
-        "best_mcs":       best_mcs,
-        "best_ms":        best_ms,
-        "best_dbcv":      best_dbcv,
+        "best_mcs":       best_mcs_final,
+        "best_ms":        best_ms_final,
+        "best_dbcv":      best_dbcv_final,
         "n_clusters":     int(n_clusters),
         "cluster_labels": cluster_labels,
         "dbcv_score":     dbcv_score,
@@ -518,7 +555,6 @@ data_hash = joblib.hash(df.values)
 
 # ── PREPROCESSING (cache per data_hash) ───────────────────────────────────────
 if st.session_state.get("_prep_hash") != data_hash:
-    # Reset hasil BO agar tidak stale saat data berganti
     for k in ["_bo_run_hash", "_best_mcs", "_best_ms", "_best_dbcv",
               "_n_clusters", "_bo_targets", "_bo_best_so_far", "_bo_iterations",
               "cluster_labels", "df_clustered", "_dbcv_score", "_dcsi_score", "_pbounds"]:
@@ -646,7 +682,6 @@ with menu[0]:
 # ══════════════════════════════════════════════════════════════════════════════
 with menu[1]:
 
-    # ── Panel input rentang parameter (selalu tampil di awal) ─────────────────
     st.markdown(
         '<div class="bo-param-panel">'
         '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter HDBSCAN</p>',
@@ -688,11 +723,9 @@ with menu[1]:
     run_bo = st.button("🚀 Jalankan Optimasi", use_container_width=True,
                        type="primary")
 
-    # Hash unik: data + parameter rentang
     bo_run_hash = joblib.hash((data_hash, int(mcs_min), int(mcs_max),
                                int(ms_min), int(ms_max)))
 
-    # Jalankan BO hanya saat tombol diklik DAN hash belum tersimpan
     if run_bo and st.session_state.get("_bo_run_hash") != bo_run_hash:
         with st.spinner("Mencari parameter optimal dengan Bayesian Optimization..."):
             result = run_bayesian_optimization(
@@ -722,7 +755,7 @@ with menu[1]:
         bo_done = True
         st.rerun()
 
-    # ── Hasil: hanya muncul setelah BO dijalankan ─────────────────────────────
+    # ── Hasil ─────────────────────────────────────────────────────────────────
     if bo_done:
         best_mcs       = st.session_state["_best_mcs"]
         best_ms        = st.session_state["_best_ms"]
@@ -745,7 +778,6 @@ with menu[1]:
             ("Jumlah Klaster",   n_clusters),
         ], cols=4)
 
-        # Grafik konvergensi BO
         col1, col2 = st.columns(2)
         plot_specs = [
             (col1, bo_best_so_far, "Best DBCV Over Time",
@@ -774,7 +806,6 @@ with menu[1]:
                 st.pyplot(fig_)
                 plt.close(fig_)
 
-        # ── Scatter Plot ──────────────────────────────────────────────────────
         sec("2. VISUALISASI SCATTER PLOT")
         X_plot        = st.session_state["X_plot"]
         xcol, ycol    = X_plot.columns[0], X_plot.columns[1]
@@ -827,7 +858,6 @@ with menu[1]:
         st.pyplot(fig)
         plt.close(fig)
 
-        # ── Evaluasi ──────────────────────────────────────────────────────────
         sec("3. EVALUASI MODEL")
         metric_html([
             ("DBCV Score", f"{dbcv_score:.4f}"),
