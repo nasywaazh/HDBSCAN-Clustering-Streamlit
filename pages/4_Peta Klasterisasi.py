@@ -546,11 +546,11 @@ selected_prov = st.selectbox(
     sorted(df_result["Provinsi"].unique()),
 )
 
-prov_row     = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
-cluster_n    = int(prov_row["cluster_num"])
-full_lbl     = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
-is_noise     = cluster_n == -1
-badge_cls    = "badge badge-noise" if is_noise else "badge badge-klaster"
+prov_row  = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
+cluster_n = int(prov_row["cluster_num"])
+full_lbl  = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
+is_noise  = cluster_n == -1
+badge_cls = "badge badge-noise" if is_noise else "badge badge-klaster"
 
 st.markdown(f"""
 <div class="prov-header">
