@@ -194,12 +194,12 @@ html, body, [data-testid="stAppViewContainer"] {
 """, unsafe_allow_html=True)
 
 
-# ── HELPERS ───────────────────────────────────────────────────────────────────
+# HELPERS
 def sec(title):
     st.markdown(f"### {title}")
 
 
-# ── LABEL CONFIGS ─────────────────────────────────────────────────────────────
+# LABEL CONFIGS
 LEGEND_LABEL = {
     0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
     1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
@@ -211,10 +211,9 @@ SHORT_LABEL = {
     0:  "Klaster 0",
     1:  "Klaster 1",
     2:  "Klaster 2",
-    -1: "Noise (-1)",
+    -1: "Noise",
 }
 
-# Label lengkap untuk detail provinsi: "Klaster 0 - Moderat ..."
 FULL_LABEL = {
     0:  "Klaster 0 - Moderat (Pengungsian & Genangan Tinggi)",
     1:  "Klaster 1 - Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
@@ -239,7 +238,7 @@ CARD_CLASS = {
 PEMEKARAN_LIST = ["Papua Barat Daya", "Papua Selatan", "Papua Pegunungan", "Papua Tengah"]
 
 
-# ── PAGE HEADER (guard) ───────────────────────────────────────────────────────
+# PAGE HEADER (guard)
 if "df_clustered" not in st.session_state:
     st.markdown("""
     <div class="page-header">
@@ -252,7 +251,7 @@ if "df_clustered" not in st.session_state:
 
 df_result: pd.DataFrame = st.session_state["df_clustered"].copy()
 
-# ── KOORDINAT & MAPPING ───────────────────────────────────────────────────────
+# KOORDINAT & MAPPING
 CENTROIDS = {
     "Aceh": (4.695135, 96.749397), "Sumatera Utara": (2.115201, 99.544901),
     "Sumatera Barat": (-0.739610, 100.800018), "Riau": (0.293416, 101.706939),
@@ -325,7 +324,7 @@ def normalize_province(name: str) -> str:
     return stripped
 
 
-# ── DATA PREP ─────────────────────────────────────────────────────────────────
+# DATA PREP
 df_result["Provinsi_norm"] = df_result["Provinsi"].apply(normalize_province)
 df_result["cluster_num"]   = df_result["Cluster"]
 df_result["label_klaster"] = df_result["cluster_num"].apply(
@@ -346,7 +345,7 @@ numeric_cols = (
     .tolist()
 )
 
-# ── PAGE HEADER ───────────────────────────────────────────────────────────────
+# PAGE HEADER
 st.markdown("""
 <div class="page-header">
     <h1 class="page-title">PETA KLASTERISASI WILAYAH TERDAMPAK BANJIR DI INDONESIA</h1>
@@ -357,7 +356,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────────
+# SIDEBAR
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan Peta")
     map_style = st.selectbox(
@@ -371,7 +370,7 @@ with st.sidebar:
         default=numeric_cols,
     )
 
-# ── LOAD & PATCH GEOJSON ──────────────────────────────────────────────────────
+# LOAD & PATCH GEOJSON
 GEOJSON_URLS = [
     "https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/master/indonesia-prov.geojson",
     "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-en.geojson",
@@ -438,13 +437,12 @@ geojson, feature_id_key = load_and_patch_geojson(tuple(GEOJSON_URLS), PAPUA_GEOM
 
 if not PAPUA_GEOM_AVAILABLE:
     st.warning(
-        "⚠️ File `papua_geom.py` tidak ditemukan. Letakkan di folder yang sama dengan halaman ini "
-        "agar 4 provinsi Papua pemekaran tampil sebagai polygon akurat."
+        "⚠️ File `papua_geom.py` tidak ditemukan"
     )
 
 df_map = df_result.dropna(subset=["lat", "lon"]).copy()
 
-# ── SECTION 1: PETA ───────────────────────────────────────────────────────────
+# PETA KLASTERISASI
 sec("1. PETA KLASTERISASI")
 
 hover_cols_cfg = {col: True for col in selected_hover}
@@ -471,10 +469,10 @@ if geojson and feature_id_key:
         opacity=0.80,
         labels={"label_klaster": "Label Klaster"},
     )
-    # Batas wilayah warna coklat tua
+
     fig.update_traces(
         marker_line_color="#4A2C0A",
-        marker_line_width=0.8,
+        marker_line_width=1.1,
     )
 else:
     fig = go.Figure()
@@ -504,10 +502,9 @@ fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     legend=dict(
-        # Judul legend diubah menjadi "Label Klaster"
-        title=dict(text="Label Klaster", font=dict(size=12, color="#1565c0", weight="bold")),
+        # lEGEND KLASTER
+        title=dict(text="Label Klaster", font=dict(size=14, color="#1565c0", weight="bold")),
         orientation="v",
-        # Pojok kiri bawah
         x=0.01,
         y=0.02,
         xanchor="left",
@@ -525,7 +522,7 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-# ── KARTU RINGKASAN KLASTER ───────────────────────────────────────────────────
+# METRIC RINGKASAN KLASTER
 klaster_counts = df_result.groupby("cluster_num").size().to_dict()
 n_cards = len(all_cluster_nums)
 
@@ -542,7 +539,7 @@ for n in all_cluster_nums:
 cards_html += "</div>"
 st.markdown(cards_html, unsafe_allow_html=True)
 
-# ── SECTION 2: DETAIL PROVINSI ────────────────────────────────────────────────
+# DETAIL PROVINSI
 sec("2. DETAIL INFORMASI PROVINSI")
 
 selected_prov = st.selectbox(
@@ -589,7 +586,7 @@ for i in range(0, len(items), chunk_size):
     )
     st.markdown(f'<div class="metric-grid-{len(chunk)}">{cards}</div>', unsafe_allow_html=True)
 
-# ── SECTION 3: DOWNLOAD ───────────────────────────────────────────────────────
+# SECTION 3: DOWNLOAD
 sec("3. DOWNLOAD HASIL KLASTERISASI")
 
 csv = (
