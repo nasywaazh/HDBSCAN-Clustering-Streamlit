@@ -1080,7 +1080,7 @@ with menu[2]:
 
             # ── Moderat — Risiko Pengungsian & Genangan ───────────────────────
             if b_dom and n_mixed > 4:
-                kategori = "Dampak Banjir Moderat (Risiko Pengungsian & Genangan Tinggi)"
+                kategori = "Dampak Banjir Moderat (Pengungsian & Genangan Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
                     f"serta rumah terendam dibandingkan dengan klaster utama lainnya. Namun, "
@@ -1110,7 +1110,7 @@ with menu[2]:
 
             # ── Fallback: dominasi Grup A atau Grup B tanpa ambang batas > 4 ──
             if a_dom:
-                kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
+                kategori = "Dampak Banjir Tinggi (Fatalitas & Kerusakan Struktural Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
                     f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
@@ -1121,7 +1121,7 @@ with menu[2]:
                 return kategori, interp, "error"
 
             if b_dom:
-                kategori = "Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
+                kategori = "Dampak Banjir Moderat (Pengungsian & Genangan Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
                     f"serta rumah terendam dibandingkan dengan klaster utama lainnya, namun "
