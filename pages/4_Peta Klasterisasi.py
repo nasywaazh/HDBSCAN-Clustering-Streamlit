@@ -467,7 +467,7 @@ if geojson and feature_id_key:
         zoom=3.8,
         center={"lat": -2.5, "lon": 118},
         opacity=0.80,
-        labels={"label_klaster"},
+        labels={"label_klaster": "Label Klaster"},
     )
 
     fig.update_traces(
