@@ -190,6 +190,7 @@ html, body, [data-testid="stAppViewContainer"] {
 ::-webkit-scrollbar-thumb { background: #90caf9; border-radius: 3px; }
 #MainMenu, footer, header { visibility: hidden; }
 [data-testid="stDecoration"], .stDeployButton { display: none; }
+[data-testid="stSelectbox"] > div > div > div[data-baseweb="select"] ~ div { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -546,6 +547,7 @@ selected_prov = st.selectbox(
     sorted(df_result["Provinsi"].unique()),
 )
 
+# SESUDAH
 prov_row  = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 cluster_n = int(prov_row["cluster_num"])
 full_lbl  = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
@@ -556,8 +558,7 @@ st.markdown(f"""
 <div class="prov-header">
     <p class="prov-name">{selected_prov}</p>
     <div class="prov-meta">
-        <span class="{badge_cls}">{short_lbl}</span>
-        <span class="badge badge-label">{full_lbl}</span>
+        <span class="{badge_cls}">{full_lbl}</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
