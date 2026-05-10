@@ -646,12 +646,10 @@ with menu[0]:
 # ══════════════════════════════════════════════════════════════════════════════
 with menu[1]:
 
-    sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
-
-    # ── Panel input rentang parameter ─────────────────────────────────────────
+    # ── Panel input rentang parameter (selalu tampil di awal) ─────────────────
     st.markdown(
         '<div class="bo-param-panel">'
-        '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter Pencarian</p>',
+        '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter HDBSCAN</p>',
         unsafe_allow_html=True
     )
 
@@ -724,10 +722,8 @@ with menu[1]:
         bo_done = True
         st.rerun()
 
-    # ── Tampilkan hasil ────────────────────────────────────────────────────────
-    if not bo_done:
-        st.info("Atur rentang parameter di atas lalu klik **Jalankan Optimasi** untuk memulai.")
-    else:
+    # ── Hasil: hanya muncul setelah BO dijalankan ─────────────────────────────
+    if bo_done:
         best_mcs       = st.session_state["_best_mcs"]
         best_ms        = st.session_state["_best_ms"]
         best_dbcv      = st.session_state["_best_dbcv"]
@@ -739,6 +735,8 @@ with menu[1]:
         dbcv_score     = st.session_state["_dbcv_score"]
         dcsi_score     = st.session_state["_dcsi_score"]
 
+        st.divider()
+        sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
         st.success("Parameter optimal berhasil ditemukan!")
         metric_html([
             ("min cluster size", best_mcs),
