@@ -984,7 +984,7 @@ with menu[2]:
                     )
                     return kategori, interp, "noise"
                 else:
-                    kategori = "Noise / Atipikal"
+                    kategori = "Noise"
                     interp   = (
                         "Klaster -1 merupakan noise yang terdiri dari provinsi-provinsi dengan "
                         "karakteristik dampak banjir yang atipikal dan tidak membentuk pola "
@@ -1038,7 +1038,7 @@ with menu[2]:
             # ── Dampak Tinggi — Fatalitas & Kerusakan Struktural ──────────────
             # Cek lebih dulu sebelum "tinggi generik" agar lebih spesifik
             if a_dom and n_higher_than_all > 4:
-                kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
+                kategori = "Dampak Banjir Tinggi (Fatalitas & Kerusakan Struktural Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
                     f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
@@ -1080,7 +1080,7 @@ with menu[2]:
 
             # ── Moderat — Risiko Pengungsian & Genangan ───────────────────────
             if b_dom and n_mixed > 4:
-                kategori = "Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
+                kategori = "Dampak Banjir Moderat (Risiko Pengungsian & Genangan Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
                     f"serta rumah terendam dibandingkan dengan klaster utama lainnya. Namun, "
