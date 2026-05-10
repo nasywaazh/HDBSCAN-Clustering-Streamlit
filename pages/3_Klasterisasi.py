@@ -1101,32 +1101,17 @@ with menu[2]:
             cluster_mean_all.sum(axis=0), axis=1
         ).mul(100).round(2)
 
-        step_label("Karakteristik")
-
-        # Tabel nilai rata-rata & persentase untuk klaster yang dipilih
+        # Hitung pct_row_sel untuk keperluan interpretasi (tidak ditampilkan sebagai tabel)
         if selected_cluster == -1:
-            mean_noise = df_cluster[numeric_cols].mean().round(3).to_frame("Nilai Rata-rata").T
             if not cluster_mean_all.empty:
-                pct_noise = (
+                pct_row_sel = (
                     df_cluster[numeric_cols].mean()
                     .div(cluster_mean_all.sum(axis=0)) * 100
-                ).round(2).to_frame("Rata-Rata Persentase (%)").T
-                combined  = pd.concat([mean_noise, pct_noise])
-                combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
-                pct_row_sel = pct_noise.iloc[0]
+                ).round(2)
             else:
-                combined = mean_noise
-                combined.index = ["Nilai Rata-rata"]
                 pct_row_sel = pd.Series(dtype=float)
         else:
-            combined = pd.concat([
-                cluster_mean_all.loc[selected_cluster].to_frame("Nilai Rata-rata").T,
-                cluster_pct_all.loc[selected_cluster].to_frame("Rata-Rata Persentase (%)").T
-            ])
-            combined.index = ["Nilai Rata-rata", "Rata-Rata Persentase (%)"]
             pct_row_sel = cluster_pct_all.loc[selected_cluster]
-
-        safe_table(combined.reset_index())
 
         # ── Interpretasi otomatis ──────────────────────────────────────────────
         step_label("Interpretasi Otomatis")
