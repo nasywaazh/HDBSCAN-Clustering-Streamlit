@@ -225,7 +225,7 @@ COLOR_PALETTE = {
     0:  "#E07B39",
     1:  "#C0392B",
     2:  "#D4AC0D",
-    -1: "#95A5A6",
+    -1: "#AAAAAA",
 }
 
 CARD_CLASS = {
@@ -471,7 +471,7 @@ if geojson and feature_id_key:
     )
 
     fig.update_traces(
-        marker_line_color="#4A2C0A",
+        marker_line_color="#2C2C2A",
         marker_line_width=1,
     )
 else:
@@ -503,7 +503,6 @@ fig.update_layout(
     plot_bgcolor="rgba(0,0,0,0)",
     legend=dict(
         # LEGEND KLASTER
-        title=dict(text="Label Klaster", font=dict(size=13, color="#1565c0", weight="bold")),
         orientation="v",
         x=0.01,
         y=0.02,
@@ -547,6 +546,7 @@ selected_prov = st.selectbox(
     sorted(df_result["Provinsi"].unique()),
 )
 
+prov_row     = df_result[df_result["Provinsi"] == selected_prov].iloc[0]
 cluster_n    = int(prov_row["cluster_num"])
 full_lbl     = FULL_LABEL.get(cluster_n, f"Klaster {cluster_n}")
 is_noise     = cluster_n == -1
