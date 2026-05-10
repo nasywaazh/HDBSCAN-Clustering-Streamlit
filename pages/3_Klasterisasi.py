@@ -1068,13 +1068,13 @@ with menu[2]:
             if n_lower_than_all > 4:
                 kategori = "Dampak Banjir Rendah"
                 interp = (
-                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
-                    f"proporsi lebih rendah dibandingkan seluruh klaster utama lainnya. "
+                    f"Klaster {cl_id} memiliki proporsi yang rendah pada seluruh indikator "
+                    f"dampak banjir dibandingkan dengan klaster utama lainnya, tanpa adanya indikator dampak banjir yang dominan. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
-                    f"relatif tidak terdampak parah oleh banjir, baik dari sisi korban jiwa, "
-                    f"korban luka dan pengungsi, maupun kerusakan dan genangan permukiman. "
+                    f"mengalami dampak banjir yang relatif rendah, baik dari segi korban, "
+                    f"kerusakan, maupun genangan permukiman. "
                     f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir rendah</strong> dibandingkan klaster utama lainnya."
+                    f"<strong>dampak banjir rendah</strong>"
                 )
                 return kategori, interp, "success"
 
