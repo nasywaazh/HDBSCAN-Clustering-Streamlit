@@ -200,7 +200,7 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1.2rem;
 }
 .bo-param-panel-title {
-    font-size: 0.82rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #1565c0;
     letter-spacing: 0.09em;
@@ -684,7 +684,7 @@ with menu[1]:
 
     st.markdown(
         '<div class="bo-param-panel">'
-        '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter HDBSCAN</p>',
+        '<p class="bo-param-panel-title">⚙️ Atur Rentang Parameter Utama HDBSCAN</p>',
         unsafe_allow_html=True
     )
 
@@ -720,7 +720,7 @@ with menu[1]:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    run_bo = st.button("🚀 Jalankan Optimasi", use_container_width=True,
+    run_bo = st.button("MULAI PROSES OPTIMASI", use_container_width=True,
                        type="primary")
 
     bo_run_hash = joblib.hash((data_hash, int(mcs_min), int(mcs_max),
@@ -845,7 +845,7 @@ with menu[1]:
                 except Exception:
                     pass
 
-        ax.set_title("Distribusi Klaster HDBSCAN + Bayesian Optimization",
+        ax.set_title("Scatter Plot HDBSCAN + Bayesian Optimization",
                      fontsize=13, fontweight='bold', color='#1565c0', pad=12)
         ax.set_xlabel(xcol, fontsize=9, color='#3d6b8e')
         ax.set_ylabel(ycol, fontsize=9, color='#3d6b8e')
@@ -905,11 +905,11 @@ with menu[2]:
         sec("1. HASIL KLASTERISASI")
         safe_table(df_result)
 
-        step_label("Nilai Rata-rata per Klaster")
+        step_label("Nilai Rata-Rata Setiap Klaster")
         cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
         safe_table(cluster_mean.reset_index())
 
-        step_label("Rata-Rata Persentase per Klaster (%)")
+        step_label("Rata-Rata Persentase Setiap Klaster (%)")
         cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
         safe_table(cluster_pct.reset_index())
 
@@ -1147,7 +1147,7 @@ with menu[2]:
         selected_cluster = st.selectbox(
             "Pilih Klaster",
             all_clusters,
-            format_func=lambda x: "Noise (-1)" if x == -1 else f"Klaster {x}"
+            format_func=lambda x: "Klaster -1 (Noise)" if x == -1 else f"Klaster {x}"
         )
         df_cluster = df_result[df_result["Cluster"] == selected_cluster].reset_index(drop=True)
         label_text = "Noise" if selected_cluster == -1 else f"Klaster {selected_cluster}"
@@ -1175,7 +1175,7 @@ with menu[2]:
             pct_row_sel = cluster_pct_all.loc[selected_cluster]
 
         # ── Interpretasi otomatis ──────────────────────────────────────────────
-        step_label("Interpretasi Otomatis")
+        step_label("Interpretasi Klaster")
         kategori_str, interp_str, alert_t = interpret_cluster(
             selected_cluster,
             pct_row_sel,
