@@ -946,21 +946,31 @@ with menu[2]:
         def interpret_cluster(cl_id, pct_row, cluster_mean_all_df,
                               cluster_pct_all_df, grup_a, grup_b, all_numeric_cols):
             """
-            Kembalikan tuple (kategori_str, interpretasi_str, alert_type)
-            alert_type: 'error' | 'warning' | 'success' | 'info'
+            Kembalikan tuple (kategori_str, interpretasi_str, alert_type).
+
+            Logika utama untuk klaster utama (bukan noise):
+            - Bandingkan proporsi klaster ini terhadap SETIAP klaster utama lain
+              secara per-indikator (bukan rata-rata), lalu hitung:
+                n_higher_than_all  = indikator yang lebih tinggi dari SEMUA klaster lain
+                n_lower_than_all   = indikator yang lebih rendah dari SEMUA klaster lain
+                n_mixed            = indikator yang ada di antara (lebih tinggi dari sebagian,
+                                     lebih rendah dari sebagian klaster lain)
+            - Jika n_higher_than_all > 4  → Dampak Tinggi (atau sub-kategori Grup A)
+            - Jika n_lower_than_all  > 4  → Dampak Rendah
+            - Jika n_mixed           > 4  → Dampak Moderat (atau sub-kategori Grup B)
+            - Fallback: cek dominasi Grup A / Grup B
             """
             # ── Noise ──────────────────────────────────────────────────────────
             if cl_id == -1:
-                # Cek apakah semua indikator proporsinya di atas rata-rata klaster utama
                 if not cluster_pct_all_df.empty:
-                    mean_pct_main = cluster_pct_all_df.mean()  # rata-rata proporsi klaster utama
-                    noise_pct     = pct_row[list(all_numeric_cols)]
+                    mean_pct_main = cluster_pct_all_df.mean()
+                    noise_pct     = pct_row.reindex(list(all_numeric_cols), fill_value=0)
                     all_high = all(
                         noise_pct.get(c, 0) >= mean_pct_main.get(c, 0)
                         for c in all_numeric_cols
                     )
                 else:
-                    all_high = True  # tidak ada klaster utama pembanding
+                    all_high = True
 
                 if all_high:
                     kategori = "Dampak Banjir Ekstrem (Noise)"
@@ -986,35 +996,66 @@ with menu[2]:
             if cluster_pct_all_df.empty:
                 return "Tidak Dapat Ditentukan", "Tidak cukup data klaster pembanding.", "info"
 
-            # Proporsi klaster ini vs rata-rata semua klaster utama
-            mean_pct_all = cluster_pct_all_df.mean()
-            pct_this     = cluster_pct_all_df.loc[cl_id]
+            other_ids  = [c for c in cluster_pct_all_df.index if c != cl_id]
+            pct_this   = cluster_pct_all_df.loc[cl_id]
+            cols       = list(all_numeric_cols)
 
-            # Hitung skor relatif tiap kolom: > mean → tinggi, < mean → rendah
-            high_cols = [c for c in all_numeric_cols if pct_this.get(c, 0) > mean_pct_all.get(c, 0)]
-            low_cols  = [c for c in all_numeric_cols if pct_this.get(c, 0) < mean_pct_all.get(c, 0)]
+            if not other_ids:
+                return "Tidak Dapat Ditentukan", "Tidak ada klaster lain sebagai pembanding.", "info"
 
-            n_total = len(all_numeric_cols)
-            n_high  = len(high_cols)
-            n_low   = len(low_cols)
+            # Per indikator: hitung berapa klaster lain yang lebih rendah / lebih tinggi
+            n_higher_than_all = 0   # indikator di mana klaster ini > SEMUA klaster lain
+            n_lower_than_all  = 0   # indikator di mana klaster ini < SEMUA klaster lain
+            n_mixed           = 0   # indikator di mana klaster ini di antara klaster lain
 
-            # Cek dominasi per grup
-            a_present   = [c for c in grup_a if c in all_numeric_cols]
-            b_present   = [c for c in grup_b if c in all_numeric_cols]
-            a_high_cnt  = sum(1 for c in a_present if c in high_cols)
-            b_high_cnt  = sum(1 for c in b_present if c in high_cols)
-            a_dom = len(a_present) > 0 and a_high_cnt == len(a_present)
-            b_dom = len(b_present) > 0 and b_high_cnt == len(b_present)
+            for col in cols:
+                val        = pct_this.get(col, 0)
+                other_vals = [cluster_pct_all_df.loc[o, col] for o in other_ids]
+                if all(val > ov for ov in other_vals):
+                    n_higher_than_all += 1
+                elif all(val < ov for ov in other_vals):
+                    n_lower_than_all  += 1
+                else:
+                    n_mixed           += 1
 
-            threshold_high = 0.65   # ≥65% kolom tinggi → "tinggi"
-            threshold_low  = 0.65   # ≥65% kolom rendah → "rendah"
+            # Cek dominasi Grup A & Grup B terhadap semua klaster lain
+            a_present = [c for c in grup_a if c in cols]
+            b_present = [c for c in grup_b if c in cols]
 
-            # ── Semua tinggi ───────────────────────────────────────────────────
-            if n_high / n_total >= threshold_high:
-                kategori = f"Dampak Banjir Tinggi"
+            # Grup A dominan: semua indikator Grup A lebih tinggi dari semua klaster lain
+            a_dom = len(a_present) > 0 and all(
+                all(cluster_pct_all_df.loc[cl_id, c] > cluster_pct_all_df.loc[o, c]
+                    for o in other_ids)
+                for c in a_present
+            )
+            # Grup B dominan: semua indikator Grup B lebih tinggi dari semua klaster lain
+            b_dom = len(b_present) > 0 and all(
+                all(cluster_pct_all_df.loc[cl_id, c] > cluster_pct_all_df.loc[o, c]
+                    for o in other_ids)
+                for c in b_present
+            )
+
+            # ── Dampak Tinggi — Fatalitas & Kerusakan Struktural ──────────────
+            # Cek lebih dulu sebelum "tinggi generik" agar lebih spesifik
+            if a_dom and n_higher_than_all > 4:
+                kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi yang tinggi pada seluruh indikator "
-                    f"dampak banjir dibandingkan dengan klaster utama lainnya. "
+                    f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
+                    f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
+                    f"klaster utama lainnya. Hal ini menunjukkan bahwa provinsi dalam "
+                    f"Klaster {cl_id} cenderung mengalami dampak banjir yang lebih serius dari "
+                    f"segi kerusakan struktural dan fatalitas (korban jiwa). Oleh karena itu, "
+                    f"klaster ini dapat dikategorikan sebagai <strong>dampak banjir tinggi "
+                    f"dengan risiko kerusakan struktural dan fatalitas yang tinggi</strong>."
+                )
+                return kategori, interp, "error"
+
+            # ── Dampak Tinggi generik ──────────────────────────────────────────
+            if n_higher_than_all > 4:
+                kategori = "Dampak Banjir Tinggi"
+                interp = (
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
+                    f"proporsi lebih tinggi dibandingkan seluruh klaster utama lainnya. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
                     f"mengalami dampak banjir yang berat secara menyeluruh, baik dari sisi "
                     f"korban jiwa, korban luka dan pengungsi, maupun kerusakan dan genangan "
@@ -1023,12 +1064,12 @@ with menu[2]:
                 )
                 return kategori, interp, "error"
 
-            # ── Semua rendah ───────────────────────────────────────────────────
-            if n_low / n_total >= threshold_low:
-                kategori = f"Dampak Banjir Rendah"
+            # ── Dampak Rendah ─────────────────────────────────────────────────
+            if n_lower_than_all > 4:
+                kategori = "Dampak Banjir Rendah"
                 interp = (
-                    f"Klaster {cl_id} memiliki proporsi yang rendah pada seluruh indikator "
-                    f"dampak banjir dibandingkan dengan klaster utama lainnya. "
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
+                    f"proporsi lebih rendah dibandingkan seluruh klaster utama lainnya. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
                     f"relatif tidak terdampak parah oleh banjir, baik dari sisi korban jiwa, "
                     f"korban luka dan pengungsi, maupun kerusakan dan genangan permukiman. "
@@ -1037,9 +1078,9 @@ with menu[2]:
                 )
                 return kategori, interp, "success"
 
-            # ── Grup B dominan (terluka+mengungsi, terendam) ──────────────────
-            if b_dom and not a_dom and len(b_present) > 0:
-                kategori = f"Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
+            # ── Moderat — Risiko Pengungsian & Genangan ───────────────────────
+            if b_dom and n_mixed > 4:
+                kategori = "Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
                     f"serta rumah terendam dibandingkan dengan klaster utama lainnya. Namun, "
@@ -1053,30 +1094,50 @@ with menu[2]:
                 )
                 return kategori, interp, "warning"
 
-            # ── Grup A dominan (meninggal+hilang, kerusakan) ──────────────────
-            if a_dom and not b_dom and len(a_present) > 0:
-                kategori = f"Dampak Banjir Tinggi — Risiko Kerusakan Struktural & Fatalitas Tinggi"
+            # ── Moderat generik ───────────────────────────────────────────────
+            if n_mixed > 4:
+                kategori = "Dampak Banjir Moderat"
+                interp = (
+                    f"Klaster {cl_id} memiliki lebih dari 4 indikator dengan proporsi yang "
+                    f"berada di antara klaster utama lainnya — lebih tinggi dari sebagian "
+                    f"klaster dan lebih rendah dari klaster lainnya. Hal ini menunjukkan bahwa "
+                    f"provinsi-provinsi dalam Klaster {cl_id} mengalami dampak banjir yang "
+                    f"tidak ekstrem di salah satu ujung, melainkan berada pada tingkat menengah "
+                    f"antarklaster. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
+                    f"<strong>dampak banjir moderat</strong> dibandingkan klaster utama lainnya."
+                )
+                return kategori, interp, "warning"
+
+            # ── Fallback: dominasi Grup A atau Grup B tanpa ambang batas > 4 ──
+            if a_dom:
+                kategori = "Dampak Banjir Tinggi — Fatalitas & Kerusakan Struktural Tinggi"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
-                    f"serta kerusakan rumah, mulai dari kerusakan ringan hingga berat "
-                    f"dibandingkan dengan klaster utama lainnya. Hal ini menunjukkan bahwa "
-                    f"provinsi dalam Klaster {cl_id} cenderung mengalami dampak banjir yang "
-                    f"lebih serius dari segi kerusakan struktural dan fatalitas (korban jiwa). "
-                    f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir tinggi dengan risiko kerusakan struktural dan "
-                    f"fatalitas yang tinggi</strong>."
+                    f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
+                    f"klaster utama lainnya. Oleh karena itu, klaster ini dapat dikategorikan "
+                    f"sebagai <strong>dampak banjir tinggi dengan risiko kerusakan struktural "
+                    f"dan fatalitas yang tinggi</strong>."
                 )
                 return kategori, interp, "error"
 
-            # ── Moderat / campuran ─────────────────────────────────────────────
-            kategori = f"Dampak Banjir Moderat"
+            if b_dom:
+                kategori = "Dampak Banjir Moderat — Risiko Pengungsian & Genangan Tinggi"
+                interp = (
+                    f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
+                    f"serta rumah terendam dibandingkan dengan klaster utama lainnya, namun "
+                    f"kontribusi pada fatalitas dan kerusakan struktural relatif rendah. "
+                    f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
+                    f"<strong>dampak banjir moderat dengan risiko pengungsian dan genangan "
+                    f"permukiman yang tinggi</strong>."
+                )
+                return kategori, interp, "warning"
+
+            # ── Fallback terakhir ─────────────────────────────────────────────
+            kategori = "Dampak Banjir Moderat"
             interp = (
-                f"Klaster {cl_id} memiliki proporsi yang beragam pada indikator dampak banjir "
-                f"— sebagian indikator berada di atas rata-rata klaster utama dan sebagian "
-                f"lainnya di bawah rata-rata. Hal ini menunjukkan bahwa provinsi-provinsi "
-                f"dalam Klaster {cl_id} mengalami dampak banjir yang tidak merata antarindikator. "
-                f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                f"<strong>dampak banjir moderat</strong> dibandingkan klaster utama lainnya."
+                f"Klaster {cl_id} memiliki karakteristik campuran pada indikator dampak banjir "
+                f"dibandingkan klaster utama lainnya. Oleh karena itu, klaster ini dapat "
+                f"dikategorikan sebagai <strong>dampak banjir moderat</strong>."
             )
             return kategori, interp, "warning"
 
