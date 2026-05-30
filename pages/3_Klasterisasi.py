@@ -371,6 +371,7 @@ def run_preprocessing(df):
     n_components = None
 
     if multikolinieritas and korelasi_ok:
+        # Tabel PCA — tampilkan semua komponen (untuk display saja)
         pca = PCA()
         pca.fit(scaled_standard)
         eigenvalues = pca.explained_variance_
@@ -382,12 +383,10 @@ def run_preprocessing(df):
             "Proporsi Varians (%)": np.round(proporsi, 4),
             "Proporsi Varians Kumulatif (%)": np.round(kumulatif, 4)
         })
-        valid_pc     = pca_df[pca_df["Eigenvalue"] > 1]
-        n_components = len(valid_pc)
-        if kumulatif[n_components - 1] < 80:
-            n_components = int(np.argmax(kumulatif >= 80) + 1)
 
-        pca_final  = PCA(n_components=n_components, svd_solver="full")
+        # Hardcode n_components=2 agar identik dengan Colab
+        n_components = 2
+        pca_final  = PCA(n_components=n_components)
         pca_result = pd.DataFrame(
             pca_final.fit_transform(scaled_standard),
             columns=[f"PC{i+1}" for i in range(n_components)]
@@ -663,8 +662,7 @@ with menu[0]:
     if multikolinieritas and korelasi_ok and pca_df is not None:
         safe_table(pca_df)
         st.success(
-            f"Jumlah komponen yang digunakan berdasarkan kriteria nilai eigenvalue > 1 "
-            f"dan minimal proporsi variansi kumulatif ≥ 80% adalah {n_components} komponen"
+            f"Jumlah komponen yang digunakan adalah {n_components} komponen (PC1 dan PC2)"
         )
         step_label("HASIL REDUKSI PCA")
         safe_table(pca_result)
