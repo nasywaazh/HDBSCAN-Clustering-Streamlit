@@ -638,13 +638,12 @@ with menu[0]:
     sec("3. DETEKSI OUTLIER (LOCAL OUTLIER FACTOR)")
     safe_table(df_lof[["Provinsi", "LOF Score", "Label"]])
 
-    # [PERUBAHAN 1] Warna batang merah=Outlier, biru=Normal + interpretasi LOF
     fig, ax = plt.subplots(figsize=(10, 4))
     fig.patch.set_facecolor('#f7fbff')
     ax.set_facecolor('#f7fbff')
     sns.barplot(
         data=df_lof, x="Provinsi", y="LOF Score", hue="Label",
-        palette={"Normal": "#64b5f6", "Outlier": "#ef5350"},
+        palette={"Normal": "#64b5f6", "Outlier": "#ef9a9a"},
         ax=ax
     )
     plt.xticks(rotation=90, fontsize=8)
@@ -664,9 +663,8 @@ with menu[0]:
     st.pyplot(fig)
     plt.close(fig)
 
-    # [PERUBAHAN 1] Interpretasi LOF — daftar outlier + narasi
+    # Interpretasi LOF — satu kotak untuk outlier saja
     outlier_provinces = df_lof[df_lof["Label"] == "Outlier"]["Provinsi"].tolist()
-    normal_provinces  = df_lof[df_lof["Label"] == "Normal"]["Provinsi"].tolist()
 
     step_label("Interpretasi Deteksi Outlier LOF")
 
@@ -679,7 +677,7 @@ with menu[0]:
                         font-size:0.92rem;line-height:1.75;color:#1a3a5c;">
                 <p style="margin:0 0 0.5rem 0;font-size:0.82rem;font-weight:800;
                            letter-spacing:0.08em;text-transform:uppercase;color:#c62828;">
-                    🔴 Provinsi Terdeteksi sebagai Outlier ({len(outlier_provinces)} Provinsi)
+                    Provinsi Terdeteksi sebagai Outlier ({len(outlier_provinces)} Provinsi)
                 </p>
                 <p style="margin:0 0 0.6rem 0;">
                     <strong>{outlier_str}</strong>
@@ -701,25 +699,6 @@ with menu[0]:
         st.success(
             f"Tidak ditemukan outlier. Seluruh provinsi memiliki LOF Score "
             f"di bawah threshold ({lof_threshold:.4f})."
-        )
-
-    if normal_provinces:
-        normal_str = ", ".join(normal_provinces)
-        st.markdown(
-            f"""
-            <div style="background:#f0f9ff;border:1.5px solid #90caf9;border-left:4px solid #1565c0;
-                        border-radius:10px;padding:1rem 1.3rem;margin-bottom:0.8rem;
-                        font-size:0.92rem;line-height:1.75;color:#1a3a5c;">
-                <p style="margin:0 0 0.5rem 0;font-size:0.82rem;font-weight:800;
-                           letter-spacing:0.08em;text-transform:uppercase;color:#1565c0;">
-                    🔵 Provinsi Terdeteksi sebagai Normal ({len(normal_provinces)} Provinsi)
-                </p>
-                <p style="margin:0;">
-                    <strong>{normal_str}</strong>
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
         )
 
     sec("4. REDUKSI DATA (PRINCIPAL COMPONENT ANALYSIS)")
@@ -969,15 +948,7 @@ with menu[1]:
         )
         safe_table(df_tabel)
 
-        step_label("Nilai Rata-Rata Setiap Klaster")
-        cluster_mean_pm = df_result.groupby("Cluster")[numeric_cols_pm].mean().round(3)
-        safe_table(cluster_mean_pm.reset_index())
 
-        step_label("Rata-Rata Persentase Setiap Klaster (%)")
-        cluster_pct_pm = cluster_mean_pm.div(
-            cluster_mean_pm.sum(axis=0), axis=1
-        ).mul(100).round(2)
-        safe_table(cluster_pct_pm.reset_index())
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1176,8 +1147,36 @@ with menu[2]:
             )
             return kategori, interp, "warning"
 
+        # ── Tabel karakteristik (dipindah dari tab Pemodelan) ────────────────
+        sec("1. TABEL HASIL KLASTERISASI")
+        numeric_cols_h = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+
+        LEGEND_LABEL_H = {
+            0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
+            1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
+            2:  "Klaster 2 – Rendah",
+            -1: "Noise – Ekstrem",
+        }
+        df_tabel_h = df_result.copy()
+        df_tabel_h.insert(
+            df_tabel_h.columns.get_loc("Cluster") + 1,
+            "Label Klaster",
+            df_tabel_h["Cluster"].map(lambda x: LEGEND_LABEL_H.get(x, f"Klaster {x}"))
+        )
+        safe_table(df_tabel_h)
+
+        step_label("Nilai Rata-Rata Setiap Klaster")
+        cluster_mean_h = df_result.groupby("Cluster")[numeric_cols_h].mean().round(3)
+        safe_table(cluster_mean_h.reset_index())
+
+        step_label("Rata-Rata Persentase Setiap Klaster (%)")
+        cluster_pct_h = cluster_mean_h.div(
+            cluster_mean_h.sum(axis=0), axis=1
+        ).mul(100).round(2)
+        safe_table(cluster_pct_h.reset_index())
+
         # ── Render Seksi ───────────────────────────────────────────────────────
-        sec("1. KARAKTERISTIK KLASTER")
+        sec("2. KARAKTERISTIK KLASTER")
         all_clusters     = sorted(df_result["Cluster"].unique())
         selected_cluster = st.selectbox(
             "Pilih Klaster",
