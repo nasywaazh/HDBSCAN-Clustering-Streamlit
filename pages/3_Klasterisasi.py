@@ -454,41 +454,11 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
     bo_iterations  = list(range(1, len(bo_targets) + 1))
 
-    # ── Fase 2: Grid search deterministik (identik Colab) ─────────────────────
-    # Iterasi ascending (mcs, ms) → hasil selalu sama di mana pun
-    best_mcs_final  = None
-    best_ms_final   = None
-    best_dbcv_final = -np.inf
-
-    for mcs in range(int(mcs_min), int(mcs_max) + 1):
-        for ms in range(int(ms_min), int(ms_max) + 1):
-            if ms < 1 or ms > mcs:
-                continue
-            clusterer = hdbscan.HDBSCAN(
-                min_cluster_size=mcs,
-                min_samples=ms,
-                metric="euclidean"
-            )
-            labels  = clusterer.fit_predict(X_clust)
-            n_valid = len(set(labels)) - (1 if -1 in labels else 0)
-            if n_valid < 2:
-                continue
-            try:
-                score = validity_index(X_clust, labels)
-            except Exception:
-                continue
-            # strictly-greater: mcs/ms lebih kecil menang jika seri
-            if score > best_dbcv_final:
-                best_dbcv_final = score
-                best_mcs_final  = mcs
-                best_ms_final   = ms
-
-    # Fallback ke optimizer.max jika grid search gagal
-    if best_mcs_final is None:
-        bo_best = optimizer.max["params"]
-        best_mcs_final  = int(np.floor(bo_best["min_cluster_size"]))
-        best_ms_final   = int(np.floor(bo_best["min_samples"]))
-        best_dbcv_final = float(optimizer.max["target"])
+    # ── Ambil parameter terbaik langsung dari optimizer.max (identik Colab) ──
+    bo_best         = optimizer.max["params"]
+    best_mcs_final  = int(np.floor(bo_best["min_cluster_size"]))
+    best_ms_final   = int(np.floor(bo_best["min_samples"]))
+    best_dbcv_final = float(optimizer.max["target"])
 
     # ── Fit model final ────────────────────────────────────────────────────────
     hdbscan_model = hdbscan.HDBSCAN(
@@ -503,7 +473,7 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
 
     dbcv_score = float(validity_index(X_clust, cluster_labels))
 
-    # DCSI — gunakan best_ms_final (identik Colab)
+    # DCSI
     _dcsi      = dcsi_index(X_clust, cluster_labels, best_ms_final)
     dcsi_score = float(_dcsi) if _dcsi is not None else None
 
@@ -585,11 +555,10 @@ X_clustering      = st.session_state["X_clustering"].values
 bo_done = "_best_mcs" in st.session_state
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
-# [PERUBAHAN 3] Nama tab terakhir diubah menjadi "INTERPRETASI HASIL KLASTER"
 menu = st.tabs([
     "PREPROCESSING DATA",
     "PEMODELAN KLASTERISASI",
-    "HASIL & INTERPRETASI KLASTER"
+    "INTERPRETASI HASIL KLASTER"
 ])
 
 
@@ -657,7 +626,6 @@ with menu[0]:
     st.pyplot(fig)
     plt.close(fig)
 
-    # Interpretasi LOF — satu kotak untuk outlier saja
     outlier_provinces = df_lof[df_lof["Label"] == "Outlier"]["Provinsi"].tolist()
 
     step_label("Interpretasi Deteksi Outlier LOF")
@@ -922,10 +890,8 @@ with menu[1]:
         safe_table(df_result)
 
 
-
-
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — HASIL & INTERPRETASI KLASTER
+# TAB 3 — INTERPRETASI HASIL KLASTER
 # ══════════════════════════════════════════════════════════════════════════════
 with menu[2]:
 
@@ -935,7 +901,6 @@ with menu[2]:
         df_result    = st.session_state["df_clustered"]
         numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
 
-        # Deteksi grup indikator otomatis
         _kw_fatal    = ["meninggal", "hilang", "jiwa", "fatal", "mati", "tewas",
                         "korban meninggal"]
         _kw_rusak    = ["rusak", "kerusakan", "hancur", "roboh", "runtuh"]
@@ -1133,7 +1098,6 @@ with menu[2]:
         ).mul(100).round(2)
         safe_table(cluster_pct_h.reset_index())
 
-        # ── Render Seksi ───────────────────────────────────────────────────────
         sec("2. KARAKTERISTIK KLASTER")
         all_clusters     = sorted(df_result["Cluster"].unique())
         selected_cluster = st.selectbox(
