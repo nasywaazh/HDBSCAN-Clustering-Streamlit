@@ -719,7 +719,7 @@ with menu[1]:
     bo_run_hash = joblib.hash((data_hash, int(mcs_min), int(mcs_max),
                                int(ms_min), int(ms_max)))
 
-    if run_bo and st.session_state.get("_bo_run_hash") != bo_run_hash:
+    if run_bo:
         with st.spinner("Mencari parameter optimal dengan Bayesian Optimization..."):
             result = run_bayesian_optimization(
                 X_clustering,
