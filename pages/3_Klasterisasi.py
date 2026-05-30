@@ -337,7 +337,7 @@ def dcsi_index(X, labels, min_samples, eps_quantile=0.5):
     return dcsi_weighted_sum / total_weight
 
 
-# ── PREPROCESSING ──────────────────────────────────────────────────────────────
+# ── PREPROCESSING DATA ──────────────────────────────────────────────────────────────
 def run_preprocessing(df):
     data_numeric = df.drop(columns=["Provinsi"])
     scaler = StandardScaler()
@@ -418,12 +418,6 @@ def run_preprocessing(df):
 
 # ── FUNGSI OPTIMASI ────────────────────────────────────────────────────────────
 def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
-    """
-    Fase 1: Bayesian Optimization (untuk plot konvergensi).
-    Fase 2: Exhaustive grid search deterministik — identik dengan Colab.
-    Constraint: ms >= 1, ms <= mcs (bukan ms > mcs seperti versi lama).
-    """
-
     def hdbscan_objective_dbcv(min_cluster_size, min_samples):
         mcs = int(np.floor(min_cluster_size))
         ms  = int(np.floor(min_samples))
@@ -630,7 +624,7 @@ with menu[0]:
         variabels = ", ".join(high_vif["Variabel"].tolist())
         st.warning(
             f"Variabel {variabels} memiliki nilai VIF ≥ 10 "
-            f"yang mengindikasikan adanya multikolinieritas tinggi"
+            f"yang mengindikasikan adanya multikolinieritas antarvariabel yang tinggi"
         )
     else:
         st.success("Tidak terdapat multikolinieritas tinggi (VIF < 10)")
@@ -686,10 +680,6 @@ with menu[0]:
                     Provinsi-provinsi ini dikategorikan sebagai <strong>outlier</strong> karena
                     memiliki skor LOF yang tinggi dan melebihi nilai ambang batas
                     (<em>threshold</em>) sebesar <strong>{lof_threshold:.4f}</strong>.
-                    Skor LOF yang tinggi mengindikasikan bahwa kepadatan lokal di sekitar
-                    provinsi-provinsi tersebut jauh lebih rendah dibandingkan tetangga-tetangganya,
-                    sehingga karakteristik dampak banjirnya dinilai atipikal atau menyimpang
-                    dari pola umum data.
                 </p>
             </div>
             """,
