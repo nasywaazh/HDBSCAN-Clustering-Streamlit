@@ -591,7 +591,7 @@ X_clustering      = st.session_state["X_clustering"].values
 bo_done = "_best_mcs" in st.session_state
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
-# [PERUBAHAN 3] Nama tab terakhir diubah menjadi "HASIL & INTERPRETASI KLASTER"
+# [PERUBAHAN 3] Nama tab terakhir diubah menjadi "INTERPRETASI HASIL KLASTER"
 menu = st.tabs([
     "PREPROCESSING DATA",
     "PEMODELAN KLASTERISASI",
@@ -928,25 +928,8 @@ with menu[1]:
             else:
                 st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
 
-        # [PERUBAHAN 2] Tabel hasil klasterisasi (dengan kolom Label Klaster)
-        # dipindahkan ke sini (sub menu Pemodelan Klasterisasi)
         sec("4. TABEL HASIL KLASTERISASI")
-        numeric_cols_pm = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
-
-        # Label klaster lengkap
-        LEGEND_LABEL_PM = {
-            0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
-            1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
-            2:  "Klaster 2 – Rendah",
-            -1: "Noise – Ekstrem",
-        }
-        df_tabel = df_result.copy()
-        df_tabel.insert(
-            df_tabel.columns.get_loc("Cluster") + 1,
-            "Label Klaster",
-            df_tabel["Cluster"].map(lambda x: LEGEND_LABEL_PM.get(x, f"Klaster {x}"))
-        )
-        safe_table(df_tabel)
+        safe_table(df_result)
 
 
 
@@ -1147,23 +1130,8 @@ with menu[2]:
             )
             return kategori, interp, "warning"
 
-        # ── Tabel karakteristik (dipindah dari tab Pemodelan) ────────────────
-        sec("1. TABEL HASIL KLASTERISASI")
+        sec("1. NILAI RATA-RATA DAN PERSENTASE PER KLASTER")
         numeric_cols_h = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
-
-        LEGEND_LABEL_H = {
-            0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
-            1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
-            2:  "Klaster 2 – Rendah",
-            -1: "Noise – Ekstrem",
-        }
-        df_tabel_h = df_result.copy()
-        df_tabel_h.insert(
-            df_tabel_h.columns.get_loc("Cluster") + 1,
-            "Label Klaster",
-            df_tabel_h["Cluster"].map(lambda x: LEGEND_LABEL_H.get(x, f"Klaster {x}"))
-        )
-        safe_table(df_tabel_h)
 
         step_label("Nilai Rata-Rata Setiap Klaster")
         cluster_mean_h = df_result.groupby("Cluster")[numeric_cols_h].mean().round(3)
