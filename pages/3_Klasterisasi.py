@@ -567,6 +567,10 @@ menu = st.tabs([
 with menu[0]:
 
     sec("1. STANDARISASI DATA")
+    st.write("Shape scaled_standard:", scaled_standard.shape)
+    st.write("Columns scaled_standard:", list(scaled_standard.columns))
+    st.write("Shape X_clustering:", st.session_state["X_clustering"].shape)
+    st.write("X_clustering head:", st.session_state["X_clustering"].head())
     safe_table(scaled_standard.round(6))
 
     sec("2. UJI STATISTIK")
