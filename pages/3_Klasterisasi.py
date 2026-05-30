@@ -419,14 +419,11 @@ def run_preprocessing(df):
 # ── FUNGSI OPTIMASI ────────────────────────────────────────────────────────────
 def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     """
-    Jalankan BO untuk mempersempit ruang pencarian, lalu lakukan
-    exhaustive grid search deterministik atas SEMUA kombinasi integer
-    (min_cluster_size, min_samples) dalam rentang yang ditentukan.
-    Parameter terbaik dipilih berdasarkan DBCV tertinggi secara deterministik
-    — hasilnya konsisten di Colab maupun Streamlit.
+    Fase 1: Bayesian Optimization (untuk plot konvergensi).
+    Fase 2: Exhaustive grid search deterministik — identik dengan Colab.
+    Constraint: ms >= 1, ms <= mcs (bukan ms > mcs seperti versi lama).
     """
 
-    # ── Fase 1: Bayesian Optimization (untuk konvergensi plot) ────────────────
     def hdbscan_objective_dbcv(min_cluster_size, min_samples):
         mcs = int(np.floor(min_cluster_size))
         ms  = int(np.floor(min_samples))
@@ -463,16 +460,14 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     bo_best_so_far = [float(v) for v in np.maximum.accumulate(bo_targets)]
     bo_iterations  = list(range(1, len(bo_targets) + 1))
 
-    # ── Fase 2: Exhaustive grid search deterministik ──────────────────────────
-    # Evaluasi SEMUA kombinasi integer (mcs, ms) dalam rentang yang diberikan.
-    # Urutan iterasi diurutkan (mcs asc, ms asc) → hasil selalu sama di mana pun.
+    # ── Fase 2: Grid search deterministik (identik Colab) ─────────────────────
+    # Iterasi ascending (mcs, ms) → hasil selalu sama di mana pun
     best_mcs_final  = None
     best_ms_final   = None
     best_dbcv_final = -np.inf
 
     for mcs in range(int(mcs_min), int(mcs_max) + 1):
         for ms in range(int(ms_min), int(ms_max) + 1):
-            # Constraint logis identik dengan Colab
             if ms < 1 or ms > mcs:
                 continue
             clusterer = hdbscan.HDBSCAN(
@@ -488,21 +483,20 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
                 score = validity_index(X_clust, labels)
             except Exception:
                 continue
-            # Ambil yang lebih tinggi; jika seri, mcs/ms lebih kecil menang
-            # (karena kita iterasi ascending, kondisi strictly-greater cukup)
+            # strictly-greater: mcs/ms lebih kecil menang jika seri
             if score > best_dbcv_final:
                 best_dbcv_final = score
                 best_mcs_final  = mcs
                 best_ms_final   = ms
 
-    # Fallback ke optimizer.max jika grid search gagal (ruang terlalu sempit)
+    # Fallback ke optimizer.max jika grid search gagal
     if best_mcs_final is None:
         bo_best = optimizer.max["params"]
         best_mcs_final  = int(np.floor(bo_best["min_cluster_size"]))
         best_ms_final   = int(np.floor(bo_best["min_samples"]))
         best_dbcv_final = float(optimizer.max["target"])
 
-    # ── Fit model final dengan parameter terbaik deterministik ───────────────
+    # ── Fit model final ────────────────────────────────────────────────────────
     hdbscan_model = hdbscan.HDBSCAN(
         min_cluster_size=best_mcs_final,
         min_samples=best_ms_final,
@@ -513,10 +507,9 @@ def run_bayesian_optimization(X_clust, mcs_min, mcs_max, ms_min, ms_max):
     cluster_labels = hdbscan_model.labels_
     n_clusters     = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
 
-    # DBCV pada model final
     dbcv_score = float(validity_index(X_clust, cluster_labels))
 
-    # DCSI — gunakan best_ms_final (identik dengan Colab)
+    # DCSI — gunakan best_ms_final (identik Colab)
     _dcsi      = dcsi_index(X_clust, cluster_labels, best_ms_final)
     dcsi_score = float(_dcsi) if _dcsi is not None else None
 
@@ -598,10 +591,11 @@ X_clustering      = st.session_state["X_clustering"].values
 bo_done = "_best_mcs" in st.session_state
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
+# [PERUBAHAN 3] Nama tab terakhir diubah menjadi "HASIL & INTERPRETASI KLASTER"
 menu = st.tabs([
     "PREPROCESSING DATA",
     "PEMODELAN KLASTERISASI",
-    "HASIL KLASTERISASI"
+    "HASIL & INTERPRETASI KLASTER"
 ])
 
 
@@ -644,14 +638,20 @@ with menu[0]:
     sec("3. DETEKSI OUTLIER (LOCAL OUTLIER FACTOR)")
     safe_table(df_lof[["Provinsi", "LOF Score", "Label"]])
 
+    # [PERUBAHAN 1] Warna batang merah=Outlier, biru=Normal + interpretasi LOF
     fig, ax = plt.subplots(figsize=(10, 4))
     fig.patch.set_facecolor('#f7fbff')
     ax.set_facecolor('#f7fbff')
-    sns.barplot(data=df_lof, x="Provinsi", y="LOF Score", hue="Label",
-                palette={"Normal": "#64b5f6", "Outlier": "#ef9a9a"}, ax=ax)
+    sns.barplot(
+        data=df_lof, x="Provinsi", y="LOF Score", hue="Label",
+        palette={"Normal": "#64b5f6", "Outlier": "#ef5350"},
+        ax=ax
+    )
     plt.xticks(rotation=90, fontsize=8)
-    ax.axhline(lof_threshold, linestyle="--", color="#1565c0", alpha=0.7,
-               label=f"Threshold = {lof_threshold:.2f}")
+    ax.axhline(
+        lof_threshold, linestyle="--", color="#1565c0", alpha=0.7,
+        label=f"Threshold = {lof_threshold:.4f}"
+    )
     ax.set_title("Visualisasi LOF Score per Provinsi", fontsize=12,
                  fontweight='bold', color='#1565c0')
     ax.set_xlabel("Provinsi", fontsize=9, color='#3d6b8e')
@@ -663,6 +663,64 @@ with menu[0]:
     plt.tight_layout()
     st.pyplot(fig)
     plt.close(fig)
+
+    # [PERUBAHAN 1] Interpretasi LOF — daftar outlier + narasi
+    outlier_provinces = df_lof[df_lof["Label"] == "Outlier"]["Provinsi"].tolist()
+    normal_provinces  = df_lof[df_lof["Label"] == "Normal"]["Provinsi"].tolist()
+
+    step_label("Interpretasi Deteksi Outlier LOF")
+
+    if outlier_provinces:
+        outlier_str = ", ".join(outlier_provinces)
+        st.markdown(
+            f"""
+            <div style="background:#fff3f3;border:1.5px solid #ef9a9a;border-left:4px solid #c62828;
+                        border-radius:10px;padding:1rem 1.3rem;margin-bottom:0.8rem;
+                        font-size:0.92rem;line-height:1.75;color:#1a3a5c;">
+                <p style="margin:0 0 0.5rem 0;font-size:0.82rem;font-weight:800;
+                           letter-spacing:0.08em;text-transform:uppercase;color:#c62828;">
+                    🔴 Provinsi Terdeteksi sebagai Outlier ({len(outlier_provinces)} Provinsi)
+                </p>
+                <p style="margin:0 0 0.6rem 0;">
+                    <strong>{outlier_str}</strong>
+                </p>
+                <p style="margin:0;">
+                    Provinsi-provinsi ini dikategorikan sebagai <strong>outlier</strong> karena
+                    memiliki skor LOF yang tinggi dan melebihi nilai ambang batas
+                    (<em>threshold</em>) sebesar <strong>{lof_threshold:.4f}</strong>.
+                    Skor LOF yang tinggi mengindikasikan bahwa kepadatan lokal di sekitar
+                    provinsi-provinsi tersebut jauh lebih rendah dibandingkan tetangga-tetangganya,
+                    sehingga karakteristik dampak banjirnya dinilai atipikal atau menyimpang
+                    dari pola umum data.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.success(
+            f"Tidak ditemukan outlier. Seluruh provinsi memiliki LOF Score "
+            f"di bawah threshold ({lof_threshold:.4f})."
+        )
+
+    if normal_provinces:
+        normal_str = ", ".join(normal_provinces)
+        st.markdown(
+            f"""
+            <div style="background:#f0f9ff;border:1.5px solid #90caf9;border-left:4px solid #1565c0;
+                        border-radius:10px;padding:1rem 1.3rem;margin-bottom:0.8rem;
+                        font-size:0.92rem;line-height:1.75;color:#1a3a5c;">
+                <p style="margin:0 0 0.5rem 0;font-size:0.82rem;font-weight:800;
+                           letter-spacing:0.08em;text-transform:uppercase;color:#1565c0;">
+                    🔵 Provinsi Terdeteksi sebagai Normal ({len(normal_provinces)} Provinsi)
+                </p>
+                <p style="margin:0;">
+                    <strong>{normal_str}</strong>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     sec("4. REDUKSI DATA (PRINCIPAL COMPONENT ANALYSIS)")
     if multikolinieritas and korelasi_ok and pca_df is not None:
@@ -767,6 +825,7 @@ with menu[1]:
         cluster_labels = st.session_state["cluster_labels"]
         dbcv_score     = st.session_state["_dbcv_score"]
         dcsi_score     = st.session_state["_dcsi_score"]
+        df_result      = st.session_state["df_clustered"]
 
         st.divider()
         sec("1. PENCARIAN PARAMETER OPTIMAL (BAYESIAN OPTIMIZATION)")
@@ -890,9 +949,39 @@ with menu[1]:
             else:
                 st.error("Kualitas klaster kurang optimal berdasarkan DBCV")
 
+        # [PERUBAHAN 2] Tabel hasil klasterisasi (dengan kolom Label Klaster)
+        # dipindahkan ke sini (sub menu Pemodelan Klasterisasi)
+        sec("4. TABEL HASIL KLASTERISASI")
+        numeric_cols_pm = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
+
+        # Label klaster lengkap
+        LEGEND_LABEL_PM = {
+            0:  "Klaster 0 – Moderat (Pengungsian & Genangan Tinggi)",
+            1:  "Klaster 1 – Tinggi (Fatalitas & Kerusakan Struktural Tinggi)",
+            2:  "Klaster 2 – Rendah",
+            -1: "Noise – Ekstrem",
+        }
+        df_tabel = df_result.copy()
+        df_tabel.insert(
+            df_tabel.columns.get_loc("Cluster") + 1,
+            "Label Klaster",
+            df_tabel["Cluster"].map(lambda x: LEGEND_LABEL_PM.get(x, f"Klaster {x}"))
+        )
+        safe_table(df_tabel)
+
+        step_label("Nilai Rata-Rata Setiap Klaster")
+        cluster_mean_pm = df_result.groupby("Cluster")[numeric_cols_pm].mean().round(3)
+        safe_table(cluster_mean_pm.reset_index())
+
+        step_label("Rata-Rata Persentase Setiap Klaster (%)")
+        cluster_pct_pm = cluster_mean_pm.div(
+            cluster_mean_pm.sum(axis=0), axis=1
+        ).mul(100).round(2)
+        safe_table(cluster_pct_pm.reset_index())
+
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — HASIL KLASTERISASI
+# TAB 3 — HASIL & INTERPRETASI KLASTER
 # ══════════════════════════════════════════════════════════════════════════════
 with menu[2]:
 
@@ -902,25 +991,11 @@ with menu[2]:
         df_result    = st.session_state["df_clustered"]
         numeric_cols = df_result.select_dtypes(include=np.number).columns.drop("Cluster")
 
-        sec("1. HASIL KLASTERISASI")
-        safe_table(df_result)
-
-        step_label("Nilai Rata-Rata Setiap Klaster")
-        cluster_mean = df_result.groupby("Cluster")[numeric_cols].mean().round(3)
-        safe_table(cluster_mean.reset_index())
-
-        step_label("Rata-Rata Persentase Setiap Klaster (%)")
-        cluster_pct = cluster_mean.div(cluster_mean.sum(axis=0), axis=1).mul(100).round(2)
-        safe_table(cluster_pct.reset_index())
-
-        # ── Kelompokkan kolom ke dalam dua grup indikator ──────────────────────
-        # Grup A: fatalitas & kerusakan struktural
-        # Grup B: pengungsian & genangan
-        # Deteksi otomatis berdasarkan kata kunci pada nama kolom (case-insensitive)
-        _kw_fatal  = ["meninggal", "hilang", "jiwa", "fatal", "mati", "tewas",
-                      "korban meninggal"]
-        _kw_rusak  = ["rusak", "kerusakan", "hancur", "roboh", "runtuh"]
-        _kw_ungsi  = ["mengungsi", "pengungsi", "terluka", "luka", "korban terluka"]
+        # Deteksi grup indikator otomatis
+        _kw_fatal    = ["meninggal", "hilang", "jiwa", "fatal", "mati", "tewas",
+                        "korban meninggal"]
+        _kw_rusak    = ["rusak", "kerusakan", "hancur", "roboh", "runtuh"]
+        _kw_ungsi    = ["mengungsi", "pengungsi", "terluka", "luka", "korban terluka"]
         _kw_terendam = ["terendam", "genangan", "tergenang", "banjir rumah",
                         "rumah terendam"]
 
@@ -928,39 +1003,21 @@ with menu[2]:
             c = col.lower()
             return any(kw in c for kw in keywords)
 
-        cols_fatal   = [c for c in numeric_cols if _col_in_group(c, _kw_fatal)]
-        cols_rusak   = [c for c in numeric_cols if _col_in_group(c, _kw_rusak)]
-        cols_ungsi   = [c for c in numeric_cols if _col_in_group(c, _kw_ungsi)]
-        cols_terendam= [c for c in numeric_cols if _col_in_group(c, _kw_terendam)]
+        cols_fatal    = [c for c in numeric_cols if _col_in_group(c, _kw_fatal)]
+        cols_rusak    = [c for c in numeric_cols if _col_in_group(c, _kw_rusak)]
+        cols_ungsi    = [c for c in numeric_cols if _col_in_group(c, _kw_ungsi)]
+        cols_terendam = [c for c in numeric_cols if _col_in_group(c, _kw_terendam)]
 
-        grup_A = list(dict.fromkeys(cols_fatal + cols_rusak))   # meninggal+hilang, kerusakan
-        grup_B = list(dict.fromkeys(cols_ungsi + cols_terendam)) # terluka+mengungsi, terendam
+        grup_A = list(dict.fromkeys(cols_fatal + cols_rusak))
+        grup_B = list(dict.fromkeys(cols_ungsi + cols_terendam))
 
-        # Fallback: jika deteksi gagal, bagi kolom jadi dua separuh
         if not grup_A and not grup_B:
-            half = len(numeric_cols) // 2
+            half   = len(numeric_cols) // 2
             grup_A = list(numeric_cols[:half])
             grup_B = list(numeric_cols[half:])
 
-        # ── Fungsi interpretasi otomatis ───────────────────────────────────────
         def interpret_cluster(cl_id, pct_row, cluster_mean_all_df,
                               cluster_pct_all_df, grup_a, grup_b, all_numeric_cols):
-            """
-            Kembalikan tuple (kategori_str, interpretasi_str, alert_type).
-
-            Logika utama untuk klaster utama (bukan noise):
-            - Bandingkan proporsi klaster ini terhadap SETIAP klaster utama lain
-              secara per-indikator (bukan rata-rata), lalu hitung:
-                n_higher_than_all  = indikator yang lebih tinggi dari SEMUA klaster lain
-                n_lower_than_all   = indikator yang lebih rendah dari SEMUA klaster lain
-                n_mixed            = indikator yang ada di antara (lebih tinggi dari sebagian,
-                                     lebih rendah dari sebagian klaster lain)
-            - Jika n_higher_than_all > 4  → Dampak Tinggi (atau sub-kategori Grup A)
-            - Jika n_lower_than_all  > 4  → Dampak Rendah
-            - Jika n_mixed           > 4  → Dampak Moderat (atau sub-kategori Grup B)
-            - Fallback: cek dominasi Grup A / Grup B
-            """
-            # ── Noise ──────────────────────────────────────────────────────────
             if cl_id == -1:
                 if not cluster_pct_all_df.empty:
                     mean_pct_main = cluster_pct_all_df.mean()
@@ -992,7 +1049,6 @@ with menu[2]:
                     )
                     return kategori, interp, "noise"
 
-            # ── Klaster utama ──────────────────────────────────────────────────
             if cluster_pct_all_df.empty:
                 return "Tidak Dapat Ditentukan", "Tidak cukup data klaster pembanding.", "info"
 
@@ -1003,10 +1059,9 @@ with menu[2]:
             if not other_ids:
                 return "Tidak Dapat Ditentukan", "Tidak ada klaster lain sebagai pembanding.", "info"
 
-            # Per indikator: hitung berapa klaster lain yang lebih rendah / lebih tinggi
-            n_higher_than_all = 0   # indikator di mana klaster ini > SEMUA klaster lain
-            n_lower_than_all  = 0   # indikator di mana klaster ini < SEMUA klaster lain
-            n_mixed           = 0   # indikator di mana klaster ini di antara klaster lain
+            n_higher_than_all = 0
+            n_lower_than_all  = 0
+            n_mixed           = 0
 
             for col in cols:
                 val        = pct_this.get(col, 0)
@@ -1018,25 +1073,20 @@ with menu[2]:
                 else:
                     n_mixed           += 1
 
-            # Cek dominasi Grup A & Grup B terhadap semua klaster lain
             a_present = [c for c in grup_a if c in cols]
             b_present = [c for c in grup_b if c in cols]
 
-            # Grup A dominan: semua indikator Grup A lebih tinggi dari semua klaster lain
             a_dom = len(a_present) > 0 and all(
                 all(cluster_pct_all_df.loc[cl_id, c] > cluster_pct_all_df.loc[o, c]
                     for o in other_ids)
                 for c in a_present
             )
-            # Grup B dominan: semua indikator Grup B lebih tinggi dari semua klaster lain
             b_dom = len(b_present) > 0 and all(
                 all(cluster_pct_all_df.loc[cl_id, c] > cluster_pct_all_df.loc[o, c]
                     for o in other_ids)
                 for c in b_present
             )
 
-            # ── Dampak Tinggi — Fatalitas & Kerusakan Struktural ──────────────
-            # Cek lebih dulu sebelum "tinggi generik" agar lebih spesifik
             if a_dom and n_higher_than_all > 4:
                 kategori = "Dampak Banjir Tinggi (Fatalitas & Kerusakan Struktural Tinggi)"
                 interp = (
@@ -1050,73 +1100,60 @@ with menu[2]:
                 )
                 return kategori, interp, "error"
 
-            # ── Dampak Tinggi generik ──────────────────────────────────────────
             if n_higher_than_all > 4:
                 kategori = "Dampak Banjir Tinggi"
                 interp = (
                     f"Klaster {cl_id} memiliki lebih dari 4 indikator dampak banjir dengan "
                     f"proporsi lebih tinggi dibandingkan seluruh klaster utama lainnya. "
                     f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
-                    f"mengalami dampak banjir yang berat secara menyeluruh, baik dari sisi "
-                    f"korban jiwa, korban luka dan pengungsi, maupun kerusakan dan genangan "
-                    f"permukiman. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir tinggi</strong> dibandingkan klaster utama lainnya."
+                    f"mengalami dampak banjir yang berat secara menyeluruh. Oleh karena itu, "
+                    f"klaster ini dapat dikategorikan sebagai <strong>dampak banjir tinggi"
+                    f"</strong> dibandingkan klaster utama lainnya."
                 )
                 return kategori, interp, "error"
 
-            # ── Dampak Rendah ─────────────────────────────────────────────────
             if n_lower_than_all > 4:
                 kategori = "Dampak Banjir Rendah"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi yang rendah pada seluruh indikator "
-                    f"dampak banjir dibandingkan dengan klaster utama lainnya, tanpa adanya indikator dampak banjir yang dominan. "
-                    f"Hal ini menunjukkan bahwa provinsi-provinsi dalam Klaster {cl_id} "
-                    f"mengalami dampak banjir yang relatif rendah, baik dari segi korban, "
-                    f"kerusakan, maupun genangan permukiman. "
-                    f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir rendah</strong>"
+                    f"dampak banjir dibandingkan dengan klaster utama lainnya, tanpa adanya "
+                    f"indikator dampak banjir yang dominan. Hal ini menunjukkan bahwa "
+                    f"provinsi-provinsi dalam Klaster {cl_id} mengalami dampak banjir yang "
+                    f"relatif rendah, baik dari segi korban, kerusakan, maupun genangan "
+                    f"permukiman. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
+                    f"<strong>dampak banjir rendah</strong>."
                 )
                 return kategori, interp, "success"
 
-            # ── Moderat — Risiko Pengungsian & Genangan ───────────────────────
             if b_dom and n_mixed > 4:
                 kategori = "Dampak Banjir Moderat (Pengungsian & Genangan Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
                     f"serta rumah terendam dibandingkan dengan klaster utama lainnya. Namun, "
                     f"kontribusinya terhadap korban meninggal dan hilang serta kerusakan rumah "
-                    f"relatif rendah. Hal ini menunjukkan bahwa provinsi-provinsi dalam "
-                    f"Klaster {cl_id} cenderung mengalami bencana banjir yang menyebabkan "
-                    f"pengungsian massal dan genangan luas, namun tidak diikuti oleh korban "
-                    f"jiwa dan kerusakan struktural yang tinggi. Oleh karena itu, klaster ini "
-                    f"dapat dikategorikan sebagai <strong>dampak banjir moderat dengan risiko "
-                    f"pengungsian dan genangan permukiman yang tinggi</strong>."
+                    f"relatif rendah. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
+                    f"<strong>dampak banjir moderat dengan risiko pengungsian dan genangan "
+                    f"permukiman yang tinggi</strong>."
                 )
                 return kategori, interp, "warning"
 
-            # ── Moderat generik ───────────────────────────────────────────────
             if n_mixed > 4:
                 kategori = "Dampak Banjir Moderat"
                 interp = (
                     f"Klaster {cl_id} memiliki lebih dari 4 indikator dengan proporsi yang "
-                    f"berada di antara klaster utama lainnya — lebih tinggi dari sebagian "
-                    f"klaster dan lebih rendah dari klaster lainnya. Hal ini menunjukkan bahwa "
-                    f"provinsi-provinsi dalam Klaster {cl_id} mengalami dampak banjir yang "
-                    f"tidak ekstrem di salah satu ujung, melainkan berada pada tingkat menengah "
-                    f"antarklaster. Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir moderat</strong> dibandingkan klaster utama lainnya."
+                    f"berada di antara klaster utama lainnya. Oleh karena itu, klaster ini "
+                    f"dapat dikategorikan sebagai <strong>dampak banjir moderat</strong> "
+                    f"dibandingkan klaster utama lainnya."
                 )
                 return kategori, interp, "warning"
 
-            # ── Fallback: dominasi Grup A atau Grup B tanpa ambang batas > 4 ──
             if a_dom:
                 kategori = "Dampak Banjir Tinggi (Fatalitas & Kerusakan Struktural Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban meninggal dan hilang "
-                    f"serta kerusakan rumah (ringan, sedang, maupun berat) dibandingkan dengan "
-                    f"klaster utama lainnya. Oleh karena itu, klaster ini dapat dikategorikan "
-                    f"sebagai <strong>dampak banjir tinggi dengan risiko kerusakan struktural "
-                    f"dan fatalitas yang tinggi</strong>."
+                    f"serta kerusakan rumah dibandingkan klaster utama lainnya. Oleh karena itu, "
+                    f"klaster ini dapat dikategorikan sebagai <strong>dampak banjir tinggi "
+                    f"dengan risiko kerusakan struktural dan fatalitas yang tinggi</strong>."
                 )
                 return kategori, interp, "error"
 
@@ -1124,15 +1161,13 @@ with menu[2]:
                 kategori = "Dampak Banjir Moderat (Pengungsian & Genangan Tinggi)"
                 interp = (
                     f"Klaster {cl_id} memiliki proporsi tinggi pada korban terluka dan mengungsi "
-                    f"serta rumah terendam dibandingkan dengan klaster utama lainnya, namun "
-                    f"kontribusi pada fatalitas dan kerusakan struktural relatif rendah. "
-                    f"Oleh karena itu, klaster ini dapat dikategorikan sebagai "
-                    f"<strong>dampak banjir moderat dengan risiko pengungsian dan genangan "
-                    f"permukiman yang tinggi</strong>."
+                    f"serta rumah terendam, namun kontribusi pada fatalitas dan kerusakan "
+                    f"struktural relatif rendah. Oleh karena itu, klaster ini dapat "
+                    f"dikategorikan sebagai <strong>dampak banjir moderat dengan risiko "
+                    f"pengungsian dan genangan permukiman yang tinggi</strong>."
                 )
                 return kategori, interp, "warning"
 
-            # ── Fallback terakhir ─────────────────────────────────────────────
             kategori = "Dampak Banjir Moderat"
             interp = (
                 f"Klaster {cl_id} memiliki karakteristik campuran pada indikator dampak banjir "
@@ -1141,8 +1176,8 @@ with menu[2]:
             )
             return kategori, interp, "warning"
 
-        # ── Render Seksi 2 ─────────────────────────────────────────────────────
-        sec("2. KARAKTERISTIK KLASTER")
+        # ── Render Seksi ───────────────────────────────────────────────────────
+        sec("1. KARAKTERISTIK KLASTER")
         all_clusters     = sorted(df_result["Cluster"].unique())
         selected_cluster = st.selectbox(
             "Pilih Klaster",
@@ -1162,7 +1197,6 @@ with menu[2]:
             cluster_mean_all.sum(axis=0), axis=1
         ).mul(100).round(2)
 
-        # Hitung pct_row_sel untuk keperluan interpretasi (tidak ditampilkan sebagai tabel)
         if selected_cluster == -1:
             if not cluster_mean_all.empty:
                 pct_row_sel = (
@@ -1174,7 +1208,6 @@ with menu[2]:
         else:
             pct_row_sel = cluster_pct_all.loc[selected_cluster]
 
-        # ── Interpretasi otomatis ──────────────────────────────────────────────
         step_label("Interpretasi Klaster")
         kategori_str, interp_str, alert_t = interpret_cluster(
             selected_cluster,
@@ -1186,7 +1219,6 @@ with menu[2]:
             numeric_cols,
         )
 
-        # Badge kategori
         badge_color = {
             "error":   ("#ffebee", "#c62828", "#ef9a9a"),
             "warning": ("#fff8e1", "#e65100", "#ffcc80"),
@@ -1209,7 +1241,6 @@ with menu[2]:
             unsafe_allow_html=True
         )
 
-        # Kotak interpretasi naratif
         st.markdown(
             f"""
             <div style="background:#f8fbff;border:1px solid #c2dff5;border-left:4px solid {badge_color[1]};
