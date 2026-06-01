@@ -662,7 +662,7 @@ with menu[0]:
     if multikolinieritas and korelasi_ok and pca_df is not None:
         safe_table(pca_df)
         st.success(
-            f"Jumlah komponen yang digunakan adalah {n_components} komponen (PC1 dan PC2)"
+            f"Jumlah komponen yang digunakan adalah {n_components} komponen utama karena memiliki nilai eigenvalue > 1 dan mampu menjelaskan minimal sekitar 80% dari total variansi data"
         )
         step_label("HASIL REDUKSI PCA")
         safe_table(pca_result)
